@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+
+# Add EndlessDNS library to $LOAD_PATH.
+$LOAD_PATH.unshift File.join(File.dirname(__FILE__), '..', 'lib')
+
+require 'rubygems'
+require 'endlessdns'
+
+# EndlessDNS entry point.
+EndlessDNS::Engine.invoke ARGV.dup
