@@ -17,6 +17,10 @@ module EndlessDNS
     def enq(obj)
       @queue.enq(obj)
     end
+
+    def size
+      @queue.size
+    end
   end
 end
 
