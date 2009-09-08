@@ -6,6 +6,8 @@ require 'thread'
 require 'rubygems'
 
 require 'endlessdns/config'  # system configlation
+require 'endlessdns/analysis' # packet analyzer
+require 'endlessdns/cache'   # dns cache
 require 'endlessdns/engine'  # system controller
 require 'endlessdns/log'     # system log
 require 'endlessdns/statistics' # DNS query statistics

@@ -1,5 +1,4 @@
 require 'pcap'
-require 'net/dns/packet'
 
 module EndlessDNS
 

@@ -32,7 +32,6 @@ module EndlessDNS
     def load
       conf = YAML.load_file(EndlessDNS::CONF_FILE)
       conf.each do |key, val|
-        p key, val
         @store[key] = val
       end
     end
