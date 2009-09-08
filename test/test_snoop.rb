@@ -1,5 +1,5 @@
 require File.dirname(__FILE__) + '/test_helper'
 
-class TestSpoof < Test::Unit::TestCase
+class TestSnoop < Test::Unit::TestCase
 end
 
