@@ -6,11 +6,11 @@ module EndlessDNS
   attr_reader :device
 
   class Snoop
-    def initialize(device=nil, snaplen=1518, promisc=0, to_ms=1000)
+    def initialize(device=nil, snaplen=1518, promisc=0)
       unless device
         @device = Pcap.lookupdev
       end
-      @handle = Pcap::Capture.open(device, snaplen, promisc, to_ms)
+      @handle = Pcap::Capture.open_live(@device, snaplen, promisc)
     end
 
     def dump(count=-1)
@@ -23,8 +23,8 @@ module EndlessDNS
       @handle.close
     end
 
-    def setfileter(filter, optimize=false)
-      @handle.setfileter(filter, optimize)
+    def setfilter(filter, optimize=false)
+      @handle.setfilter(filter, optimize)
     end
   end
 end
