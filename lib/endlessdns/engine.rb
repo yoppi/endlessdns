@@ -1,3 +1,6 @@
+#
+# EndlessDNSのコントローラ
+#
 module EndlessDNS
   class Engine
 
@@ -7,8 +10,15 @@ module EndlessDNS
         #snoop_start()
       end
 
+      def load_config
+        unless File.exist? EndlessDNS::CONF_FILE
+          config.setup()
+        end
+        config.load()
+      end
+
       def snoop_start
-        @snoop = Spoof.new
+        @snoop = Snoop.new
         @snoop_th = Thread.new do
         end
       end

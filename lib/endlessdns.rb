@@ -15,4 +15,7 @@ require 'endlessdns/packet'  # packet queue
 require 'endlessdns/version' # version of system
 
 module EndlessDNS
+  HOME = ENV['HOME']
+  CONF_DIR = HOME + "./endlessdns"
+  CONF_FILE = CONF_DIR + "/config"
 end
