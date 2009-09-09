@@ -12,9 +12,11 @@ module EndlessDNS
     def initialize
       # {[domain, type] => record, ...}
       @cache = {}
+      @negative_cache = {}
     end
 
-    def add(pkt)
+    def add(domain, type)
+
     end
 
     def delete(record)
