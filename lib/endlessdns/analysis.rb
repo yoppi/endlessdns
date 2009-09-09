@@ -25,11 +25,24 @@ module EndlessDNS
         src = pkt.ip_src
         question = dns.question
         domain = question.domain
-        type = question.type
+        type   = question.type
         statistics.add(src, domain, type)
       elsif dns.header.response?
-        cache.add(dns_data)
+        if nxdomain?(dns)
+          domain = dns.question.domain 
+          type   = dns.question.type
+          cache.add(domain, type)
+        else
+        (dns.answer + dns.authority + dns.additional).each do |rr|
+          domain = rr.domain
+          type   = rr.type
+          cache.add(domain, type)
+        end
       end
+    end
+
+    def nxdomain?(dns)
+      dns.header.rcode.type == "NXDomain"
     end
   end
 end
