@@ -14,11 +14,8 @@ module EndlessDNS
     end
 
     def add(src, domain, type)
-      if exist? src
-      end
-    end
-
-    def exist?(src)
+      @stats[[src, domain, type]] ||= 0
+      @stats[[src, domain, type]] += 1
     end
   end
 end
