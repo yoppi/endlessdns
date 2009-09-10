@@ -9,7 +9,7 @@ module EndlessDNS
     end
 
     def initialize
-      # {src => {[domain, type] => n, ...}, ...}
+      # {[src, domain, type] => n, ...}
       @stats = {}
     end
 
