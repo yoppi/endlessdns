@@ -5,8 +5,6 @@ require 'net/dns/packet'
 
 module EndlessDNS
   class Analysis
-    @@query_n = 0
-    @@response_n = 0
 
     def initialize
     end
@@ -74,19 +72,19 @@ module EndlessDNS
     end
 
     def client_query?(pkt)
-      pkt.ip_dst == EndlessDNS::LOCAL_DNS_IP
+      pkt.ip_dst == config.get(:localip) 
     end
 
     def localdns_query?(pkt)
-      pkt.ip_src == EndlessDNS::LOCAL_DNS_IP
+      pkt.ip_src == config.get(:localip)
     end
 
     def localdns_response?(pkt)
-      pkt.ip_src == EndlessDNS::LOCAL_DNS_IP
+      pkt.ip_src == config.get(:localip)
     end
 
     def outside_response?(pkt)
-      pkt.ip_dst == EndlessDNS::LOCAL_DNS_IP
+      pkt.ip_dst == config.get(:localip) 
     end
   end
 end

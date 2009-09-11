@@ -22,6 +22,8 @@ module EndlessDNS
       conf[:port] = $stdin.gets.chomp.to_i
       print "network address?: "
       conf[:netaddress] = $stdin.gets.chomp
+      print "local dns ipaddr?: "
+      conf[:localip] = $stdin.gets.chomp
 
       Dir.mkdir(EndlessDNS::CONF_DIR) unless File.exist? EndlessDNS::CONF_DIR
       File.open(EndlessDNS::CONF_FILE, 'w') {|f|

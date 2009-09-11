@@ -2,6 +2,12 @@ require 'net/dns/packet'
 
 module EndlessDNS
   class Statistics
+
+    @@client_query = 0
+    @@localdns_query = 0
+    @@localdns_response = 0
+    @@outside_response = 0
+
     class << self
       def instance
         @instance ||= self.new
