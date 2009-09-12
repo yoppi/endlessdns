@@ -1,8 +1,6 @@
 #
 # DNSパケットの解析器
 #
-require 'net/dns/packet'
-
 module EndlessDNS
   class Analysis
 
@@ -33,38 +31,45 @@ module EndlessDNS
     end
       
     def analy_query(pkt, dns)
+      domain = dns.question.domain
+      type   = dns.question.type
       if client_query?(pkt)
-        key = cache.make_key(dns.question.domain, dns.question.type)
-        if cache.cached?(key)
-          cache.hit()
-          #statistics.add_client_query()
-          return
+        if cached?(domain, type)
+          # NOTE: log処理
+          statistics.hit()
+          puts "cached!"
         end
-        question = dns.question
-        domain = question.domain
-        type   = question.type
-        statistics.add(src, domain, type)
+        statistics.add_client_query(pkt.ip_src, domain, type)
+        puts "debug: [#{pkt.time}]client_query"
       elsif localdns_query?(pkt)
         # nop
+        statistics.add_localdns_query(pkt.ip_src, domain, type)
+        puts "debug: [#{pkt.time}]localdns_query"
       end
     end
 
     def analy_response(pkt, dns)
       if localdns_response?(pkt)
-        # nop 
-      elsif outside_response?(pkt)
         if nxdomain?(dns) # negativeキャッシュの処理
-          domain = dns.question.domain
-          type   = dns.question.type
-          cache.add_negative(domain, type)
+          cache.add_negative(pkt.ip_dst, dns.question.domain, dns.question.type)
         else
           (dns.answer + dns.authority + dns.additional).each do |rr|
-            domain = rr.domain
-            type   = rr.type
-            cache.add(domain, type, ttl)
+            cache.refcnt(rr.domain, rr.type)
+            statistics.add_localdns_response(pkt.ip_dst, rr.domain, rr.type)
           end
         end
+        puts "debug: [#{pkt.time}]localdns_response"
+      elsif outside_response?(pkt)
+        (dns.answer + dns.authority + dns.additional).each do |rr|
+          cache.add(rr.domain, rr.type, rr)
+          statistics.add_outside_response(pkt.ip_src, rr.domain, rr.type)
+        end
+        puts "debug: [#{pkt.time}]outside_response"
       end
+    end
+
+    def cached?(domain, type)
+      cache.cached?(key)
     end
 
     def nxdomain?(dns)

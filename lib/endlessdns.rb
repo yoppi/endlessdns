@@ -5,6 +5,8 @@ end
 require 'thread'
 require 'rubygems'
 
+require 'net/dns/packet'
+
 require 'endlessdns/config'  # system configlation
 require 'endlessdns/analysis' # packet analyzer
 require 'endlessdns/cache'   # dns cache
