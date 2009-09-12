@@ -31,19 +31,19 @@ module EndlessDNS
     end
       
     def analy_query(pkt, dns)
-      domain = dns.question.domain
+      name = dns.question.name
       type   = dns.question.type
       if client_query?(pkt)
-        if cached?(domain, type)
+        if cached?(name, type)
           # NOTE: log処理
           statistics.hit()
           puts "cached!"
         end
-        statistics.add_client_query(pkt.ip_src, domain, type)
+        statistics.add_client_query(pkt.ip_src, name, type)
         puts "debug: [#{pkt.time}]client_query"
       elsif localdns_query?(pkt)
         # nop
-        statistics.add_localdns_query(pkt.ip_src, domain, type)
+        statistics.add_localdns_query(pkt.ip_src, name, type)
         puts "debug: [#{pkt.time}]localdns_query"
       end
     end
@@ -51,25 +51,25 @@ module EndlessDNS
     def analy_response(pkt, dns)
       if localdns_response?(pkt)
         if nxdomain?(dns) # negativeキャッシュの処理
-          cache.add_negative(pkt.ip_dst, dns.question.domain, dns.question.type)
+          cache.add_negative(pkt.ip_dst, dns.question.name, dns.question.type)
         else
           (dns.answer + dns.authority + dns.additional).each do |rr|
-            cache.refcnt(rr.domain, rr.type)
-            statistics.add_localdns_response(pkt.ip_dst, rr.domain, rr.type)
+            cache.refcnt(rr.name, rr.type)
+            statistics.add_localdns_response(pkt.ip_dst, rr.name, rr.type)
           end
         end
         puts "debug: [#{pkt.time}]localdns_response"
       elsif outside_response?(pkt)
         (dns.answer + dns.authority + dns.additional).each do |rr|
-          cache.add(rr.domain, rr.type, rr)
-          statistics.add_outside_response(pkt.ip_src, rr.domain, rr.type)
+          cache.add(rr.name, rr.type, rr)
+          statistics.add_outside_response(pkt.ip_src, rr.name, rr.type)
         end
         puts "debug: [#{pkt.time}]outside_response"
       end
     end
 
-    def cached?(domain, type)
-      cache.cached?(key)
+    def cached?(name, type)
+      cache.cached?(name, type)
     end
 
     def nxdomain?(dns)

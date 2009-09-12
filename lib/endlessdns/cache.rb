@@ -10,43 +10,43 @@ module EndlessDNS
     end
 
     def initialize
-      # {[domain, type] => {:rr => rr, :ref => n}, ...}
+      # {[name, type] => {:rr => rr, :ref => n}, ...}
       @cache = Hash.new(0)
-      # {dst => {[domain, type] =>  n}, ...}
+      # {dst => {[name, type] =>  n}, ...}
       @negative_cache = Hash.new(0)
     end
 
-    def add(domain, type, rr)
-      key = make_key(domain, type)
+    def add(name, type, rr)
+      key = make_key(name, type)
       @cache[key] ||= Hash.new
       @cache[key][:rr] = rr
       @cache[key][:ref] ||= 0
       @cache[key][:ref] += 1
     end
 
-    def add_negative(dst, domain, type)
+    def add_negative(dst, name, type)
       @negative_cache[dst] ||= Hash.new 
-      @negative_cache[dst][[domain, type]] ||= 0
-      @negative_cache[dst][[domain, type]] += 0
+      @negative_cache[dst][[name, type]] ||= 0
+      @negative_cache[dst][[name, type]] += 0
     end
 
-    def delete(domain, type)
+    def delete(name, type)
 
     end
 
-    def make_key(domain, type)
-      [domain, type]
+    def make_key(name, type)
+      [name, type]
     end
 
-    # NOTE: [domain, type]のペアが存在すればhit
-    # なければdomainとCNAMEで検索
+    # NOTE: [name, type]のペアが存在すればhit
+    # なければnameとCNAMEで検索
     # CNAMEでhitすれば、さらにその正規名とAで検索
     # hitしなければ存在しない
-    def cached?(domain, type)
-      if @cache.has_key? [domain, key]
+    def cached?(name, type)
+      if @cache.has_key? [name, key]
         return true
-      elsif @cache.has_key? [domain, Net::DNS::CNAME]
-        cname = @cache[[domain, Net::DNS::CNAME]].cname
+      elsif @cache.has_key? [name, Net::DNS::CNAME]
+        cname = @cache[[name, Net::DNS::CNAME]].cname
         if @cache.has_key? [cname, Net::DNS::A]
           return true
         else
@@ -57,9 +57,9 @@ module EndlessDNS
       end
     end
 
-    def refcnt(domain, type)
-      if @cache.has_key? [domain, type]
-        @cache[[domain, type]][:ref] += 1
+    def refcnt(name, type)
+      if @cache.has_key? [name, type]
+        @cache[[name, type]][:ref] += 1
       end
     end
   end
