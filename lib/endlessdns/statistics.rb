@@ -22,7 +22,7 @@ module EndlessDNS
       @localdns_query = {}
       # {dst => {[name, type] => n}, ...}
       @outside_response = {}
-      @localdins_response = {}
+      @localdns_response = {}
     end
 
     def hit

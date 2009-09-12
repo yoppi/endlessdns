@@ -11,9 +11,9 @@ module EndlessDNS
 
     def initialize
       # {[name, type] => {:rr => rr, :ref => n}, ...}
-      @cache = Hash.new(0)
+      @cache = {}
       # {dst => {[name, type] =>  n}, ...}
-      @negative_cache = Hash.new(0)
+      @negative_cache = {}
     end
 
     def add(name, type, rr)
@@ -43,11 +43,11 @@ module EndlessDNS
     # CNAMEでhitすれば、さらにその正規名とAで検索
     # hitしなければ存在しない
     def cached?(name, type)
-      if @cache.has_key? [name, key]
+      if @cache.has_key? [name, type]
         return true
-      elsif @cache.has_key? [name, Net::DNS::CNAME]
-        cname = @cache[[name, Net::DNS::CNAME]].cname
-        if @cache.has_key? [cname, Net::DNS::A]
+      elsif @cache.has_key? [name, "CNAME"]
+        cname = @cache[[name, "CNAME"]][:rr].cname
+        if @cache.has_key? [cname, "A"]
           return true
         else
           return false

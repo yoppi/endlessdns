@@ -31,40 +31,59 @@ module EndlessDNS
     end
       
     def analy_query(pkt, dns)
-      name = dns.question.qName
-      type   = dns.question.qType
-      if client_query?(pkt)
-        if cached?(name, type)
-          # NOTE: log処理
-          statistics.hit()
-          puts "cached!"
+      dns.question.each {|q|
+        if client_query?(pkt)
+          puts "debug: [#{pkt.time}]client_query"
+          client_query(pkt, q.qName, q.qType.to_s)
+        elsif localdns_query?(pkt)
+          puts "debug: [#{pkt.time}]localdns_query"
+          localdns_query(pkt, q.qName, q.qType.to_s)
         end
-        statistics.add_client_query(pkt.ip_src, name, type)
-        puts "debug: [#{pkt.time}]client_query"
-      elsif localdns_query?(pkt)
-        # nop
-        statistics.add_localdns_query(pkt.ip_src, name, type)
-        puts "debug: [#{pkt.time}]localdns_query"
+      }
+    end
+
+    def client_query(pkt, name, type)
+      if cached?(name, type)
+        # NOTE: log処理
+        statistics.hit()
+        puts "cached!"
+      else
+        puts "no cached..."
       end
+      statistics.add_client_query(pkt.ip_src.to_num_s, name, type)
+    end
+
+    def localdns_query(pkt, name, type)
+      statistics.add_localdns_query(pkt.ip_src.to_num_s, name, type)
     end
 
     def analy_response(pkt, dns)
       if localdns_response?(pkt)
-        if nxdomain?(dns) # negativeキャッシュの処理
-          cache.add_negative(pkt.ip_dst, dns.question.qName, dns.question.qType)
-        else
-          (dns.answer + dns.authority + dns.additional).each do |rr|
-            cache.refcnt(rr.name, rr.type)
-            statistics.add_localdns_response(pkt.ip_dst, rr.name, rr.type)
-          end
-        end
         puts "debug: [#{pkt.time}]localdns_response"
+        localdns_response(pkt, dns)
       elsif outside_response?(pkt)
-        (dns.answer + dns.authority + dns.additional).each do |rr|
-          cache.add(rr.name, rr.type, rr)
-          statistics.add_outside_response(pkt.ip_src, rr.name, rr.type)
-        end
         puts "debug: [#{pkt.time}]outside_response"
+        outside_response(pkt, dns)
+      end
+    end
+
+    def localdns_response(pkt, dns)
+      if nxdomain?(dns) # negativeキャッシュの処理
+        dns.question.each do |q|
+          cache.add_negative(pkt.ip_dst.to_num_s, q.qName, q.qType)
+        end
+      else
+        (dns.answer + dns.authority + dns.additional).each do |rr|
+          cache.refcnt(rr.name, rr.type)
+          statistics.add_localdns_response(pkt.ip_dst.to_num_s, rr.name, rr.type)
+        end
+      end
+    end
+
+    def outside_response(pkt, dns)
+      (dns.answer + dns.authority + dns.additional).each do |rr|
+        cache.add(rr.name, rr.type, rr)
+        statistics.add_outside_response(pkt.ip_src.to_num_s, rr.name, rr.type)
       end
     end
 
@@ -73,23 +92,23 @@ module EndlessDNS
     end
 
     def nxdomain?(dns)
-      dns.header.rcode.type == "NXDomain"
+      dns.header.rCode.type == "NXDomain"
     end
 
     def client_query?(pkt)
-      pkt.ip_dst == config.get(:localip) 
+      pkt.ip_dst.to_num_s == config.get(:localip) 
     end
 
     def localdns_query?(pkt)
-      pkt.ip_src == config.get(:localip)
+      pkt.ip_src.to_num_s == config.get(:localip)
     end
 
     def localdns_response?(pkt)
-      pkt.ip_src == config.get(:localip)
+      pkt.ip_src.to_num_s == config.get(:localip)
     end
 
     def outside_response?(pkt)
-      pkt.ip_dst == config.get(:localip) 
+      pkt.ip_dst.to_num_s == config.get(:localip) 
     end
   end
 end
