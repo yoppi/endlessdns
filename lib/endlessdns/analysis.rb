@@ -31,8 +31,8 @@ module EndlessDNS
     end
       
     def analy_query(pkt, dns)
-      name = dns.question.name
-      type   = dns.question.type
+      name = dns.question.qName
+      type   = dns.question.qType
       if client_query?(pkt)
         if cached?(name, type)
           # NOTE: log処理
@@ -51,7 +51,7 @@ module EndlessDNS
     def analy_response(pkt, dns)
       if localdns_response?(pkt)
         if nxdomain?(dns) # negativeキャッシュの処理
-          cache.add_negative(pkt.ip_dst, dns.question.name, dns.question.type)
+          cache.add_negative(pkt.ip_dst, dns.question.qName, dns.question.qType)
         else
           (dns.answer + dns.authority + dns.additional).each do |rr|
             cache.refcnt(rr.name, rr.type)
