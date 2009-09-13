@@ -47,7 +47,7 @@ module EndlessDNS
       if @cache.has_key? [name, type]
         return true
       elsif @cache.has_key? [name, "CNAME"]
-        cname = @cache[[name, "CNAME"]][:rr].cname
+        cname = @cache[[name, "CNAME"]][:rr][0].cname
         if @cache.has_key? [cname, "A"]
           return true
         else
