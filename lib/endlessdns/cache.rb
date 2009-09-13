@@ -10,7 +10,7 @@ module EndlessDNS
     end
 
     def initialize
-      # {[name, type] => {:rr => rr, :ref => n}, ...}
+      # {[name, type] => {:rr => [rr1, rr2, ...] :ref => n}, ...}
       @cache = {}
       # {dst => {[name, type] =>  n}, ...}
       @negative_cache = {}
@@ -19,13 +19,14 @@ module EndlessDNS
     def add(name, type, rr)
       key = make_key(name, type)
       @cache[key] ||= Hash.new
-      @cache[key][:rr] = rr
+      @cache[key][:rr] ||= []
+      @cache[key][:rr] << rr
       @cache[key][:ref] ||= 0
       @cache[key][:ref] += 1
     end
 
     def add_negative(dst, name, type)
-      @negative_cache[dst] ||= Hash.new 
+      @negative_cache[dst] ||= Hash.new
       @negative_cache[dst][[name, type]] ||= 0
       @negative_cache[dst][[name, type]] += 0
     end
