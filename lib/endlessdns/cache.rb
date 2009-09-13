@@ -14,21 +14,26 @@ module EndlessDNS
       @cache = {}
       # {dst => {[name, type] =>  n}, ...}
       @negative_cache = {}
+      @mutex = Mutex.new
     end
 
     def add(name, type, rr)
-      key = make_key(name, type)
-      @cache[key] ||= Hash.new
-      @cache[key][:rr] ||= []
-      @cache[key][:rr] << rr
-      @cache[key][:ref] ||= 0
-      @cache[key][:ref] += 1
+      @mutex.synchronize do
+        key = make_key(name, type)
+        @cache[key] ||= Hash.new
+        @cache[key][:rr] ||= []
+        @cache[key][:rr] << rr
+        @cache[key][:ref] ||= 0
+        @cache[key][:ref] += 1
+      end
     end
 
     def add_negative(dst, name, type)
-      @negative_cache[dst] ||= Hash.new
-      @negative_cache[dst][[name, type]] ||= 0
-      @negative_cache[dst][[name, type]] += 0
+      @mutex.synchronize do
+        @negative_cache[dst] ||= Hash.new
+        @negative_cache[dst][[name, type]] ||= 0
+        @negative_cache[dst][[name, type]] += 0
+      end
     end
 
     def delete(name, type)
@@ -44,23 +49,27 @@ module EndlessDNS
     # CNAMEでhitすれば、さらにその正規名とAで検索
     # hitしなければ存在しない
     def cached?(name, type)
-      if @cache.has_key? [name, type]
-        return true
-      elsif @cache.has_key? [name, "CNAME"]
-        cname = @cache[[name, "CNAME"]][:rr][0].cname
-        if @cache.has_key? [cname, "A"]
+      @mutex.synchronize do
+        if @cache.has_key? [name, type]
           return true
+        elsif @cache.has_key? [name, "CNAME"]
+          cname = @cache[[name, "CNAME"]][:rr][0].cname
+          if @cache.has_key? [cname, "A"]
+            return true
+          else
+            return false
+          end
         else
           return false
         end
-      else
-        return false
       end
     end
 
     def refcnt(name, type)
-      if @cache.has_key? [name, type]
-        @cache[[name, type]][:ref] += 1
+      @mutex.synchronize do
+        if @cache.has_key? [name, type]
+          @cache[[name, type]][:ref] += 1
+        end
       end
     end
   end

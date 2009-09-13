@@ -23,6 +23,7 @@ module EndlessDNS
       # {dst => {[name, type] => n}, ...}
       @outside_response = {}
       @localdns_response = {}
+      @mutex = Mutex.new
     end
 
     def hit
@@ -30,27 +31,35 @@ module EndlessDNS
     end
 
     def add_client_query(src, name, type)
-      @client_query[src] ||= Hash.new
-      @client_query[src][[name, type]] ||= 0
-      @client_query[src][[name, type]] += 1
+      @mutex.synchronize do
+        @client_query[src] ||= Hash.new
+        @client_query[src][[name, type]] ||= 0
+        @client_query[src][[name, type]] += 1
+      end
     end
 
     def add_localdns_query(src, name, type)
-      @localdns_query[src] ||= Hash.new
-      @localdns_query[src][[name, type]] ||= 0
-      @localdns_query[src][[name, type]] += 1
+      @mutex.synchronize do
+        @localdns_query[src] ||= Hash.new
+        @localdns_query[src][[name, type]] ||= 0
+        @localdns_query[src][[name, type]] += 1
+      end
     end
 
     def add_localdns_response(dst, name, type)
-      @localdns_response[dst] ||= Hash.new
-      @localdns_response[dst][[name, type]] ||= 0
-      @localdns_response[dst][[name, type]] += 1
+      @mutex.synchronize do
+        @localdns_response[dst] ||= Hash.new
+        @localdns_response[dst][[name, type]] ||= 0
+        @localdns_response[dst][[name, type]] += 1
+      end
     end
 
     def add_outside_response(dst, name, type)
-      @outside_response[dst] ||= Hash.new
-      @outside_response[dst][[name, type]] ||= 0
-      @outside_response[dst][[name, type]] += 1
+      @mutex.synchronize do
+        @outside_response[dst] ||= Hash.new
+        @outside_response[dst][[name, type]] ||= 0
+        @outside_response[dst][[name, type]] += 1
+      end
     end
   end
 end

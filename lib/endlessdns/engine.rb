@@ -31,6 +31,7 @@ module EndlessDNS
       end
 
       def packet_analy
+        # NOTE: パケットを処理するのが遅ければthread数を増やす
         @analy_th = Thread.new do
           @analyzer = Analysis.new
           @analyzer.run
