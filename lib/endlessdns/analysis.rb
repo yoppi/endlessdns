@@ -82,9 +82,17 @@ module EndlessDNS
 
     def outside_response(pkt, dns)
       (dns.answer + dns.authority + dns.additional).each do |rr|
-        cache.add(rr.name, rr.type, rr)
+        unless cached?(rr.name, rr.type)
+          cache.add(rr.name, rr.type, rr)
+          # table.add(rr.name, rr.type, rr.ttl, Time.now.tv_sec)
+          add_table(name, type, ttl)
+        end
         statistics.add_outside_response(pkt.ip_src.to_num_s, rr.name, rr.type)
       end
+    end
+
+    def add_table(name, type, ttl)
+      table.add(name, type, ttl)  
     end
 
     def cached?(name, type)

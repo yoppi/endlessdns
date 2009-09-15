@@ -37,7 +37,11 @@ module EndlessDNS
     end
 
     def delete(name, type)
-
+      @mutex.synchronize do
+        if @cache.has_key? [name, type]
+          @cache.delete [name, type]
+        end
+      end
     end
 
     def make_key(name, type)

@@ -3,6 +3,7 @@ unless $LOAD_PATH.include? File.dirname(__FILE__)
 end
 
 require 'thread'
+require 'observer'
 require 'rubygems'
 
 require 'net/dns/packet'
