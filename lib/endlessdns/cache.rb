@@ -17,12 +17,14 @@ module EndlessDNS
       @mutex = Mutex.new
     end
 
-    def add(name, type, rr)
+    def add(name, type, rdata)
       @mutex.synchronize do
         key = make_key(name, type)
         @cache[key] ||= Hash.new
-        @cache[key][:rr] ||= []
-        @cache[key][:rr] << rr
+        @cache[key][:rdata] ||= []
+        unless @acache[key][:rdata].include? 
+          @cache[key][:rdata] << rdata
+        end
         @cache[key][:ref] ||= 0
         @cache[key][:ref] += 1
       end

@@ -70,7 +70,8 @@ module EndlessDNS
     def localdns_response(pkt, dns)
       if nxdomain?(dns) # negativeキャッシュの処理
         dns.question.each do |q|
-          cache.add_negative(pkt.ip_dst.to_num_s, q.qName, q.qType)
+          # cache.add_negative(pkt.ip_dst.to_num_s, q.qName, q.qType)
+          add_negative_cache(pkt.ip_dst.to_num_s, q.qName, q.qType)
         end
       else
         (dns.answer + dns.authority + dns.additional).each do |rr|
@@ -83,12 +84,44 @@ module EndlessDNS
     def outside_response(pkt, dns)
       (dns.answer + dns.authority + dns.additional).each do |rr|
         unless cached?(rr.name, rr.type)
-          cache.add(rr.name, rr.type, rr)
-          # table.add(rr.name, rr.type, rr.ttl, Time.now.tv_sec)
+          add_cache(rr.name, rr.type, rr)
           add_table(rr.name, rr.type, rr.ttl)
         end
         statistics.add_outside_response(pkt.ip_src.to_num_s, rr.name, rr.type)
       end
+    end
+
+    def add_cache(name, type, rr)
+      cache.add(name, type, rdata(rr))
+    end
+
+    def add_negative_cache(dst, qname, qtype)
+      cache.add_negative(dst, qname, qtype) 
+    end
+
+    def rdata(rr)
+      data = []
+      case rr.type
+      when 'A'
+        data << rr.address 
+      when 'AAAA'
+        data << rr.address
+      when 'NS'
+        data << rr.nsdname 
+      when 'CNAME'
+        data << rr.cname
+      when 'MX'
+        data << rr.preference
+        data << rr.exchage
+      when 'PTR'
+        data << rr.ptr
+      when 'TXT'
+        data << rr.txt
+      else 
+        # NOTE: ログ処理
+        return rr 
+      end
+      data
     end
 
     def add_table(name, type, ttl)
