@@ -7,6 +7,7 @@ require 'observer'
 require 'rubygems'
 
 require 'net/dns/packet'
+require 'net/dns/resolver'
 
 require 'endlessdns/config'  # system configlation
 require 'endlessdns/analysis' # packet analyzer

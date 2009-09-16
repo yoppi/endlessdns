@@ -42,6 +42,7 @@ module EndlessDNS
         records.each do |record|
           puts "update! #{expire_time}: #{record[0]}, #{record[1]}"      
           # ここがrecache処理のエントリポイントになる
+          recache.invoke(record[0], record[1]) 
         end
       end
 

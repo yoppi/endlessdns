@@ -34,7 +34,7 @@ module EndlessDNS
       @mutex.synchronize do
         @negative_cache[dst] ||= Hash.new
         @negative_cache[dst][[name, type]] ||= 0
-        @negative_cache[dst][[name, type]] += 0
+        @negative_cache[dst][[name, type]] += 1
       end
     end
 
