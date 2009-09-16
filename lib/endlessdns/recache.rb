@@ -11,12 +11,18 @@ module EndlessDNS
 
     def initialize
       @resolver = Net::DNS::Resolver.new
-      @resolver.res = config.get(:localip)
+      @resolver.res = config.get(:localip) # localDNSを探索リストに追加
     end
 
-    def run(name, type)
-      need_recache?(name, type)
-      ret = @resolver.search(name, type)
+    def invoke(name, type)
+      delete_cache(name, type)
+      if need_recache?(name, type)
+        ret = @resolver.search(name, type)
+      end
+    end
+
+    def delete_cache(name, type)
+      cache.delete(name, type)
     end
 
     def need_recache?(name, type)

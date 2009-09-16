@@ -30,7 +30,7 @@ module EndlessDNS
         end
         set_timer(ttl, expire_time)
         start_timer
-      elsif @min_expire_time <= expire_time 
+      elsif @min_expire_time <= expire_time
         add_table(expire_time, name, type)
       end
     end
@@ -40,9 +40,9 @@ module EndlessDNS
       delete_table(expire_time)
       Thread.new do
         records.each do |record|
-          puts "update! #{expire_time}: #{record[0]}, #{record[1]}"      
+          puts "update! #{expire_time}: #{record[0]}, #{record[1]}"
           # ここがrecache処理のエントリポイントになる
-          recache.invoke(record[0], record[1]) 
+          recache.invoke(record[0], record[1])
         end
       end
 
@@ -99,6 +99,6 @@ module EndlessDNS
   end
 end
 
-def table 
+def table
   EndlessDNS::Table.instance
 end
