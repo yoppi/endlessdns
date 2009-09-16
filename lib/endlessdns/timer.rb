@@ -26,7 +26,7 @@ module EndlessDNS
           end
           stop
           changed
-          notify_observers(@expire, @records)
+          notify_observers(@expire)
         end
       end
     end
@@ -47,11 +47,10 @@ module EndlessDNS
       end
     end
 
-    def set(cnt, expire, records)
+    def set(cnt, expire)
       @mutex.synchronize do
         @cnt = cnt
         @expire = expire
-        @records = records
       end
     end
   end
