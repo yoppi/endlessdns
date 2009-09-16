@@ -85,7 +85,7 @@ module EndlessDNS
         unless cached?(rr.name, rr.type)
           cache.add(rr.name, rr.type, rr)
           # table.add(rr.name, rr.type, rr.ttl, Time.now.tv_sec)
-          add_table(name, type, ttl)
+          add_table(rr.name, rr.type, rr.ttl)
         end
         statistics.add_outside_response(pkt.ip_src.to_num_s, rr.name, rr.type)
       end

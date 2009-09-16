@@ -84,7 +84,7 @@ module EndlessDNS
     def add_table(expire_time, name, type)
       @mutex.synchronize do
         @table[expire_time] ||= []
-        unless @table[expire_time].include ? [name, type]
+        unless @table[expire_time].include? [name, type]
           @table[expire_time] << [name, type]
         end
       end
