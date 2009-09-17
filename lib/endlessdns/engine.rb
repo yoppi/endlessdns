@@ -6,7 +6,10 @@ module EndlessDNS
 
     class << self
       def invoke(argv)
+        Thread.abort_on_exception = true
         load_config()
+        log_setup()
+        stat_setup()
         snoop_start()
         #loop do
         #  sleep 1
@@ -20,6 +23,12 @@ module EndlessDNS
           config.setup()
         end
         config.load()
+      end
+
+      def log_setup
+      end
+
+      def stat_setup
       end
 
       def snoop_start

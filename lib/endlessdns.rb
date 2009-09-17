@@ -20,9 +20,12 @@ require 'endlessdns/timer'   # TTL timer
 require 'endlessdns/snoop'   # packet snooping
 require 'endlessdns/packet'  # packet queue
 require 'endlessdns/version' # version of system
+require 'endlessdns/recache'
 
 module EndlessDNS
   HOME = ENV['HOME']
   CONF_DIR = HOME + "/.endlessdns"
   CONF_FILE = CONF_DIR + "/config"
+  LOG_DIR = CONF_DIR + "/log"
+  STAT_DIR = CONF_DIR + "/stat"
 end

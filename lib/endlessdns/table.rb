@@ -36,27 +36,49 @@ module EndlessDNS
     end
 
     def update(expire_time)
-      records = @table[expire_time] # [[name, type], [name, type], ...]
-      delete_table(expire_time)
-      Thread.new do
-        records.each do |record|
-          puts "update! #{expire_time}: #{record[0]}, #{record[1]}"
-          # ここがrecache処理のエントリポイントになる
+      do_recache(expire_time)
+      set_next_expire
+    end
+
+    def do_recache(expire)
+      records = @table[expire] # [[name, type], [name, type], ...]
+      delete_table(expire)
+      records.each do |record|
+        # ここがrecache処理のエントリポイントになる
+        # NOTE: Log処理
+        puts "update! #{expire}: #{record[0]}, #{record[1]}"
+        Thread.new do
           recache.invoke(record[0], record[1])
         end
       end
+    end
 
+    def set_next_expire
       Thread.new do
         if @table.size > 0
-          keys = @table.keys
-          # NOTE: ここが遅いしかも大量にttlテーブルは存在するので現実的ではない
-          # memoizeか、B木, red black treeなど、高速に最小値を探索できるものを実装する
-          # ruby1.9だとhashに100万個データがあっても0.08secで終了する
-          min = keys.sort[0]
-          set_min_expire(min)
-          set_timer(min - Time.now.tv_sec, min)
-          start_timer
+          # FIXME: ここが遅いしかも大量にttlテーブルは存在するので現実的ではない
+          #       memoizeか、B木, red black treeなど、高速に最小値を探索できる
+          #       ものを実装する
+          #       ruby1.9だとhashに100万個データがあっても0.08secで終了する
+          # NOTE: min(expire_time)をテーブルから取得したとき、すでにexpireの時
+          #       間、もしくは過ぎていることがある
+          #       時間を過ぎていたらただちにrecache処理にうつる
+          min = @table.keys.sort[0]
+          if past? min
+            do_recache(min)
+            set_next_expire
+          else
+            set_min_expire(min)
+            set_timer(min - Time.now.tv_sec, min)
+            start_timer
+          end
         end
+      end
+    end
+
+    def set_min_expire(min)
+      @mutex.synchronize do
+        @min_expire_time = min
       end
     end
 
@@ -76,12 +98,6 @@ module EndlessDNS
       timer.set(cnt, expire_time)
     end
 
-    def set_min_expire(min)
-      @mutex.synchronize do
-        @min_expire_time = min
-      end
-    end
-
     def add_table(expire_time, name, type)
       @mutex.synchronize do
         @table[expire_time] ||= []
@@ -95,6 +111,10 @@ module EndlessDNS
       @mutex.synchronize do
         @table.delete(expire_time)
       end
+    end
+
+    def past?(expire)
+      expire <= Time.now.tv_sec
     end
   end
 end
