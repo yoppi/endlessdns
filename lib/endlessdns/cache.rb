@@ -22,7 +22,7 @@ module EndlessDNS
         key = make_key(name, type)
         @cache[key] ||= Hash.new
         @cache[key][:rdata] ||= []
-        unless @acache[key][:rdata].include?
+        unless @cache[key][:rdata].include? rdata
           @cache[key][:rdata] << rdata
         end
         @cache[key][:ref] ||= 0

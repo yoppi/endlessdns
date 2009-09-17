@@ -120,6 +120,14 @@ module EndlessDNS
         data << rr.ptr
       when 'TXT'
         data << rr.txt
+      when 'SOA'
+        data << rr.mname
+        data << rr.rname
+        data << rr.serial
+        data << rr.refresh
+        data << rr.retry
+        data << rr.expire
+        data << rr.minimum
       else 
         # NOTE: ログ処理
         puts "unrecognized packet arrived"
