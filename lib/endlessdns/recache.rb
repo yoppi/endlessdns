@@ -1,5 +1,7 @@
 #
 # レコードの再cache
+#   統計情報からそのexpireされたレコードを再cache(DNSキャッシュサーバに問い合わせる)かどうか
+#   を判断する
 #
 module EndlessDNS
   class Recache

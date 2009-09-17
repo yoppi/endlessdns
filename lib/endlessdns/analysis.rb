@@ -70,12 +70,11 @@ module EndlessDNS
     def localdns_response(pkt, dns)
       if nxdomain?(dns) # negativeキャッシュの処理
         dns.question.each do |q|
-          # cache.add_negative(pkt.ip_dst.to_num_s, q.qName, q.qType)
           add_negative_cache(pkt.ip_dst.to_num_s, q.qName, q.qType)
         end
       else
         (dns.answer + dns.authority + dns.additional).each do |rr|
-          cache.refcnt(rr.name, rr.type)
+          refcnt_cache(rr.name, rr.type)
           statistics.add_localdns_response(pkt.ip_dst.to_num_s, rr.name, rr.type)
         end
       end
@@ -99,6 +98,10 @@ module EndlessDNS
       cache.add_negative(dst, qname, qtype) 
     end
 
+    def refcnt_cache(name, type)
+      cache.refcnt(name, type)
+    end
+
     def rdata(rr)
       data = []
       case rr.type
@@ -119,6 +122,7 @@ module EndlessDNS
         data << rr.txt
       else 
         # NOTE: ログ処理
+        puts "unrecognized packet arrived"
         return rr 
       end
       data

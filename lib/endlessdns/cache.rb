@@ -10,7 +10,7 @@ module EndlessDNS
     end
 
     def initialize
-      # {[name, type] => {:rr => [rr1, rr2, ...] :ref => n}, ...}
+      # {[name, type] => {:rdata => [rdata1, rdata2, ...] :ref => n}, ...}
       @cache = {}
       # {dst => {[name, type] =>  n}, ...}
       @negative_cache = {}
@@ -32,16 +32,18 @@ module EndlessDNS
 
     def add_negative(dst, name, type)
       @mutex.synchronize do
+        key = make_key(name, type)
         @negative_cache[dst] ||= Hash.new
-        @negative_cache[dst][[name, type]] ||= 0
-        @negative_cache[dst][[name, type]] += 1
+        @negative_cache[dst][key] ||= 0
+        @negative_cache[dst][key] += 1
       end
     end
 
     def delete(name, type)
       @mutex.synchronize do
-        if @cache.has_key? [name, type]
-          @cache.delete [name, type]
+        key = make_key(name, type)
+        if @cache.has_key? key
+          @cache.delete key
         end
       end
     end
@@ -59,7 +61,7 @@ module EndlessDNS
         if @cache.has_key? [name, type]
           return true
         elsif @cache.has_key? [name, "CNAME"]
-          cname = @cache[[name, "CNAME"]][:rr][0].cname
+          cname = @cache[[name, "CNAME"]][:rdata][0]
           if @cache.has_key? [cname, "A"]
             return true
           else
@@ -73,8 +75,9 @@ module EndlessDNS
 
     def refcnt(name, type)
       @mutex.synchronize do
-        if @cache.has_key? [name, type]
-          @cache[[name, type]][:ref] += 1
+        key = make_key(name, type)
+        if @cache.has_key? key
+          @cache[key][:ref] += 1
         end
       end
     end
