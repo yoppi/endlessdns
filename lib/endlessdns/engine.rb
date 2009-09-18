@@ -26,6 +26,7 @@ module EndlessDNS
       end
 
       def log_setup
+        log.setup
       end
 
       def stat_setup
