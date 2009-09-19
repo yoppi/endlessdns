@@ -13,7 +13,7 @@ module EndlessDNS
 
     def initialize
       @resolver = Net::DNS::Resolver.new
-      @resolver.nameservers = config.get(:localip) # localDNSを探索リストに追加
+      @resolver.nameservers = config.get("localip") # localDNSを探索リストに追加
     end
 
     def invoke(name, type)

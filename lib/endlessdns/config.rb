@@ -27,15 +27,15 @@ module EndlessDNS
 
     def interactive(conf)
       print "snoop port?: "
-      conf[:port] = $stdin.gets.chomp.to_i
+      conf["port"] = $stdin.gets.chomp.to_i
       print "network address?: "
-      conf[:netaddress] = $stdin.gets.chomp
+      conf["netaddress"] = $stdin.gets.chomp
       print "local dns ip address?: "
-      conf[:localip] = $stdin.gets.chomp
+      conf["localip"] = $stdin.gets.chomp
       print "log directory?: "
-      conf[:logdir] = $stdin.gets.chomp
+      conf["logdir"] = $stdin.gets.chomp
       print "statistics directory?: "
-      conf[:statdir] = $stdin.gets.chomp
+      conf["statdir"] = $stdin.gets.chomp
     end
 
     def load

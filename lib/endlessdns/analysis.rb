@@ -149,19 +149,19 @@ module EndlessDNS
     end
 
     def client_query?(pkt)
-      pkt.ip_dst.to_num_s == config.get(:localip) 
+      pkt.ip_dst.to_num_s == config.get("localip") 
     end
 
     def localdns_query?(pkt)
-      pkt.ip_src.to_num_s == config.get(:localip)
+      pkt.ip_src.to_num_s == config.get("localip")
     end
 
     def localdns_response?(pkt)
-      pkt.ip_src.to_num_s == config.get(:localip)
+      pkt.ip_src.to_num_s == config.get("localip")
     end
 
     def outside_response?(pkt)
-      pkt.ip_dst.to_num_s == config.get(:localip) 
+      pkt.ip_dst.to_num_s == config.get("localip") 
     end
   end
 end

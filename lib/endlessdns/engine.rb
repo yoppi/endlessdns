@@ -34,7 +34,7 @@ module EndlessDNS
 
       def snoop_start
         @snoop = Snoop.new
-        @snoop.setfilter("udp and port #{config.get(:port)}")
+        @snoop.setfilter("udp and port #{config.get("port")}")
         @snoop_th = Thread.new do
           @snoop.dump
         end

@@ -13,12 +13,12 @@ module EndlessDNS
     end
 
     def setup
-      @logdir = config.get(:logdir) ? config.get(:logdir) :
+      @logdir = config.get("logdir") ? config.get("logdir") :
                                       EndlessDNS::LOG_DIR
       unless File.exist? @logdir
         Dir.mkdir @logdir
       end
-      @logname = config.get(:logname) ? config.get(:logname) :
+      @logname = config.get("logname") ? config.get("logname") :
                                         "endlessdns.log"
     end
   end
