@@ -5,6 +5,13 @@ require 'yaml'
 
 module EndlessDNS
   class Config
+
+    CONFIG_ITEMS = [{"item" => "port", "banner" => "snoop port?"},
+                    {"item" => "netaddress", "banner" => "network address?"},
+                    {"item" => "dnsip", "banner" => "local dns ip address?"},
+                    {"item" => "logdir", "banner" => "log directory?", "default" => EndlessDNS::LOG_DIR},
+                    {"item" => "statdir", "banner" => "statistics directory?", "default" => EndlessDNS::STAT_DIR}]
+
     class << self
       def instance
         @instance ||= self.new
@@ -26,16 +33,14 @@ module EndlessDNS
     end
 
     def interactive(conf)
-      print "snoop port?: "
-      conf["port"] = $stdin.gets.chomp.to_i
-      print "network address?: "
-      conf["netaddress"] = $stdin.gets.chomp
-      print "local dns ip address?: "
-      conf["localip"] = $stdin.gets.chomp
-      print "log directory?: "
-      conf["logdir"] = $stdin.gets.chomp
-      print "statistics directory?: "
-      conf["statdir"] = $stdin.gets.chomp
+      CONFIG_ITEMS.each do |item|
+        banner = item["banner"]
+        banner += "(#{item["default"]})" if item["default"]
+        print "#{banner}: "
+        input = $stdin.gets.chomp
+        input = item["default"] if input.size == 0
+        conf[item["item"]] = input
+      end
     end
 
     def load

@@ -27,5 +27,6 @@ module EndlessDNS
   CONF_DIR = HOME + "/.endlessdns"
   CONF_FILE = CONF_DIR + "/config"
   LOG_DIR = CONF_DIR + "/log"
+  LOG_NAME = "endlessdns.log"
   STAT_DIR = CONF_DIR + "/stat"
 end

@@ -9,7 +9,6 @@ module EndlessDNS
     end
 
     def initialize
-      @logger = Logger.new("#{@logdir}/#{@logname}")
     end
 
     def setup
@@ -19,7 +18,12 @@ module EndlessDNS
         Dir.mkdir @logdir
       end
       @logname = config.get("logname") ? config.get("logname") :
-                                        "endlessdns.log"
+                                         EndlessDNS::LOG_NAME
+      @logger = Logger.new("#{@logdir}/#{@logname}")
     end
   end
+end
+
+def log
+  EndlessDNS::Log.instance
 end

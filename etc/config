@@ -3,7 +3,7 @@
 # DNS cache server's Network address
 #netaddress: 192.168.0.0
 # DNS cache server's ip address
-#localip: 192.168.0.10
+#dnsip: 192.168.0.10
 # to store log file directory
 #logdir: ~/.endlessdns/log
 # to store stat file directory
