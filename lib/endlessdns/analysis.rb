@@ -43,11 +43,10 @@ module EndlessDNS
 
     def client_query(pkt, name, type)
       if cached?(name, type)
-        # NOTE: log処理
         statistics.hit()
-        puts "cached!"
+        log.puts("cached!", "info")
       else
-        puts "no cached..."
+        log.puts("not cached...", "info")
       end
       statistics.add_client_query(pkt.ip_src.to_num_s, name, type)
     end
@@ -69,6 +68,7 @@ module EndlessDNS
     def localdns_response(pkt, dns)
       if nxdomain?(dns) # negativeキャッシュの処理
         dns.question.each do |q|
+          log.puts("negative cache[#{pkt.ip_dst.to_num_s}]", "warn")
           add_negative_cache(pkt.ip_dst.to_num_s, q.qName, q.qType)
         end
       else
@@ -81,6 +81,8 @@ module EndlessDNS
 
     def outside_response(pkt, dns)
       (dns.answer + dns.authority + dns.additional).each do |rr|
+        next if rr.type.to_s == "OPT" # OPTは疑似レコードなのでスキップ
+
         unless cached?(rr.name, rr.type)
           add_cache(rr.name, rr.type, rr)
           add_table(rr.name, rr.type, rr.ttl)
@@ -128,8 +130,7 @@ module EndlessDNS
         data << rr.expire
         data << rr.minimum
       else 
-        # NOTE: ログ処理
-        puts "unrecognized packet arrived"
+        log.puts("unrecognized type record[#{rr.type}]", "warn")
         return rr 
       end
       data
