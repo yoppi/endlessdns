@@ -43,13 +43,17 @@ module EndlessDNS
     def do_recache(expire)
       records = @table[expire] # [[name, type], [name, type], ...]
       delete_table(expire)
-      records.each do |record|
-        # ここがrecache処理のエントリポイントになる
-        # NOTE: Log処理
-        puts "update! #{expire}: #{record[0]}, #{record[1]}"
-        Thread.new do
-          recache.invoke(record[0], record[1])
+      if records
+        records.each do |record|
+          # ここがrecache処理のエントリポイントになる
+          # NOTE: Log処理
+          puts "update! #{expire}: #{record[0]}, #{record[1]}"
+          Thread.new do
+            recache.invoke(record[0], record[1])
+          end
         end
+      else
+        log.puts("no records[#{expire}]", "warn")
       end
     end
 

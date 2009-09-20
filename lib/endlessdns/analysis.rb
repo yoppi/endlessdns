@@ -105,7 +105,7 @@ module EndlessDNS
 
     def rdata(rr)
       data = []
-      case rr.type
+      case rr.type.to_s
       when 'A'
         data << rr.address 
       when 'AAAA'
