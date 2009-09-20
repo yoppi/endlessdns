@@ -18,8 +18,7 @@ module EndlessDNS
       begin
         dns = Net::DNS::Packet.parse(pkt.udp_data)
       rescue => e
-        # NOTE: log処理
-        puts "time: #{pkt.time}\nsrc: #{pkt.ip_src} unknown packet"
+        log.puts("src: #{pkt.ip_src} unknown packet", "error")
         return
       end
 
@@ -149,19 +148,19 @@ module EndlessDNS
     end
 
     def client_query?(pkt)
-      pkt.ip_dst.to_num_s == config.get("localip") 
+      pkt.ip_dst.to_num_s == config.get("dnsip") 
     end
 
     def localdns_query?(pkt)
-      pkt.ip_src.to_num_s == config.get("localip")
+      pkt.ip_src.to_num_s == config.get("dnsip")
     end
 
     def localdns_response?(pkt)
-      pkt.ip_src.to_num_s == config.get("localip")
+      pkt.ip_src.to_num_s == config.get("dnsip")
     end
 
     def outside_response?(pkt)
-      pkt.ip_dst.to_num_s == config.get("localip") 
+      pkt.ip_dst.to_num_s == config.get("dnsip") 
     end
   end
 end
