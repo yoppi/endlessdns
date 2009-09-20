@@ -4,6 +4,7 @@ end
 
 require 'thread'
 require 'observer'
+require 'logger'
 require 'rubygems'
 
 require 'net/dns/packet'
@@ -28,5 +29,19 @@ module EndlessDNS
   CONF_FILE = CONF_DIR + "/config"
   LOG_DIR = CONF_DIR + "/log"
   LOG_NAME = "endlessdns.log"
+  LOG_LEVEL = Logger::WARN
   STAT_DIR = CONF_DIR + "/stat"
+  CONFIG_ITEMS = [{"item" => "port",
+                   "banner" => "snoop port?",
+                   "default" => "53"},
+                  {"item" => "netaddress",
+                   "banner" => "network address?"},
+                  {"item" => "dnsip",
+                   "banner" => "local dns ip address?"},
+                  {"item" => "logdir",
+                   "banner" => "log directory?",
+                   "default" => EndlessDNS::LOG_DIR},
+                  {"item" => "statdir",
+                   "banner" => "statistics directory?",
+                   "default" => EndlessDNS::STAT_DIR}]
 end

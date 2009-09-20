@@ -5,13 +5,6 @@ require 'yaml'
 
 module EndlessDNS
   class Config
-
-    CONFIG_ITEMS = [{"item" => "port", "banner" => "snoop port?"},
-                    {"item" => "netaddress", "banner" => "network address?"},
-                    {"item" => "dnsip", "banner" => "local dns ip address?"},
-                    {"item" => "logdir", "banner" => "log directory?", "default" => EndlessDNS::LOG_DIR},
-                    {"item" => "statdir", "banner" => "statistics directory?", "default" => EndlessDNS::STAT_DIR}]
-
     class << self
       def instance
         @instance ||= self.new
@@ -23,16 +16,15 @@ module EndlessDNS
     end
 
     def setup
-      conf = {}
-      interactive(conf)
-
+      conf = interactive()
       Dir.mkdir(EndlessDNS::CONF_DIR) unless File.exist? EndlessDNS::CONF_DIR
       File.open(EndlessDNS::CONF_FILE, 'w') {|f|
         f.puts YAML.dump(conf)
       }
     end
 
-    def interactive(conf)
+    def interactive
+      conf = {}
       CONFIG_ITEMS.each do |item|
         banner = item["banner"]
         banner += "(#{item["default"]})" if item["default"]
@@ -41,6 +33,7 @@ module EndlessDNS
         input = item["default"] if input.size == 0
         conf[item["item"]] = input
       end
+      conf
     end
 
     def load
