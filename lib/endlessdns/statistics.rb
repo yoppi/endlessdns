@@ -61,6 +61,10 @@ module EndlessDNS
         @outside_response[dst][[name, type]] += 1
       end
     end
+
+    def setup
+      # not yet
+    end
   end
 end
 
