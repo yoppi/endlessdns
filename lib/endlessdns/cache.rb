@@ -9,6 +9,8 @@ module EndlessDNS
       end
     end
 
+    attr_reader :cache
+
     def initialize
       # {[name, type] => {:rdata => [rdata1, rdata2, ...] :ref => n}, ...}
       @cache = {}

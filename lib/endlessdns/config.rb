@@ -25,7 +25,7 @@ module EndlessDNS
 
     def interactive
       conf = {}
-      CONFIG_ITEMS.each do |item|
+      EndlessDNS::CONFIG_ITEMS.each do |item|
         banner = item["banner"]
         banner += "(#{item["default"]})" if item["default"]
         print "#{banner}: "
