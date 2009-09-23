@@ -1,8 +1,6 @@
 #
 # config処理を行う
 #
-require 'yaml'
-
 module EndlessDNS
   class Config
     class << self

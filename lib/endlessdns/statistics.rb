@@ -6,12 +6,6 @@ module EndlessDNS
 
     REFRESH = 60 * 5 # 5分をデフォルトにする
 
-    @@client_query_num = 0
-    @@localdns_query_num = 0
-    @@localdns_response_num = 0
-    @@outside_response_num = 0
-    @@hit = 0
-
     class << self
       def instance
         @instance ||= self.new
@@ -22,9 +16,17 @@ module EndlessDNS
       # {src => {[name, type] => n}, ...}
       @client_query = {}
       @localdns_query = {}
+
       # {dst => {[name, type] => n}, ...}
       @outside_response = {}
       @localdns_response = {}
+
+      @client_query_num = 0
+      @localdns_query_num = 0
+      @localdns_response_num = 0
+      @outside_response_num = 0
+      @hit = 0
+
       @mutex = Mutex.new
     end
 
@@ -37,6 +39,7 @@ module EndlessDNS
         @client_query[src] ||= Hash.new
         @client_query[src][[name, type]] ||= 0
         @client_query[src][[name, type]] += 1
+        @client_query_num += 1
       end
     end
 
@@ -45,6 +48,7 @@ module EndlessDNS
         @localdns_query[src] ||= Hash.new
         @localdns_query[src][[name, type]] ||= 0
         @localdns_query[src][[name, type]] += 1
+        @localdns_query_num += 1
       end
     end
 
@@ -53,6 +57,7 @@ module EndlessDNS
         @localdns_response[dst] ||= Hash.new
         @localdns_response[dst][[name, type]] ||= 0
         @localdns_response[dst][[name, type]] += 1
+        @localdns_response_num += 1
       end
     end
 
@@ -61,6 +66,7 @@ module EndlessDNS
         @outside_response[dst] ||= Hash.new
         @outside_response[dst][[name, type]] ||= 0
         @outside_response[dst][[name, type]] += 1
+        @outside_response_num += 1
       end
     end
 
@@ -80,7 +86,7 @@ module EndlessDNS
       now = Time.now
       stat = collect_stat()
       File.open(stat_file_name(now), 'w') do |io|
-        io.puts(stat)
+        io.puts YAML.dump(stat)
       end
     end
 
@@ -107,7 +113,7 @@ module EndlessDNS
         val.each do |name_type, cnt|
           ret["num_of_query"] ||= {}
           ret["num_of_query"][name_type[1]] ||= 0
-          ret["num_of_query"][name_type[1]] += 1
+          ret["num_of_query"][name_type[1]] += cnt
         end
       end
       ret
@@ -115,10 +121,25 @@ module EndlessDNS
 
     def cache_stat
       ret = {}
-      cache  = deep_copy(cache.cache)
-      cache.each do |name_type, val|
-        
+      cache_tmp = deep_copy(cache.cache)
+      cache_tmp.each do |name_type, val|
+        ret["num_of_cache"] ||= {}
+        ret["num_of_cache"][name_type[1]] ||= 0
+        ret["num_of_cache"][name_type[1]] += val[:rdata].size
       end
+      negative_cache_tmp = deep_copy(cache.negative_cache)
+      negative_cache_tmp.each do |dst, val|
+        val.each do |name_type, cnt|
+          ret["num_of_negative"] ||= {}
+          ret["num_of_negative"][name_type[1]] += cnt
+        end
+      end
+      ret
+    end
+
+    def hit_rate_stat
+      ret = {}
+      ret["hit_rate"] = @hit.fdiv @client_query_num 
     end
 
     def deep_copy(obj)

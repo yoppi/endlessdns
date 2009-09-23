@@ -5,6 +5,7 @@ end
 require 'thread'
 require 'observer'
 require 'logger'
+require 'yaml'
 require 'rubygems'
 
 require 'net/dns/packet'
