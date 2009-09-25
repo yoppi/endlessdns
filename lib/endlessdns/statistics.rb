@@ -33,7 +33,7 @@ module EndlessDNS
     end
 
     def hit
-      @@hit += 1
+      @hit += 1
     end
 
     def add_client_query(src, name, type)
@@ -73,7 +73,7 @@ module EndlessDNS
     end
 
     def setup
-      if File.exist? @stat_dir
+      unless File.exist? @stat_dir
         Dir.mkdir @stat_dir
       end
       Thread.new do
@@ -97,18 +97,19 @@ module EndlessDNS
         # NOTE: Hashなので吐きだされた統計情報は項目の順番がばらばら
         #       項目の順番を決定するか?
         io.puts YAML.dump(stat)
+        log.puts("stat: update", "info")
       end
     end
 
     def stat_file_name(now)
-      stat_file_name = stat_dir + "/#{now.year}#{now.month}#{now.day}#{now.hour}#{now.min}.stat"
+      @stat_dir + "/#{now.year}#{now.month}#{now.day}#{now.hour}#{now.min}.stat"
     end
 
     def collect_stat
       stat = {}
-      stat.merge client_query_stat()
-      stat.merge cache_stat()
-      stat.merge hit_rate_stat()
+      stat.merge! client_query_stat()
+      stat.merge! cache_stat()
+      stat.merge! hit_rate_stat()
       stat
     end
 
@@ -148,7 +149,8 @@ module EndlessDNS
 
     def hit_rate_stat
       ret = {}
-      ret["hit_rate"] = @hit.fdiv @client_query_num 
+      hit_rate = @client_query_num == 0 ? 0 : @hit.fdiv @client_query_num
+      ret["hit_rate"] = hit_rate 
       ret
     end
 
