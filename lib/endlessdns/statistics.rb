@@ -142,6 +142,7 @@ module EndlessDNS
     def hit_rate_stat
       ret = {}
       ret["hit_rate"] = @hit.fdiv @client_query_num 
+      ret
     end
 
     def deep_copy(obj)
