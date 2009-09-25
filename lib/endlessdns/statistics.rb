@@ -4,7 +4,7 @@
 module EndlessDNS
   class Statistics
 
-    REFRESH = 60 * 5 # 5分をデフォルトにする
+    REFRESH = 60 * 1 # 5分をデフォルトにする
 
     class << self
       def instance
@@ -26,6 +26,8 @@ module EndlessDNS
       @localdns_response_num = 0
       @outside_response_num = 0
       @hit = 0
+
+      @stat_dir = config.get("statdir") ? config.get("statdir") : EndlessDNS::STAT_DIR
 
       @mutex = Mutex.new
     end
@@ -71,15 +73,21 @@ module EndlessDNS
     end
 
     def setup
-      refresh = config.get("refresh") ? config.get("refresh") : REFRESH
+      if File.exist? @stat_dir
+        Dir.mkdir @stat_dir
+      end
       Thread.new do
         loop do
-          sleep refresh
+          sleep refresh()
           Thread.new do # 統計情報を吐くのに時間がかかるとtimerがずれる
             update_statistics
           end
         end
       end
+    end
+
+    def refresh
+      config.get("refresh") ? config.get("refresh") : REFRESH
     end
 
     def update_statistics
@@ -93,7 +101,6 @@ module EndlessDNS
     end
 
     def stat_file_name(now)
-      stat_dir = config.get("statdir") ? config.get("statdir") : EndlessDNS::STAT_DIR
       stat_file_name = stat_dir + "/#{now.year}#{now.month}#{now.day}#{now.hour}#{now.min}.stat"
     end
 

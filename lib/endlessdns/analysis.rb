@@ -73,8 +73,9 @@ module EndlessDNS
         end
       else
         (dns.answer + dns.authority + dns.additional).each do |rr|
-          refcnt_cache(rr.name, rr.type)
-          statistics.add_localdns_response(pkt.ip_dst.to_num_s, rr.name, rr.type)
+          name = root?(rr.name) ? '.' : rr.name
+          refcnt_cache(name, rr.type)
+          statistics.add_localdns_response(pkt.ip_dst.to_num_s, name, rr.type)
         end
       end
     end
@@ -83,13 +84,12 @@ module EndlessDNS
       (dns.answer + dns.authority + dns.additional).each do |rr|
         next if rr.type.to_s == "OPT" # OPTは疑似レコードなのでスキップ
 
-        unless cached?(rr.name, rr.type)
-          name = root?(rr.name) ? '.' : rr.name # NOTE: namesのdn_expandで対処すべきか?
-puts "debug: name = #{name}, type = #{rr.type}"
+        name = root?(rr.name) ? '.' : rr.name # NOTE: namesのdn_expandで対処すべきか?
+        unless cached?(name, rr.type)
           add_cache(name, rr.type, rr)
           add_table(name, rr.type, rr.ttl)
         end
-        statistics.add_outside_response(pkt.ip_src.to_num_s, rr.name, rr.type)
+        statistics.add_outside_response(pkt.ip_src.to_num_s, name, rr.type)
       end
     end
 
