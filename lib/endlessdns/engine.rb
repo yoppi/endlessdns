@@ -30,7 +30,7 @@ module EndlessDNS
       end
 
       def stat_setup
-        stat.setup
+        statistics.setup
       end
 
       def snoop_start

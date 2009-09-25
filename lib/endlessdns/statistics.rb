@@ -86,6 +86,8 @@ module EndlessDNS
       now = Time.now
       stat = collect_stat()
       File.open(stat_file_name(now), 'w') do |io|
+        # NOTE: Hashなので吐きだされた統計情報は項目の順番がばらばら
+        #       項目の順番を決定するか?
         io.puts YAML.dump(stat)
       end
     end

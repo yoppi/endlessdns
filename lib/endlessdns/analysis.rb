@@ -84,8 +84,10 @@ module EndlessDNS
         next if rr.type.to_s == "OPT" # OPTは疑似レコードなのでスキップ
 
         unless cached?(rr.name, rr.type)
-          add_cache(rr.name, rr.type, rr)
-          add_table(rr.name, rr.type, rr.ttl)
+          name = root?(rr.name) ? '.' : rr.name # NOTE: namesのdn_expandで対処すべきか?
+puts "debug: name = #{name}, type = #{rr.type}"
+          add_cache(name, rr.type, rr)
+          add_table(name, rr.type, rr.ttl)
         end
         statistics.add_outside_response(pkt.ip_src.to_num_s, rr.name, rr.type)
       end
@@ -146,6 +148,10 @@ module EndlessDNS
 
     def nxdomain?(dns)
       dns.header.rCode.type == "NXDomain"
+    end
+
+    def root?(name)
+      name == ''
     end
 
     def client_query?(pkt)
