@@ -102,7 +102,14 @@ module EndlessDNS
     end
 
     def stat_file_name(now)
-      @stat_dir + "/#{now.year}#{now.month}#{now.day}#{now.hour}#{now.min}.stat"
+      ret = ""
+      ret << @stat_dir + "/"
+      ret << sprintf("%04d", now.year)
+      ret << sprintf("%02d", now.month)
+      ret << sprintf("%02d", now.day)
+      ret << sprintf("%02d", now.hour)
+      ret << sprintf("%02d", now.min)
+      ret
     end
 
     def collect_stat
