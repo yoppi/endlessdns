@@ -19,7 +19,7 @@ module EndlessDNS
     def invoke(name, type)
       delete_cache(name, type)
       if need_recache?(name, type)
-        puts "recache: #{name}, #{type}"
+        log.puts("recache: #{name}, #{type}", "info")
         ret = @resolver.search(name, type)
       end
     end
