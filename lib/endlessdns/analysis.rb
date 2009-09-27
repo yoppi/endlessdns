@@ -33,9 +33,11 @@ module EndlessDNS
       dns.question.each {|q|
         if client_query?(pkt)
           log.puts("debug: [#{pkt.time}]client_query", "info")
+          #puts "debug: [#{pkt.time}]client_query"
           client_query(pkt, q.qName, q.qType.to_s)
         elsif localdns_query?(pkt)
           log.puts("debug: [#{pkt.time}]localdns_query", "info")
+          #puts "debug: [#{pkt.time}]localdns_query"
           localdns_query(pkt, q.qName, q.qType.to_s)
         end
       }
@@ -58,9 +60,11 @@ module EndlessDNS
     def analy_response(pkt, dns)
       if localdns_response?(pkt)
         log.puts("debug: [#{pkt.time}]localdns_response", "info")
+        #puts "debug: [#{pkt.time}]localdns_response"
         localdns_response(pkt, dns)
       elsif outside_response?(pkt)
         log.puts("debug: [#{pkt.time}]outside_response", "info")
+        #puts "debug: [#{pkt.time}]outside_response"
         outside_response(pkt, dns)
       end
     end

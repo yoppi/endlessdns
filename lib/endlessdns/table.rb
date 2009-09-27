@@ -47,6 +47,7 @@ module EndlessDNS
         records.each do |record|
           # ここがrecache処理のエントリポイントになる
           log.puts("update! #{expire}: #{record[0]}, #{record[1]}", "info")
+          #puts "update! #{expire}: #{record[0]}, #{record[1]}"
           Thread.new do
             recache.invoke(record[0], record[1])
           end

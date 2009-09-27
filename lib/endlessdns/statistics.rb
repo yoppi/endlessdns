@@ -4,7 +4,7 @@
 module EndlessDNS
   class Statistics
 
-    REFRESH = 60 * 1 # 5分をデフォルトにする
+    REFRESH = 60 * 5 # 5分をデフォルトにする
 
     class << self
       def instance
@@ -109,6 +109,7 @@ module EndlessDNS
       ret << sprintf("%02d", now.day)
       ret << sprintf("%02d", now.hour)
       ret << sprintf("%02d", now.min)
+      ret << ".stat"
       ret
     end
 
@@ -148,6 +149,7 @@ module EndlessDNS
       negative_cache_tmp.each do |dst, val|
         val.each do |name_type, cnt|
           ret["num_of_negative"] ||= {}
+          ret["num_of_negative"][name_type[1]] ||= 0
           ret["num_of_negative"][name_type[1]] += cnt
         end
       end
@@ -156,7 +158,7 @@ module EndlessDNS
 
     def hit_rate_stat
       ret = {}
-      hit_rate = @client_query_num == 0 ? 0 : @hit.fdiv @client_query_num
+      hit_rate = (@client_query_num == 0) ? 0 : @hit.fdiv(@client_query_num)
       ret["hit_rate"] = hit_rate 
       ret
     end
