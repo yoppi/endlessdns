@@ -73,7 +73,7 @@ module EndlessDNS
       if nxdomain?(dns) # negativeキャッシュの処理
         dns.question.each do |q|
           log.puts("negative cache[#{pkt.ip_dst.to_num_s}]", "warn")
-          add_negative_cache(pkt.ip_dst.to_num_s, q.qName, q.qType)
+          add_negative_cache(pkt.ip_dst.to_num_s, q.qName.to_s, q.qType.to_s)
         end
       else
         (dns.answer + dns.authority + dns.additional).each do |rr|
