@@ -34,6 +34,8 @@ module EndlessDNS
                                                 EndlessDNS::Cache::DEFAULT_MAINTAIN
       # 統計データからfalseかtrueを判断
       case maintain
+      when "no" # for monitoring and experiments
+        false
       when "all"
         true
       when "nonref"
