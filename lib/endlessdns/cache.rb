@@ -93,9 +93,15 @@ module EndlessDNS
       end
     end
 
-    def check_ref(name, type)
+    def check_cache_ref(name, type)
       @mutex.synchronize do
         @cache_ref[[name, type]]
+      end
+    end
+
+    def init_cache_ref(name, type)
+      @mutex.synchronize do
+        @cache_ref[[name, type]] = 0 if @cache_ref[[name, type]]
       end
     end
   end

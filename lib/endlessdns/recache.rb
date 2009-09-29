@@ -39,18 +39,25 @@ module EndlessDNS
       when "all"
         true
       when "nonref"
-        cache_check_ref(name, type)
+        check_cache_ref(name, type)
       end
     end
 
-    def cache_check_ref(name, type)
-      ref = cache.check_ref(name, type)
-      if ref > 1
+    def check_cache_ref(name, type)
+      ref = cache.check_cache_ref(name, type)
+      if ref == nil
+        log.puts("[#{name}, #{type}] is no reference", "warn")
+        false
+      elsif ref > 1
+        cache.init_cache_ref(name, type)
         true
       else
         false
       end
-      init_cache_ref(name, type)
+    end
+
+    def init_cache_ref(name, type)
+      cache.init_cache_ref(name, type)
     end
   end
 end
