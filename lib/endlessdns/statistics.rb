@@ -143,7 +143,7 @@ module EndlessDNS
       cache_tmp.each do |name_type, val|
         ret["num_of_cache"] ||= {}
         ret["num_of_cache"][name_type[1]] ||= 0
-        ret["num_of_cache"][name_type[1]] += val[:rdata].size
+        ret["num_of_cache"][name_type[1]] += val.size
       end
       negative_cache_tmp = deep_copy(cache.negative_cache)
       negative_cache_tmp.each do |dst, val|

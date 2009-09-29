@@ -46,6 +46,6 @@ module EndlessDNS
                    "banner" => "statistics directory?",
                    "default" => EndlessDNS::STAT_DIR},
                   {"item" => "cache-maintian",
-                   "banner" => "cache maintain?"
+                   "banner" => "cache maintain?",
                    "default" => EndlessDNS::Cache::DEFAULT_MAINTAIN}]
 end
