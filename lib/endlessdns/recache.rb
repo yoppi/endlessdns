@@ -30,8 +30,25 @@ module EndlessDNS
     end
 
     def need_recache?(name, type)
+      maintain = config.get("cache-maintain") ? config.get("cache-maintain") :
+                                                EndlessDNS::Cache::DEFAULT_MAINTAIN
       # 統計データからfalseかtrueを判断
-      true
+      case maintain
+      when "all"
+        true
+      when "nonref"
+        cache_check_ref(name, type)
+      end
+    end
+
+    def cache_check_ref(name, type)
+      ref = cache.check_ref(name, type)
+      if ref > 1
+        true
+      else
+        false
+      end
+      init_cache_ref(name, type)
     end
   end
 end

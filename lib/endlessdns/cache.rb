@@ -3,6 +3,8 @@
 #
 module EndlessDNS
   class Cache
+    DEFAULT_MAINTAIN = "all"
+
     class << self
       def instance
         @instance ||= self.new
@@ -88,6 +90,12 @@ module EndlessDNS
         key = make_key(name, type)
         @cache_ref[key] ||= 0
         @cache_ref[key] += 1
+      end
+    end
+
+    def check_ref(name, type)
+      @mutex.synchronize do
+        @cache_ref[[name, type]]
       end
     end
   end
