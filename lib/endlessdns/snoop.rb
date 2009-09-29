@@ -22,7 +22,7 @@ module EndlessDNS
       @handle.close
     end
 
-    def setfilter(filter, optimize=false)
+    def setfilter(filter, optimize=true)
       @handle.setfilter(filter, optimize)
     end
   end
