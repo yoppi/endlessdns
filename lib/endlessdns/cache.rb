@@ -12,8 +12,10 @@ module EndlessDNS
     attr_reader :cache, :negative_cache
 
     def initialize
-      # {[name, type] => {:rdata => [rdata1, rdata2, ...] :ref => n}, ...}
+      # {[name, type] => {:rdata => [rdata1, rdata2, ...]}, ...}
       @cache = {}
+      # {[name, type] => n }
+      @cache_ref = {}
       # {dst => {[name, type] =>  n}, ...}
       @negative_cache = {}
       @mutex = Mutex.new
@@ -27,8 +29,6 @@ module EndlessDNS
         unless @cache[key][:rdata].include? rdata
           @cache[key][:rdata] << rdata
         end
-        @cache[key][:ref] ||= 0
-        @cache[key][:ref] += 1
       end
     end
 
@@ -78,9 +78,8 @@ module EndlessDNS
     def refcnt(name, type)
       @mutex.synchronize do
         key = make_key(name, type)
-        if @cache.has_key? key
-          @cache[key][:ref] += 1
-        end
+        @cache_ref[key] ||= 0
+        @cache_ref[key] += 1
       end
     end
   end
