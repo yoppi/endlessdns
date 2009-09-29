@@ -6,7 +6,7 @@ module EndlessDNS
 
     def initialize
     end
-  
+
     def run
       loop do
         pkt = packet.deq
@@ -28,7 +28,7 @@ module EndlessDNS
         analy_response(pkt, dns)
       end
     end
-      
+
     def analy_query(pkt, dns)
       dns.question.each {|q|
         if client_query?(pkt)
@@ -72,7 +72,7 @@ module EndlessDNS
     def localdns_response(pkt, dns)
       if nxdomain?(dns) # negativeキャッシュの処理
         dns.question.each do |q|
-          log.puts("negative cache[#{pkt.ip_dst.to_num_s}]", "warn")
+          log.puts("negative cache[#{pkt.ip_dst.to_num_s} is #{q.qName.to_s}]", "warn")
           add_negative_cache(pkt.ip_dst.to_num_s, q.qName.to_s, q.qType.to_s)
         end
       else
@@ -102,7 +102,7 @@ module EndlessDNS
     end
 
     def add_negative_cache(dst, qname, qtype)
-      cache.add_negative(dst, qname, qtype) 
+      cache.add_negative(dst, qname, qtype)
     end
 
     def refcnt_cache(name, type)
@@ -110,24 +110,25 @@ module EndlessDNS
     end
 
     def rdata(rr)
-      data = []
       case rr.type.to_s
       when 'A'
-        data << rr.address 
+        data = rr.address
       when 'AAAA'
-        data << rr.address
+        data = rr.address
       when 'NS'
-        data << rr.nsdname 
+        data = rr.nsdname
       when 'CNAME'
-        data << rr.cname
+        data = rr.cname
       when 'MX'
+        data = []
         data << rr.preference
         data << rr.exchage
       when 'PTR'
-        data << rr.ptr
+        data = rr.ptr
       when 'TXT'
-        data << rr.txt
+        data = rr.txt
       when 'SOA'
+        data = []
         data << rr.mname
         data << rr.rname
         data << rr.serial
@@ -135,15 +136,15 @@ module EndlessDNS
         data << rr.retry
         data << rr.expire
         data << rr.minimum
-      else 
+      else
         log.puts("unrecognized type record[#{rr.type}]", "warn")
-        return rr 
+        return rr
       end
       data
     end
 
     def add_table(name, type, ttl)
-      table.add(name, type, ttl)  
+      table.add(name, type, ttl)
     end
 
     def cached?(name, type)
@@ -159,7 +160,7 @@ module EndlessDNS
     end
 
     def client_query?(pkt)
-      pkt.ip_dst.to_num_s == config.get("dnsip") 
+      pkt.ip_dst.to_num_s == config.get("dnsip")
     end
 
     def localdns_query?(pkt)
@@ -171,7 +172,7 @@ module EndlessDNS
     end
 
     def outside_response?(pkt)
-      pkt.ip_dst.to_num_s == config.get("dnsip") 
+      pkt.ip_dst.to_num_s == config.get("dnsip")
     end
   end
 end

@@ -12,7 +12,7 @@ module EndlessDNS
     attr_reader :cache, :negative_cache
 
     def initialize
-      # {[name, type] => {:rdata => [rdata1, rdata2, ...]}, ...}
+      # {[name, type] => [rdata1, rdata2, ...], ...}
       @cache = {}
       # {[name, type] => n }
       @cache_ref = {}
@@ -24,10 +24,9 @@ module EndlessDNS
     def add(name, type, rdata)
       @mutex.synchronize do
         key = make_key(name, type)
-        @cache[key] ||= Hash.new
-        @cache[key][:rdata] ||= []
-        unless @cache[key][:rdata].include? rdata
-          @cache[key][:rdata] << rdata
+        @cache[key] ||= []
+        unless @cache[key].include? rdata
+          @cache[key] << rdata
         end
       end
     end
@@ -56,22 +55,31 @@ module EndlessDNS
 
     # NOTE: [name, type]のペアが存在すればhit
     # なければnameとCNAMEで検索
-    # CNAMEでhitすれば、さらにその正規名とAで検索
+    # CNAMEでhitすれば、さらにその正規名とtypeで検索
     # hitしなければ存在しない
     def cached?(name, type)
       @mutex.synchronize do
         if @cache.has_key? [name, type]
           return true
-        elsif @cache.has_key? [name, "CNAME"]
-          cname = @cache[[name, "CNAME"]][:rdata][0]
-          if @cache.has_key? [cname, "A"]
-            return true
-          else
-            return false
-          end
+        elsif check_cname(name, type)
+          return true
         else
           return false
         end
+      end
+    end
+
+    def check_cname(name, type)
+      if @cache.has_key? [name, "CNAME"]
+        cnames = @cache[[name, "CNAME"]]
+        cnames.each do |cname|
+          if @cache.has_key? [cname, type]
+            return true
+          end
+          return check_cname(cname, type)
+        end
+      else
+        return false
       end
     end
 
