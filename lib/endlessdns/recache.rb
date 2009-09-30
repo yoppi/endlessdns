@@ -21,7 +21,11 @@ module EndlessDNS
       if need_recache?(name, type)
         log.puts("recache: #{name}, #{type}", "info")
         #puts "recache: #{name}, #{type}"
-        ret = @resolver.search(name, type)
+        begin
+          ret = @resolver.search(name, type)
+        rescue => e
+          log.puts("#{e}", "warn")
+        end
       end
     end
 
