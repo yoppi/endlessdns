@@ -145,13 +145,11 @@ module EndlessDNS
         ret["num_of_cache"][name_type[1]] ||= 0
         ret["num_of_cache"][name_type[1]] += val.size
       end
-      negative_cache_tmp = deep_copy(cache.negative_cache)
-      negative_cache_tmp.each do |dst, val|
-        val.each do |name_type, cnt|
-          ret["num_of_negative"] ||= {}
-          ret["num_of_negative"][name_type[1]] ||= 0
-          ret["num_of_negative"][name_type[1]] += cnt
-        end
+      ncache_ref = deep_copy(cache.negative_cache_ref)
+      ncache_ref.each do |name_type, cnt|
+        ret["num_of_negative"] ||= {}
+        ret["num_of_negative"][name_type[1]] ||= 0
+        ret["num_of_negative"][name_type[1]] += cnt
       end
       ret
     end

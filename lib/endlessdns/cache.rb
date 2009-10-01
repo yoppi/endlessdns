@@ -11,15 +11,22 @@ module EndlessDNS
       end
     end
 
-    attr_reader :cache, :negative_cache
+    attr_reader :cache, :cache_ref
+    attr_reader :negative_cache, :negative_cache_ref, :negative_cache_client
 
     def initialize
       # {[name, type] => [rdata1, rdata2, ...], ...}
       @cache = {}
       # {[name, type] => n }
       @cache_ref = {}
-      # {dst => {[name, type] =>  n}, ...}
+
+      # {[name, type] => [soa1, ...]}, ...}
       @negative_cache = {}
+      # {[name, type] => n }
+      @negative_cache_ref = {}
+      # {src(client) => {[name, type] => n } }
+      @negative_cache_client = {}
+
       @mutex = Mutex.new
     end
 
@@ -33,12 +40,28 @@ module EndlessDNS
       end
     end
 
-    def add_negative(dst, name, type)
+    def add_negative(name, type, soa)
       @mutex.synchronize do
         key = make_key(name, type)
-        @negative_cache[dst] ||= Hash.new
-        @negative_cache[dst][key] ||= 0
-        @negative_cache[dst][key] += 1
+        @negative_cache[key] || = []
+        @negative_cache[key] << soa
+      end
+    end
+
+    def add_negative_cache_client(client, name, type)
+      @mutex.synchronize do
+        key = make_key(name, type)
+        @negative_cache_client[client] ||= {}
+        @negative_cache_client[client][key] ||= 0
+        @negative_cache_client[client][key] += 1
+      end
+    end
+
+    def add_negative_cache_ref(name, type)
+      @mutex.synchronize do
+        key = make_key(name, type)
+        @negative_cache_ref[key] ||= 0
+        @negative_cache_ref[key] += 1
       end
     end
 
@@ -65,6 +88,9 @@ module EndlessDNS
           return true
         elsif check_cname(name, type)
           return true
+        elsif check_negative(name, type)
+          add_negative_cache_ref(name, type)
+          return true
         else
           return false
         end
@@ -85,7 +111,11 @@ module EndlessDNS
       end
     end
 
-    def refcnt(name, type)
+    def check_negative(name, type)
+      @negative_cache.has_key? [name, type]
+    end
+
+    def add_cache_ref(name, type)
       @mutex.synchronize do
         key = make_key(name, type)
         @cache_ref[key] ||= 0
