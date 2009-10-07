@@ -157,7 +157,7 @@ module EndlessDNS
     def hit_rate_stat
       ret = {}
       hit_rate = (@client_query_num == 0) ? 0 : @hit.fdiv(@client_query_num)
-      ret["hit_rate"] = hit_rate 
+      ret["hit_rate"] = hit_rate
       ret
     end
 

@@ -43,7 +43,7 @@ module EndlessDNS
     def add_negative(name, type, soa)
       @mutex.synchronize do
         key = make_key(name, type)
-        @negative_cache[key] || = []
+        @negative_cache[key] ||= []
         @negative_cache[key] << soa
       end
     end

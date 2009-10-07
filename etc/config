@@ -8,3 +8,10 @@
 #logdir: ~/.endlessdns/log
 # to store stat file directory
 #statdir: ~/.endlessdns/stat
+# cache maintain
+#cache-maintain: nonref
+# cache sharing
+#share:
+#  host: master # or sleave
+#  addr: 192.168.0.10
+#  port: 12345
