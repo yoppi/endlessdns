@@ -5,7 +5,7 @@ require 'drb/drb'
 
 module EndlessDNS
   class Sharing
-    RETRY_SEC 300
+    RETRY_SEC = 300
 
     def initialize
     end
@@ -24,11 +24,11 @@ module EndlessDNS
 
     def check_master_or_slave
       share = config.get("share") ? config.get("share") : default_share
-      @host_type = share['host_type']
+      @host_type = share['host-type']
       if @host_type == "master"
-        @serv_addr = share['serv_addr']
+        @serv_addr = share['serv-addr']
         raise "must be set serv-addr" unless @serv_addr
-        @serv_port = share['serv_port']
+        @serv_port = share['serv-port']
         raise "must be set serv-port" unless @serv_port
       elsif @host_type == "slave"
         @master_addr = share['master-addr']
@@ -47,6 +47,7 @@ module EndlessDNS
       share['host-type'] = "master"
       share['serv-addr'] = config.get("dnsip")
       share['serv-port'] = 12345
+      share
     end
   
     def master_setup
