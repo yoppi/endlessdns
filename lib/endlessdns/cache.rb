@@ -134,6 +134,16 @@ module EndlessDNS
         @cache_ref[[name, type]] = 0 if @cache_ref[[name, type]]
       end
     end
+
+    def deep_copy_cache
+      deep_copy(@cache)
+    end
+
+    def deep_copy(obj)
+      @mutex.synchronize do
+        Marshal.load(Marshal.dump(obj))
+      end
+    end
   end
 end
 

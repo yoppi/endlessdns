@@ -23,6 +23,7 @@ require 'endlessdns/snoop'   # packet snooping
 require 'endlessdns/packet'  # packet queue
 require 'endlessdns/version' # version of system
 require 'endlessdns/recache'
+require 'endlessdns/share'
 
 module EndlessDNS
   HOME = ENV['HOME']
