@@ -32,7 +32,7 @@ module EndlessDNS
         raise "must be set serv-port" unless @serv_port
       elsif @host_type == "slave"
         @master_addr = share['master-addr']
-        raise "must be set master-addr" unless @master_addr 
+        raise "must be set master-addr" unless @master_addr
         @master_port = share['master-port']
         raise "must be set master-port" unless @master_port
         @refresh = share['refresh']
@@ -49,7 +49,7 @@ module EndlessDNS
       share['serv-port'] = 12345
       share
     end
-  
+
     def master_setup
       front = EndlessDNS::Master.new
       DRb.start_service("druby://#{@host}:#{@port}", front)
@@ -59,7 +59,8 @@ module EndlessDNS
       begin
         master = DRbObject.new_with_uri("druby://#{@master_addr}:#{@master_port}")
         master.connected?
-      rescue
+      rescue => e
+        log.puts("cannot connect master server!", "warn")
         sleep RETRY_SEC
         retry
       end
@@ -79,8 +80,8 @@ module EndlessDNS
     end
 
     def push(diff)
-      diff.each do |name_type, rdatas| 
-        rrdatas.each do |rdata| 
+      diff.each do |name_type, rdatas|
+        rdatas.each do |rdata|
           cache.add(name_type[0], name_type[1], rdata)
         end
       end
@@ -99,7 +100,7 @@ module EndlessDNS
 
     def run
       loop do
-        sleep @refresh 
+        sleep @refresh
         master_cache = @master.pull
         self_cache = cache.deep_copy_cache
 
@@ -125,8 +126,8 @@ module EndlessDNS
     end
 
     def update_self_cashe(diff)
-      diff.each do |name_type, rdatas| 
-        rrdatas.each do |rdata| 
+      diff.each do |name_type, rdatas|
+        rdatas.each do |rdata|
           cache.add(name_type[0], name_type[1], rdata)
         end
       end
@@ -135,5 +136,5 @@ module EndlessDNS
     def update_master_cache(diff)
       @master.push(diff)
     end
-  end 
+  end
 end
