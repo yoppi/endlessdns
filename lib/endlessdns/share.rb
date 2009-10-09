@@ -58,8 +58,7 @@ module EndlessDNS
     def slave_setup
       begin
         master = DRbObject.new_with_uri("druby://#{@master_addr}:#{@master_port}")
-        #この時点ではdrbサーバが起動していないくてもエラーにならない。
-        # objectに対してメソッドをsendして初めて分かる
+        master.connected?
       rescue
         sleep RETRY_SEC
         retry
@@ -85,6 +84,10 @@ module EndlessDNS
           cache.add(name_type[0], name_type[1], rdata)
         end
       end
+    end
+
+    def connected?
+      true
     end
   end
 
