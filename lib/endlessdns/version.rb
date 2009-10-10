@@ -1,3 +1,9 @@
 module EndlessDNS
-  VERSION = '0.0.0'
+  class Version
+    VERSION = '0.0.0'
+    def self.version
+      puts "Version #{VERSION}"
+      exit
+    end
+  end
 end

@@ -5,6 +5,33 @@ $LOAD_PATH.unshift File.join(File.dirname(__FILE__), '..', 'lib')
 
 require 'rubygems'
 require 'endlessdns'
+require 'optparse'
 
-# EndlessDNS entry point.
-EndlessDNS::Engine.invoke ARGV.dup
+begin
+  options = {:daemonize => true}
+  opts = OptionParser.new do |opts|
+    opts.on("-D", "--no-daemonize", "Don't daemonize") do
+      options[:daemonize] = false
+    end
+    opts.on("-v", "--version", "Print the version number and exit") do
+      options[:version] = true
+    end
+  end
+  opts.parse!
+
+  if options[:version]
+    EndlessDNS::Version.version
+  else
+    # EndlessDNS entry point.
+    EndlessDNS::Engine.invoke options
+  end
+rescue => e
+  if e.instance_of?(SystemExit)
+    raise
+  else
+    puts "Uncaught exception"
+    puts e.message
+    puts e.backtrace.join("\n")
+  end
+end
+

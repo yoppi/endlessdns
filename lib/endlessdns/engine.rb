@@ -5,24 +5,37 @@ module EndlessDNS
   class Engine
 
     class << self
-      def invoke(argv)
+      def invoke(options)
+        @options = options
+
+        if @options[:daemonize]
+          run_daemonize
+        else
+          run_in_front
+        end
+      end
+
+      def run_daemonize
+        pid = fork do
+          run_in_front
+        end
+        exit
+      end
+
+      def run_in_front
         Thread.abort_on_exception = true
         load_config()
         log_setup()
         stat_setup()
         snoop_start()
-        #loop do
-        #  sleep 1
-        #  puts packet.size
-        #end
         packet_analy()
       end
 
       def load_config
         unless File.exist? EndlessDNS::CONF_FILE
-          config.setup()
+          config.setup
         end
-        config.load()
+        config.load
       end
 
       def log_setup
