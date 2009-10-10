@@ -27,6 +27,7 @@ module EndlessDNS
         load_config()
         log_setup()
         stat_setup()
+        sharing_setup()
         snoop_start()
         packet_analy()
       end
@@ -44,6 +45,11 @@ module EndlessDNS
 
       def stat_setup
         statistics.setup
+      end
+
+      def sharing_setup
+        @shareing = Sharing.new
+        @shareing.setup
       end
 
       def snoop_start
