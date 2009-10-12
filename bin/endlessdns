@@ -8,13 +8,18 @@ require 'endlessdns'
 require 'optparse'
 
 begin
-  options = {:daemonize => true}
+  options = {:daemonize => true, :web => true}
   opts = OptionParser.new do |opts|
     opts.on("-D", "--no-daemonize", "Don't daemonize") do
       options[:daemonize] = false
     end
+
     opts.on("-v", "--version", "Print the version number and exit") do
       options[:version] = true
+    end
+
+    opts.on("--no-web", "Don't start webserver") do
+      options[:web] = false
     end
   end
   opts.parse!

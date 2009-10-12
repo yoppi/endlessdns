@@ -7,6 +7,7 @@ module EndlessDNS
     class << self
       def invoke(options)
         @options = options
+        load_config()
 
         if @options[:daemonize]
           run_daemonize
@@ -24,10 +25,10 @@ module EndlessDNS
 
       def run_in_front
         Thread.abort_on_exception = true
-        load_config()
         log_setup()
         stat_setup()
         sharing_setup()
+        webserver_setup()
         snoop_start()
         packet_analy()
       end
@@ -48,8 +49,19 @@ module EndlessDNS
       end
 
       def sharing_setup
-        @shareing = Sharing.new
-        @shareing.setup
+        @share_th = Thread.new do
+          @shareing = Sharing.new
+          @shareing.setup
+        end
+      end
+
+      def webserver_setup
+        if @options[:web]
+          fork do
+            exec(EndlessDNS::LIB_DIR + "/" + "web/webserver.rb")
+          end
+          log.puts("launching webserver", "info")
+        end
       end
 
       def snoop_start

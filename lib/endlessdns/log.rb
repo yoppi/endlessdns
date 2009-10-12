@@ -3,6 +3,8 @@
 #
 module EndlessDNS
   class Log
+    LOG_LEVEL = Logger::WARN
+
     class << self
       def instance
         @instance ||= self.new
@@ -22,7 +24,7 @@ module EndlessDNS
                                          EndlessDNS::LOG_NAME
       @logger = Logger.new("#{@logdir}/#{@logname}")
       @loglevel = config.get("loglevel") ? config.get("loglevel") :
-                                           EndlessDNS::LOG_LEVEL
+                                           LOG_LEVEL
       @logger.level = @loglevel
     end
 

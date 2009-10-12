@@ -26,13 +26,14 @@ require 'endlessdns/recache'
 require 'endlessdns/share'
 
 module EndlessDNS
+  LIB_DIR = File.expand_path(File.dirname(__FILE__))
   HOME = ENV['HOME']
-  CONF_DIR = HOME + "/.endlessdns"
-  CONF_FILE = CONF_DIR + "/config"
-  LOG_DIR = CONF_DIR + "/log"
+  APP_DIR = HOME + "/.endlessdns"
+  CONF_DIR = APP_DIR + '/conf'
+  CONF_FILE = CONF_DIR + "/endlessdns.conf"
+  LOG_DIR = APP_DIR + "/log"
   LOG_NAME = "endlessdns.log"
-  LOG_LEVEL = Logger::WARN
-  STAT_DIR = CONF_DIR + "/stat"
+  STAT_DIR = APP_DIR + "/stat"
   CONFIG_ITEMS = [{"item" => "port",
                    "banner" => "snoop port?",
                    "default" => "53"},

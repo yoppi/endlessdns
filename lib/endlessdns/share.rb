@@ -13,7 +13,7 @@ module EndlessDNS
     def setup
       # masterかslaveかを決定
       check_master_or_slave
-      if @host == "master"
+      if @host_type == "master"
         # masterであればDRbServerを起動
         master_setup
       else
@@ -23,7 +23,7 @@ module EndlessDNS
     end
 
     def check_master_or_slave
-      share = config.get("share") ? config.get("share") : default_share
+      share = config.get("share") ? config.get("share") : default_share()
       @host_type = share['host-type']
       if @host_type == "master"
         @serv_addr = share['serv-addr']
@@ -52,7 +52,7 @@ module EndlessDNS
 
     def master_setup
       front = EndlessDNS::Master.new
-      DRb.start_service("druby://#{@host}:#{@port}", front)
+      DRb.start_service("druby://#{@serv_addr}:#{@serv_port}", front)
     end
 
     def slave_setup
@@ -64,10 +64,8 @@ module EndlessDNS
         sleep RETRY_SEC
         retry
       end
-      Thread.new do
-        slave = EndlessDNS::Slave.new(master, @refresh)
-        slave.run
-      end
+      slave = EndlessDNS::Slave.new(master, @refresh)
+      slave.run
     end
   end
 

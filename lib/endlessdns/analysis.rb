@@ -86,7 +86,7 @@ module EndlessDNS
 
     def outside_response(pkt, dns)
       if nxdomain?(dns)
-        if dns.header.qdCount == 1 && dns.authority.nsCount == 1
+        if dns.header.qdCount == 1 && dns.header.nsCount == 1
           q = dns.question.first
           authority = dns.authority.first
           add_negative_cache(q.qName.to_s, q.qType, authority)
@@ -116,7 +116,7 @@ module EndlessDNS
     end
 
     def add_negative_cache_client(client, qname, qtype)
-      cache.add_negative_cache_client(client. qname, qtype)
+      cache.add_negative_cache_client(client, qname, qtype)
     end
 
     def add_cache_ref(name, type)
