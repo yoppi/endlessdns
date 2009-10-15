@@ -28,7 +28,7 @@ module EndlessDNS
         log_setup()
         stat_setup()
         sharing_setup()
-        webserver_setup()
+        cgi_setup()
         snoop_start()
         packet_analy()
       end
@@ -55,12 +55,10 @@ module EndlessDNS
         end
       end
 
-      def webserver_setup
+      def cgi_setup
         if @options[:web]
-          fork do
-            exec(EndlessDNS::LIB_DIR + "/" + "web/webserver.rb")
-          end
-          log.puts("launching webserver", "info")
+          helper = CGIHelper.new
+          helper.setup
         end
       end
 

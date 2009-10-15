@@ -6,6 +6,7 @@ require 'drb/drb'
 module EndlessDNS
   class Sharing
     RETRY_SEC = 300
+    PORT = 9998
 
     def initialize
     end
@@ -46,7 +47,7 @@ module EndlessDNS
       share = {}
       share['host-type'] = "master"
       share['serv-addr'] = config.get("dnsip")
-      share['serv-port'] = 12345
+      share['serv-port'] = PORT
       share
     end
 
