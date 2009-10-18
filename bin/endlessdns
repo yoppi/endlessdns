@@ -21,11 +21,17 @@ begin
     opts.on("--no-web", "Don't start webserver") do
       options[:web] = false
     end
+
+    opts.on("-p", "--pid", "To watch DNS cache server with pid") do |o|
+      options[:pid] = o
+    end
   end
   opts.parse!
 
   if options[:version]
     EndlessDNS::Version.version
+  elsif !options[:pid]
+    raise "set DNS cache server pid!"
   else
     # EndlessDNS entry point.
     EndlessDNS::Engine.invoke options

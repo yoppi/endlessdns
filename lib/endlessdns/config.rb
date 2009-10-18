@@ -46,8 +46,12 @@ module EndlessDNS
     def validate
     end
 
-    def get(name)
-      @store[name]
+    def get(item)
+      @store[item]
+    end
+
+    def add(item, val)
+      @store[item] = val
     end
   end
 end
