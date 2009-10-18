@@ -145,7 +145,7 @@ module EndlessDNS
     end
 
     def another_status
-      @slave_statuses
+      @slave_statuses.empty? nil : @slave_statuses
     end
   end
 

@@ -68,8 +68,10 @@ class Home
     <td><%=  @self_status[:update] %></td>
   </tr>
 </table>
+<% unless @another_status == nil %>
 <h2>another host status</h2>
 <h3></h3>
+<% end %>
     EOS
   end
 
