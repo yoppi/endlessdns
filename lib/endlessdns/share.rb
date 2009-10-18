@@ -4,7 +4,7 @@
 require 'drb/drb'
 
 module EndlessDNS
-  class Sharing
+  class Share
     RETRY_SEC = 300
     PORT = 9998
 
@@ -145,7 +145,7 @@ module EndlessDNS
     end
 
     def another_status
-      @slave_statuses.empty? nil : @slave_statuses
+      @slave_statuses.empty? ? nil : @slave_statuses
     end
   end
 
