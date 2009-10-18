@@ -6,7 +6,7 @@ require 'thread'
 require 'observer'
 require 'logger'
 require 'yaml'
-require 'rubygems'
+#require 'rubygems'
 
 require 'net/dns/packet'
 require 'net/dns/resolver'
@@ -24,6 +24,8 @@ require 'endlessdns/packet'  # packet queue
 require 'endlessdns/version' # version of system
 require 'endlessdns/recache'
 require 'endlessdns/share'
+require 'endlessdns/cgihelper'
+require 'endlessdns/front'
 
 module EndlessDNS
   LIB_DIR = File.expand_path(File.dirname(__FILE__))

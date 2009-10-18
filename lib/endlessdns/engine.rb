@@ -57,13 +57,13 @@ module EndlessDNS
 
       def cgi_setup
         if @options[:web]
-          helper = CGIHelper.new
+          helper = EndlessDNS::CGIHelper.new
           helper.setup
         end
       end
 
       def snoop_start
-        @snoop = Snoop.new
+        @snoop = EndlessDNS::Snoop.new
         @snoop.setfilter("udp and port #{config.get("port")}")
         @snoop_th = Thread.new do
           @snoop.dump
