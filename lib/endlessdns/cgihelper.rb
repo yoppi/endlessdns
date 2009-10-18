@@ -6,7 +6,7 @@ require 'drb/drb'
 module EndlessDNS
   class CGIHelper
     FRONT_PORT = 9997
-    WEBSERVER = EndlessDNS::LIB_DIR + "/" + "web/webserver.rb" 
+    WEBSERVER = EndlessDNS::LIB_DIR + "/" + "web/webserver.rb"
 
     def initialize
       @front_addr = config.get("dnsip")

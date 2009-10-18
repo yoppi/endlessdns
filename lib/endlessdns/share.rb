@@ -8,6 +8,10 @@ module EndlessDNS
     RETRY_SEC = 300
     PORT = 9998
 
+    def self.instance
+      @instance ||= self.new
+    end
+
     def initialize
     end
 
@@ -26,12 +30,13 @@ module EndlessDNS
     def check_master_or_slave
       share = config.get("share") ? config.get("share") : default_share()
       @host_type = share['host-type']
-      if @host_type == "master"
+      case @host_type
+      when "master"
         @serv_addr = share['serv-addr']
         raise "must be set serv-addr" unless @serv_addr
         @serv_port = share['serv-port']
         raise "must be set serv-port" unless @serv_port
-      elsif @host_type == "slave"
+      when "slave"
         @master_addr = share['master-addr']
         raise "must be set master-addr" unless @master_addr
         @master_port = share['master-port']
@@ -52,26 +57,63 @@ module EndlessDNS
     end
 
     def master_setup
-      front = EndlessDNS::Master.new
-      DRb.start_service("druby://#{@serv_addr}:#{@serv_port}", front)
+      @self_host = EndlessDNS::Master.new
+      DRb.start_service("druby://#{@serv_addr}:#{@serv_port}", @self_host)
     end
 
     def slave_setup
-      begin
-        master = DRbObject.new_with_uri("druby://#{@master_addr}:#{@master_port}")
-        master.connected?
-      rescue => e
-        log.puts("cannot connect master server!", "warn")
-        sleep RETRY_SEC
-        retry
-      end
-      slave = EndlessDNS::Slave.new(master, @refresh)
-      slave.run
+      master = DRbObject.new_with_uri("druby://#{@master_addr}:#{@master_port}")
+      @self_host = EndlessDNS::Slave.new(master, @refresh)
+      @self_host.run
+    end
+
+    def self_status
+      @self_host.status
+    end
+
+    # slaveのみ
+    def self_refresh
+      @self_host.refresh
+    end
+
+    def another_status
+      @self_host.another_status
     end
   end
 
-  class Master
+  class Host
+    def dnscache_process
+      pid = config.get('dnspid')
+      get_process(pid)
+    end
+
+    # CPU使用率やメモリ使用率も必要か?
+    # topコマンドを使うと遅いが回収可能
+    def get_process(pid)
+      _ = `ps p #{pid}`.split("\n")
+      if _.size == 1
+        "down"
+      else
+        "up"
+      end
+    end
+
+    def host_ipaddr
+      config.get('dnsip')
+    end
+  end
+
+  class Master < Host
     def initialize
+      # status => {
+      #   :host_type => 'master'
+      #   :ip => host's ip address,
+      #   :cache => 'up' or 'down'
+      #   :snum => num of slaves
+      #   :update => request time
+      # }
+      @status = {}
+      @slave_statuses = []
     end
 
     def pull
@@ -86,27 +128,69 @@ module EndlessDNS
       end
     end
 
+    def add_slave_status(status)
+      @slave_statuses << status
+    end
+
     def connected?
       true
     end
+
+    def status
+      @status[:host_type] = "master"
+      @status[:ip] = host_ipaddr()
+      @status[:cache] = dnscache_process()
+      @status[:snum] = @slave_statuses.size
+      @status[:update] = Time.now
+    end
+
+    def another_status
+      @slave_statuses
+    end
   end
 
-  class Slave
+  class Slave < Host
     def initialize(master, refresh)
       @master = master
       @refresh = refresh
+      # status => {
+      #   :host_type => 'slave'
+      #   :ip => ip address,
+      #   :cache  => 'up' or 'down'
+      #   :mcon => nil or time
+      #   :update => last connected time with master
+      # }
+      #
+      @status = {}
+      @master_status = nil
+      # 前回に通信した時間
+      @master_conectivity = nil
     end
 
     def run
       loop do
         sleep @refresh
-        master_cache = @master.pull
-        self_cache = cache.deep_copy_cache
+        begin
+          master_cache = @master.pull
+          self_cache = cache.deep_copy_cache
 
-        diff_self = get_diff(master_cache, self_cache)
-        diff_master = get_diff(self_cache, master_cache)
-        update_self_cashe(diff_self)
-        update_master_cache(diff_master)
+          diff_self = get_diff(master_cache, self_cache)
+          diff_master = get_diff(self_cache, master_cache)
+
+          update_self_cashe(diff_self)
+          update_master_cache(diff_master)
+
+          update_conectivity(Time.now)
+          update_self_status(@status)
+          update_master_status
+        rescue => e
+          log.puts("cannot connect master server!", "warn")
+          update_conectivity("down")
+
+          sleep RETRY_SEC
+
+          retry
+        end
       end
     end
 
@@ -135,5 +219,36 @@ module EndlessDNS
     def update_master_cache(diff)
       @master.push(diff)
     end
+
+    def status
+      @status[:host_type] = "slave"
+      @status[:ip] = host_ipaddr()
+      @status[:cache] = dnscache_process()
+      @status[:mcon] = master_conectivity()
+    end
+
+    def master_conectivity
+      @master_conectivity
+    end
+
+    def another_status
+      @master_status
+    end
+
+    def update_conectivity(arg)
+      @master_conectivity = arg
+    end
+
+    def update_self_status(status)
+      @master.add_slave_status(status)
+    end
+
+    def update_master_status
+      @master_status = @master.status
+    end
   end
+end
+
+def share
+  EndlessDNS::Share.instance
 end

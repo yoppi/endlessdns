@@ -50,8 +50,7 @@ module EndlessDNS
 
       def sharing_setup
         @share_th = Thread.new do
-          @shareing = Sharing.new
-          @shareing.setup
+          share.setup
         end
       end
 
