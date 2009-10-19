@@ -6,7 +6,6 @@ require 'drb/drb'
 module EndlessDNS
   class CGIHelper
     FRONT_PORT = 9997
-    WEBSERVER = EndlessDNS::LIB_DIR + "/" + "web/webserver.rb"
 
     def initialize
       @front_addr = config.get("dnsip")
@@ -20,15 +19,15 @@ module EndlessDNS
 
     def setup_webserver
       fork do
-        exec(WEBSERVER)
+        exec(EndlessDNS::LIB_DIR + "/" + "web/webserver.rb")
       end
       log.puts("launching webserver", "info")
     end
 
     def setup_front
       front = Front.new
-      DRbObject.start_service("druby://#{@front_addr}:#{@front_port}", front)
-      log.puts("start cgi service")
+      DRb.start_service("druby://#{@front_addr}:#{@front_port}", front)
+      log.puts("start service for cgi", "info")
     end
   end
 end
