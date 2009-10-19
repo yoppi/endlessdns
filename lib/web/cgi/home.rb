@@ -11,7 +11,7 @@ require 'menu'
 
 class Home
   include MenuHelper
-  include CGI::Util
+  include ERB::Util
 
   def initialize(cgi)
     @cgi = cgi
