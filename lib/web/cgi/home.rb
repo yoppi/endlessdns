@@ -31,8 +31,7 @@ class Home
   end
 
   def render_contents
-    # base.rhtmlを読みこむ
-    base = File.read("base.rthml")
+    base = File.read("base.rhtml")
     @erb = Erb.new(base)
   end
 
