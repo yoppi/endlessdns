@@ -32,7 +32,7 @@ class Home
 
   def render_contents
     base = File.read("base.rhtml")
-    @erb = Erb.new(base)
+    @erb = ERB.new(base)
   end
 
   def out
