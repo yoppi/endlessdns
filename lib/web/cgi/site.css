@@ -1,3 +1,16 @@
+h1 {
+  margin: 0;
+  padding: 0;
+}
+
+h2, h3 {
+  border-bottom: 1px solid #bbbbbb;
+}
+
+#main {
+  background-color: #FFFFFF;
+}
+
 #header {
   height: 5.3em;
   margin: 0;
@@ -46,6 +59,38 @@
   color: #555;
 }
 
+#content {
+  background-color: #fff;
+}
+
+table.home {
+  border: 1px solid #E4E4E4;
+  border-collapse: collpase;
+  width: 100%;
+  margin-bottom: 4px;
+}
+
+table.home th {
+  background-color: #EEEEEE;
+  padding: 4px;
+}
+
+table.home td {
+  vertical-align: top;
+}
+
+table.home td#up  {
+  background-color: #228B22;
+}
+
+table.home td#down {
+  background-color: #DC143C;
+}
+
+table.home tr:hover {
+  background-color: #FFFFDD;
+}
+
 #footer {
   clear: both;
   border-top: 1px solid #bbb;
@@ -55,3 +100,4 @@
   text-align: center;
   background: #fff;
 }
+

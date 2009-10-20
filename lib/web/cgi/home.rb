@@ -14,6 +14,7 @@ class Home
 
   def initialize(cgi)
     @cgi = cgi
+    @selected = 'home'
   end
 
   def get_statuses
@@ -59,10 +60,10 @@ class Home
 <h2>self host status</h2>
 <% if @self_status %>
 <h3><%= @self_status[:host_type] %></h3>
-<table>
+<table class="home">
   <tr>
     <th>IP Address</th>
-    <th>DNS Cache Server Status</th>
+    <th>DNS Cache Server</th>
     <% if @self_status[:host_type] == "master" %>
       <th>Slave Number</th>
     <% else %>
@@ -72,7 +73,11 @@ class Home
   </tr>
   <tr>
     <td><%= @self_status[:ip] %></td>
-    <td><%= @self_status[:cache] %></td>
+    <% if @self_status[:cache] == "up" %>
+      <td id="up" class="cache" ><%= @self_status[:cache] %></td>
+    <% else %>
+      <td id="down" class="cache" ><%= @self_status[:cache] %></td>
+    <% end %>
     <% if @self_status[:host_type] == "master" %>
       <td><%= @self_status[:snum] %></td>
     <% else %>

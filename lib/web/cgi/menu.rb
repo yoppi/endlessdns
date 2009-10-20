@@ -14,7 +14,11 @@ module MenuHelper
     <<-EOF
 <ul>
 <% MENUS.each do |menu| %>
-  <li><a href="<%= make_link(menu) %>"><%= menu %></a></li>
+  <% if menu.downcase == @selected %>
+    <li><a class="selected" href="<%= make_link(menu) %>"><%= menu %></a></li>
+  <% else%>
+    <li><a href="<%= make_link(menu) %>"><%= menu %></a></li>
+  <% end %>
 <% end %>
 </ul>
     EOF
