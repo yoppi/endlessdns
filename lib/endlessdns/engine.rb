@@ -8,7 +8,7 @@ module EndlessDNS
       def invoke(options)
         @options = options
         load_config
-        config.add('pid', @options[:pid])
+        config.add('dnspid', @options[:pid])
 
         if @options[:daemonize]
           run_daemonize

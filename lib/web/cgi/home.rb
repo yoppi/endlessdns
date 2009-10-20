@@ -44,6 +44,7 @@ class Home
   def content_erb
     <<-EOS
 <h2>self host status</h2>
+<% if @self_status %>
 <h3><%= @self_status[:host_type] %></h3>
 <table>
   <tr>
@@ -67,11 +68,16 @@ class Home
     <td><%=  @self_status[:update] %></td>
   </tr>
 </table>
-<% unless @another_status == nil %>
+<% end %>
+<% if @another_status %>
 <h2>another host status</h2>
 <h3></h3>
 <% end %>
     EOS
+  end
+
+  def html_title
+    "Home"
   end
 
   def to_html

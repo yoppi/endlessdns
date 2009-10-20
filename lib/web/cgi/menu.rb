@@ -5,6 +5,7 @@ require 'erb'
 
 module MenuHelper
   MENUS = %w[Home Statistics Config]
+
   def render_main_menu
     menu_src
   end

@@ -14,7 +14,8 @@ module EndlessDNS
     def method_missing(instance, cmd)
     end
 
-    def send(instance, cmd, args=nil)
+    def call(instance, cmd, args=nil)
+      #puts instance
       if SERVICE_INSTANCES.include?(instance)
         o = eval(instance)
         if args

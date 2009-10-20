@@ -71,20 +71,25 @@ module EndlessDNS
       @self_host.status
     end
 
+    def another_status
+      @self_host.another_status
+    end
+
     # slaveのみ
     def self_refresh
       @self_host.refresh
-    end
-
-    def another_status
-      @self_host.another_status
     end
   end
 
   class Host
     def dnscache_process
       pid = config.get('dnspid')
-      get_process(pid)
+      if pid
+        get_process(pid)
+      else
+        log.puts("cannot get pid")
+        "undefined"
+      end
     end
 
     # CPU使用率やメモリ使用率も必要か?
@@ -142,6 +147,7 @@ module EndlessDNS
       @status[:cache] = dnscache_process()
       @status[:snum] = @slave_statuses.size
       @status[:update] = Time.now
+      @status
     end
 
     def another_status
@@ -225,6 +231,7 @@ module EndlessDNS
       @status[:ip] = host_ipaddr()
       @status[:cache] = dnscache_process()
       @status[:mcon] = master_conectivity()
+      @status
     end
 
     def master_conectivity
@@ -246,8 +253,8 @@ module EndlessDNS
     def update_master_status
       @master_status = @master.status
     end
-  end
-end
+  end # Slave END
+end # Share END
 
 def share
   EndlessDNS::Share.instance
