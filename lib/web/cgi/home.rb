@@ -74,9 +74,9 @@ class Home
   <tr>
     <td><%= @self_status[:ip] %></td>
     <% if @self_status[:cache] == "up" %>
-      <td id="up" class="cache" ><%= @self_status[:cache] %></td>
+      <td class="cache up" ><%= @self_status[:cache] %></td>
     <% else %>
-      <td id="down" class="cache" ><%= @self_status[:cache] %></td>
+      <td class="cache down" ><%= @self_status[:cache] %></td>
     <% end %>
     <% if @self_status[:host_type] == "master" %>
       <td><%= @self_status[:snum] %></td>
@@ -90,6 +90,8 @@ class Home
 <h2>another host status</h2>
 <% if @another_status %>
 <h3></h3>
+<% else %>
+nothing
 <% end %>
     EOS
   end

@@ -79,11 +79,11 @@ table.home td {
   vertical-align: top;
 }
 
-table.home td#up  {
+table.home .up  {
   background-color: #228B22;
 }
 
-table.home td#down {
+table.home .down {
   background-color: #DC143C;
 }
 
