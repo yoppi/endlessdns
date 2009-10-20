@@ -72,7 +72,7 @@ class Home
     <th>Update</th>
   </tr>
   <tr>
-    <td><%= @self_status[:ip] %></td>
+    <td><a href="http://<%= @self_status[:ip] %>:9999/cgi/home.rb"><%= @self_status[:ip] %></a></td>
     <% if @self_status[:cache] == "up" %>
       <td class="cache up" ><%= @self_status[:cache] %></td>
     <% else %>
