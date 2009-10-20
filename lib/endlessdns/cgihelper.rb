@@ -8,7 +8,8 @@ module EndlessDNS
     FRONT_PORT = 9997
 
     def initialize
-      @front_addr = config.get("dnsip")
+      # TODO: must be secure!
+      @front_addr = "0.0.0.0"
       @front_port = FRONT_PORT
     end
 
