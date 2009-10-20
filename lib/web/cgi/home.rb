@@ -2,7 +2,6 @@
 # Home
 #   o Master情報
 #   o Slave情報
-#   接続したサーバをトップに表示する
 #
 require 'cgi'
 require 'erb'
@@ -23,22 +22,36 @@ class Home
   end
 
   def get_self_status
-    frontcgi.send('share', 'self_status')
+    frontcgi.call('share', 'self_status')
   end
 
   def get_another_status
-    frontcgi.send('share', 'another_status')
+    frontcgi.call('share', 'another_status')
   end
 
-  def render_contents
+  def setup
     base = File.read("base.rhtml")
-    @erb = ERB.new(base)
+    embeded = embed_menu(base)
+    embeded = embed_contents(embeded)
+    @erb = ERB.new(embeded)
+  end
+
+  def embed_menu(text)
+    text.gsub(/render_main_menu/, render_main_menu)
+  end
+
+  def embed_contents(text)
+    text.gsub(/render_content/, render_content)
   end
 
   def out
     @cgi.out {
       to_html
     }
+  end
+
+  def render_content
+    content_erb
   end
 
   def content_erb
@@ -69,8 +82,8 @@ class Home
   </tr>
 </table>
 <% end %>
-<% if @another_status %>
 <h2>another host status</h2>
+<% if @another_status %>
 <h3></h3>
 <% end %>
     EOS
@@ -88,5 +101,5 @@ end
 cgi = CGI.new
 home = Home.new(cgi)
 home.get_statuses
-home.render_contents
+home.setup
 home.out

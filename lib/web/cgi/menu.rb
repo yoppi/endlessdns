@@ -7,14 +7,14 @@ module MenuHelper
   MENUS = %w[Home Statistics Config]
 
   def render_main_menu
-    menu_src
+    menu_erb
   end
 
-  def menu_src
+  def menu_erb
     <<-EOF
 <ul>
 <% MENUS.each do |menu| %>
-  <li><a href="<%= make_link %>"><%= menu %></a></li>
+  <li><a href="<%= make_link(menu) %>"><%= menu %></a></li>
 <% end %>
 </ul>
     EOF
@@ -23,4 +23,9 @@ module MenuHelper
   def make_link(menu)
     menu.downcase + ".rb"
   end
+end
+
+if __FILE__ == $0
+  include MenuHelper
+  puts render_main_menu
 end
