@@ -82,10 +82,10 @@ module EndlessDNS
   end
 
   class Host
-    def dnscache_process
+    def dnscache_process_status
       pid = config.get('dnspid')
       if pid
-        get_process(pid)
+        process_status(pid)
       else
         log.puts("cannot get pid")
         "undefined"
@@ -94,12 +94,12 @@ module EndlessDNS
 
     # CPU使用率やメモリ使用率も必要か?
     # topコマンドを使うと遅いが回収可能
-    def get_process(pid)
+    def process_status(pid)
       _ = `ps p #{pid}`.split("\n")
-      if _.size == 1
-        "down"
-      else
+      if _[1].split(" ")[0] == pid
         "up"
+      else
+        "down"
       end
     end
 
@@ -144,7 +144,7 @@ module EndlessDNS
     def status
       @status[:host_type] = "master"
       @status[:ip] = host_ipaddr()
-      @status[:cache] = dnscache_process()
+      @status[:cache] = dnscache_process_status()
       @status[:snum] = @slave_statuses.size
       @status[:update] = Time.now
       @status

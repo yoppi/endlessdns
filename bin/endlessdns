@@ -22,7 +22,7 @@ begin
       options[:web] = false
     end
 
-    opts.on("-p", "--pid", "To watch DNS cache server with pid") do |o|
+    opts.on("-p PID", "--pid=PID", "To watch DNS cache server with pid") do |o|
       options[:pid] = o
     end
   end
