@@ -22,6 +22,8 @@ module EndlessDNS
         return
       end
 
+      # FIXME: pktをわたすのではなく、インスタンス変数に使用するパラメータ
+      # を格納する
       if dns.header.query?
         analy_query(pkt, dns)
       elsif dns.header.response?
@@ -45,7 +47,7 @@ module EndlessDNS
 
     def client_query(pkt, name, type)
       if cached?(name, type)
-        statistics.hit()
+        statistics.hit(type)
         log.puts("cached!", "info")
       else
         log.puts("not cached...", "info")
