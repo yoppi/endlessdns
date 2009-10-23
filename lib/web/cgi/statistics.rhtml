@@ -1,0 +1,88 @@
+<div id="cache" class="stats">
+<h2>Cache</h2>
+  <table>
+    <tr>
+      <td><div id="cache_graph" style="width:700px;height:400px;"></td>
+      <td><p id="cache_type">Type:</p></td>
+    </tr>
+    <tr>
+      <td><div id="cache_overview" style="width:350px;height:50px;"></td>
+    </tr>
+  </table>
+  <form id="cache_form" method="post" action="statistics.rb">
+    <fieldset id="cache_date_range">
+      <legend>Date Range</legend>
+        <input> 
+    </fieldset>
+    <fieldset id="cache_display_format">
+      <legend>Display Format</legend>
+        <input id="cache_interval" type="radio" value="interval">
+        <label for="cache_interval">Interval</label>
+        <input id="cache_total" type="radio" value="total">
+        <label for="cache_total">Total</label>
+    </fieldset>
+  </form>
+</div>
+
+
+<div id="ncache" class="stats">
+<h2>Negative Cache</h2>
+  <table>
+    <tr>
+      <td><div id="ncache_graph" style="width:700px;height:400px;"></td>
+      <td><p id="ncache_type">Type:</p></td>
+    </tr>
+  </table>
+  <form id="cache_form" method="post" action="statistics.rb">
+    <fieldset id="cache_date_range">
+      <legend>Date Range</legend>
+      
+    </fieldset>
+    <fieldset id="cache_display_format">
+      <legend>Display Format</legend>
+
+    </fieldset>
+  </form>
+</div>
+
+
+<div id="hit" class="stats">
+<h2>Hit Rate</h2>
+  <table>
+    <tr>
+      <td><div id="hit_graph" style="width:700px;height:400px;"></td>
+      <td><p id="hit_type">Type:</p></td>
+    </tr>
+  </table>
+  <form id="cache_form" method="post" action="statistics.rb">
+    <fieldset id="cache_date_range">
+      <legend>Date Range</legend>
+      
+    </fieldset>
+    <fieldset id="cache_display_format">
+      <legend>Display Format</legend>
+
+    </fieldset>
+  </form>
+</div>
+
+
+<div id="query" class="stats">
+<h2>Query</h2>
+  <table>
+    <tr>
+      <td><div id="query_graph" style="width:700px;height:400px;"></td>
+      <td><p id="query_type">Type:</p></td>
+    </tr>
+  </table>
+  <form id="cache_form" method="post" action="statistics.rb">
+    <fieldset id="cache_date_range">
+      <legend>Date Range</legend>
+      
+    </fieldset>
+    <fieldset id="cache_display_format">
+      <legend>Display Format</legend>
+
+    </fieldset>
+  </form>
+</div>

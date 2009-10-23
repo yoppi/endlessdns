@@ -15,10 +15,14 @@ class FrontCGI
     @front = DRbObject.new_with_uri("druby://#{FRONT_SERV_ADDR}:#{FRONT_SERV_PORT}")
   end
 
-  def call(obj, cmd)
+  def call(obj, cmd, args=nil)
     #eval("@front.#{obj} '#{cmd}'")
     begin
-      ret = @front.call(obj, cmd)
+      if args
+        ret = @front.call(obj, cmd, args)
+      else
+        ret = @front.call(obj, cmd)
+      end
     rescue => e
       # TODO:
       # 詳細なエラーメッセージを返す
