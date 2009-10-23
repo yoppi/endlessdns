@@ -232,6 +232,18 @@ module EndlessDNS
         Marshal.load(Marshal.dump(obj))
       end
     end
+
+    def db_name(info)
+      case info
+      when 'cach'
+        cache_db
+      when 'negativecache'
+        negative_cache_db
+      when 'hitrate'
+        hit_rate_db
+      when 'query'
+        query_db
+    end
   end
 end
 
