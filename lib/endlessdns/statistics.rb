@@ -244,6 +244,7 @@ module EndlessDNS
         hit_rate_db
       when 'query'
         query_db
+      end
     end
   end
 end

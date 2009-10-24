@@ -202,7 +202,7 @@ class Query < Graph
 end
 
 cgi = CGI.new
-stats = Home.new(cgi)
+stats = Statistics.new(cgi)
 stats.do_request
 stats.setup
 stats.out
