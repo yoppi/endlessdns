@@ -9,10 +9,11 @@ require 'cgi'
 require 'erb'
 require 'frontcgi'
 require 'menu'
+require 'pstore'
 
 class Statistics
   include MenuHelper
-  PERIOD = 60 * 60 * 12
+  DEFAULT_PERIOD = 60 * 60 * 12
 
   def initialize(cgi)
     @cgi = cgi
@@ -22,6 +23,7 @@ class Statistics
   # Ajaxによるデータの変更なのかチェック
   def do_request
     if from_ajax?
+      # そのままJSON形式でリターンする
       do_ajax
     else
       do_top
@@ -36,13 +38,16 @@ class Statistics
   def do_top
     # 各グラフの現在からデフォルトの期間分の区間統計データを取得する 
     # jsを生成してhtmlに埋めこんで返す
-    graphs = make_graphs()
+    graphs = make_all_graphs()
     graphs.each do |graph|
+      graph.get_keys
       graph.get_statistics
+      graph.convert_flot
+      graph.embed_js
     end
   end
 
-  def make_graphs
+  def make_all_graphs
     ret = []
     ret << Cache.new
     ret << NegativeCache.new
@@ -53,11 +58,22 @@ class Statistics
 
   # jsonで指定された区間データを返却
   def do_ajax
-    # どのグラフかをクエリから判断してそのオブジェクトから指定された区間データを集め返却 
+    # どのグラフかをクエリから判断してその指定された区間データを集め返却 
+    graph = which_graph?()
+  end
+
+  def which_graph?
+    # CGIのクエリから判断
   end
 
   def setup
     @base = File.read("base.rhtml")
+    embeded = embed_menu(base)
+    @erb = ERB.new(embeded)
+  end
+
+  def embed_menu(text)
+    text.gusb(/render_main_menu/, render_main_menu)
   end
 
   def out
@@ -67,7 +83,7 @@ class Statistics
   end
 
   def to_html
-
+    @erb.result(binding) 
   end
 
   def html_title
@@ -77,16 +93,71 @@ end
 
 # abstract class
 class Graph
-  def initialize
+  def initialize(period)
+    @period = period || get_period()
+    init_db
   end
 
   def get_period
-    # GETかPOSTで表示期間が指定されていればそれを使う
+    e = Time.now
+    s = e - DEFAULT_PERIOD
+    e = convert_time(e)
+    s = convert_time(e)
+    [s, e]
+  end
+
+  def get_keys
+    all_dates = get_all_dates()
+    @selected_keys = select_date_sets(all_dates).sort
   end
 
   def get_statistics
-    now = Time.now
-    period = get_period()
+    @statistics = {}
+    @db.transaction do
+      @selected_keys.each do |key|
+        data[key] = @db[key]
+      end
+    end
+  end
+
+  def convert_flot
+    @flot = {}
+    @statistics.each do |key, types|
+      types.each do |type, n|
+        @flot[type] ||= []
+        @flot[type] << [key, n]
+      end
+    end
+  end
+
+  def get_all_dates
+    date_sets = nil
+    @db.transaction do
+      date_sets = @db.roots
+    end
+    date_sets
+  end
+
+  def select_date_sets(date_sets)
+    ret = []
+    date_sets.select do |date|
+      ret << date if @period[0] <= date && date <= @period[1]
+    end
+    ret
+  end
+
+  def convert_time(time)
+    ret = ""
+    ret << sprintf("%04d", time.year)
+    ret << spritnf("%02d", time.month)
+    ret << sprintf("%02d", time.day)
+    ret << sprintf("%02d", time.hour)
+    ret << sprintf("%02d", time.min)
+    ret
+  end
+
+  def init_db
+    @db = PStore.new(db_name())
   end
 
   def db_name
@@ -95,20 +166,17 @@ class Graph
 end
 
 class Cache < Graph
-  def initialize
-    init_db
+  def initialize(period=nil)
+    super(period)
   end
 
   def get_statistics
   end
-
-  def init_db
-    @db = PStore.new(db_name())
-  end
 end
 
 class NegativeCache < Graph
-  def initialize
+  def initialize(period=nil)
+    super(period)
   end
 
   def get_statistics
@@ -116,7 +184,8 @@ class NegativeCache < Graph
 end
 
 class HitRate < Graph
-  def initialize
+  def initialize(period=nil)
+    super(period)
   end
 
   def get_statistics
@@ -124,7 +193,8 @@ class HitRate < Graph
 end
 
 class Query < Graph
-  def initialize
+  def initialize(period=nil)
+    super(period)
   end
 
   def get_statistics
@@ -134,5 +204,5 @@ end
 cgi = CGI.new
 stats = Home.new(cgi)
 stats.do_request
-#stats.setup
+stats.setup
 stats.out
