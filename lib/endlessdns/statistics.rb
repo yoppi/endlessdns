@@ -236,7 +236,7 @@ module EndlessDNS
 
     def db_name(info)
       case info
-      when 'cach'
+      when 'cache'
         cache_db
       when 'negativecache'
         negative_cache_db
