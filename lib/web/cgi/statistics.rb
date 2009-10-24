@@ -13,7 +13,6 @@ require 'pstore'
 
 class Statistics
   include MenuHelper
-  DEFAULT_PERIOD = 60 * 60 * 12
 
   def initialize(cgi)
     @cgi = cgi
@@ -93,6 +92,8 @@ end
 
 # abstract class
 class Graph
+  DEFAULT_PERIOD = 60 * 60 * 12
+
   def initialize(period)
     @period = period || get_period()
     init_db
