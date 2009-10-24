@@ -102,8 +102,8 @@ class Graph
   def get_period
     e = Time.now
     s = e - DEFAULT_PERIOD
-    e = convert_time(e)
-    s = convert_time(e)
+    e = e.tv_sec
+    s = s.tv_sec
     [s, e]
   end
 
@@ -150,9 +150,9 @@ class Graph
   def convert_time(time)
     ret = ""
     ret << sprintf("%04d", time.year)
-    ret << spritnf("%02d", time.month)
+    ret << sprintf("%02d", time.month)
     ret << sprintf("%02d", time.day)
-    ret << sprintf("%02d", time.hour)
+    ret << sprintf("%04d", time.hour)
     ret << sprintf("%02d", time.min)
     ret
   end
