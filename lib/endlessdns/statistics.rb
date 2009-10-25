@@ -100,7 +100,7 @@ module EndlessDNS
 
     def update_statistics
       #now = current_time()
-      now = Time.new.tv_sec # flotではミリ秒でx軸を描画するのでこれに1000をかける
+      now = Time.new.tv_sec
       stat = collect_stat()
 
       # pstoreで各統計情報毎にdumpする

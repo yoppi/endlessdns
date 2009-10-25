@@ -36,13 +36,14 @@ class Statistics
 
   # main menuからアクセスした場合
   def do_top
-    # 各グラフの現在からデフォルトの期間分の区間統計データを取得する 
+    # 各グラフの現在からデフォルトの期間分の区間統計データを取得する
     # jsを生成してhtmlに埋めこんで返す
     graphs = make_all_graphs()
     graphs.each do |graph|
       graph.get_keys
       graph.get_statistics
       graph.convert_to_flot
+      graph.write_datasets
       #graph.embed_js
     end
   end
@@ -58,7 +59,7 @@ class Statistics
 
   # jsonで指定された区間データを返却
   def do_ajax
-    # どのグラフかをクエリから判断してその指定された区間データを集め返却 
+    # どのグラフかをクエリから判断してその指定された区間データを集め返却
     graph = which_graph?()
   end
 
@@ -71,7 +72,6 @@ class Statistics
     embeded = embed_menu(base)
     embeded = embed_contents(embeded)
     @erb = ERB.new(embeded)
-
   end
 
   def embed_menu(text)
@@ -93,7 +93,7 @@ class Statistics
   end
 
   def to_html
-    @erb.result(binding) 
+    @erb.result(binding)
   end
 
   def html_title
@@ -139,14 +139,28 @@ class Graph
       if types
         types.each do |type, n|
           @flot[type] ||= []
-          @flot[type] << [key, n]
+          @flot[type] << [key * 1000, n] # flotではミリ秒でx軸を描画する
         end
       end
     end
     @flot.each do |type, val|
       val.sort! {|a, b| a[0] <=> b[0] }
     end
-    p @flot
+  end
+
+  def write_datasets
+    _ = "var #{self.class.to_s.downcase}_datasets = {"
+    @flot.each do |type, data|
+      _ << "#{type.downcase}: {
+        label: \"#{type}\",
+        data: #{data.inspect}
+      },"
+    end
+    _ << "};"
+    trg = "js/#{self.class.to_s.downcase}_datasets.js"
+    File.open(trg, 'w') do |io|
+      io.puts _
+    end
   end
 
   def get_all_dates
