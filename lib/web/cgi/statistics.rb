@@ -42,7 +42,7 @@ class Statistics
     graphs.each do |graph|
       graph.get_keys
       graph.get_statistics
-      #graph.convert_flot
+      graph.convert_to_flot
       #graph.embed_js
     end
   end
@@ -132,16 +132,21 @@ class Graph
     end
   end
 
-  def convert_flot
+  # グラフライブラリであるflotのデータ形式に変換
+  def convert_to_flot
     @flot = {}
     @statistics.each do |key, types|
-      unless types
+      if types
         types.each do |type, n|
           @flot[type] ||= []
           @flot[type] << [key, n]
         end
       end
     end
+    @flot.each do |type, val|
+      val.sort! {|a, b| a[0] <=> b[0] }
+    end
+    p @flot
   end
 
   def get_all_dates
