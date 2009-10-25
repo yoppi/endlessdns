@@ -117,19 +117,11 @@ module EndlessDNS
       end
     end
 
-    def cache_db
-      @stat_dir + '/' + 'cache.db'
-    end
-
     def update_negative_cash(date, negative_cache)
       db = PStore.new(negative_cache_db())
       db.transaction do
         db[date] = negative_cache
       end
-    end
-
-    def negative_cache_db
-      @stat_dir + '/' + 'negative_cache.db'
     end
 
     def update_hit_rate(date, hit_rate)
@@ -139,15 +131,23 @@ module EndlessDNS
       end
     end
 
-    def hit_rate_db
-      @stat_dir + '/' + 'hit_rate.db'
-    end
-
     def update_query(date, query)
       db = PStore.new(query_db())
       db.transaction do
         db[date] = query
       end
+    end
+
+    def cache_db
+      @stat_dir + '/' + 'cache.db'
+    end
+
+    def negative_cache_db
+      @stat_dir + '/' + 'negative_cache.db'
+    end
+
+    def hit_rate_db
+      @stat_dir + '/' + 'hit_rate.db'
     end
 
     def query_db

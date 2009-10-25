@@ -13,6 +13,7 @@ require 'pstore'
 
 class Statistics
   include MenuHelper
+  include ERB::Util
 
   def initialize(cgi)
     @cgi = cgi
@@ -41,8 +42,8 @@ class Statistics
     graphs.each do |graph|
       graph.get_keys
       graph.get_statistics
-      graph.convert_flot
-      graph.embed_js
+      #graph.convert_flot
+      #graph.embed_js
     end
   end
 
@@ -66,13 +67,23 @@ class Statistics
   end
 
   def setup
-    @base = File.read("base.rhtml")
+    base = File.read("base.rhtml")
     embeded = embed_menu(base)
+    embeded = embed_contents(embeded)
     @erb = ERB.new(embeded)
+
   end
 
   def embed_menu(text)
-    text.gusb(/render_main_menu/, render_main_menu)
+    text.gsub(/render_main_menu/, render_main_menu)
+  end
+
+  def embed_contents(text)
+    text.gsub(/render_content/, render_content)
+  end
+
+  def render_content
+    File.read("statistics.rhtml")
   end
 
   def out
@@ -94,7 +105,7 @@ end
 class Graph
   DEFAULT_PERIOD = 60 * 60 * 12
 
-  def initialize(period)
+  def initialize(period=nil)
     @period = period || get_period()
     init_db
   end
@@ -109,14 +120,14 @@ class Graph
 
   def get_keys
     all_dates = get_all_dates()
-    @selected_keys = select_date_sets(all_dates).sort
+    @selected_keys = select_date(all_dates).sort
   end
 
   def get_statistics
     @statistics = {}
     @db.transaction do
       @selected_keys.each do |key|
-        data[key] = @db[key]
+        @statistics[key] = @db[key]
       end
     end
   end
@@ -124,9 +135,11 @@ class Graph
   def convert_flot
     @flot = {}
     @statistics.each do |key, types|
-      types.each do |type, n|
-        @flot[type] ||= []
-        @flot[type] << [key, n]
+      unless types
+        types.each do |type, n|
+          @flot[type] ||= []
+          @flot[type] << [key, n]
+        end
       end
     end
   end
@@ -139,7 +152,7 @@ class Graph
     date_sets
   end
 
-  def select_date_sets(date_sets)
+  def select_date(date_sets)
     ret = []
     date_sets.select do |date|
       ret << date if @period[0] <= date && date <= @period[1]
@@ -170,17 +183,11 @@ class Cache < Graph
   def initialize(period=nil)
     super(period)
   end
-
-  def get_statistics
-  end
 end
 
 class NegativeCache < Graph
   def initialize(period=nil)
     super(period)
-  end
-
-  def get_statistics
   end
 end
 
@@ -188,17 +195,11 @@ class HitRate < Graph
   def initialize(period=nil)
     super(period)
   end
-
-  def get_statistics
-  end
 end
 
 class Query < Graph
   def initialize(period=nil)
     super(period)
-  end
-
-  def get_statistics
   end
 end
 
