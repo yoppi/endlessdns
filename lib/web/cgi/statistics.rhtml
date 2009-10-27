@@ -1,10 +1,19 @@
-<script language="javascript" type="text/javascript" src="js/graph.js"></script>
+<script type="text/javascript" src="js/jquery.js"></script>
+<script type="text/javascript" src="js/jquery.flot.js"></script>
+<script type="text/javascript" src="js/graph.js"></script>
 <div id="cache" class="stats">
 <h2>Cache</h2>
   <table>
     <tr>
       <td><div id="cache_graph" style="width:700px;height:400px;"></td>
-      <td><p id="cache_type">Type:</p></td>
+        <td>
+          <p id="cache_type">Type:</p>
+        </td>
+        <td>
+          <p>Display Format:</p>
+          <input id="cache_interval" type="radio" value="interval">Interval</input>
+          <input id="cache_total" type="radio" value="total">Total</input>
+        </td>
     </tr>
     <tr>
       <td><div id="cache_overview" style="width:350px;height:50px;"></td>
@@ -15,14 +24,8 @@
       <legend>Date Range</legend>
 
     </fieldset>
-    <fieldset id="cache_display_format">
-      <legend>Display Format</legend>
-        <input id="cache_interval" type="radio" value="interval">
-        <label for="cache_interval">Interval</label>
-        <input id="cache_total" type="radio" value="total">
-        <label for="cache_total">Total</label>
-    </fieldset>
   </form>
+  <script language="javascript" type="text/javascript" src="js/cache_datasets.js"></script>
 </div>
 
 
@@ -32,21 +35,20 @@
     <tr>
       <td><div id="ncache_graph" style="width:700px;height:400px;"></td>
       <td><p id="ncache_type">Type:</p></td>
+      <td>
+        <p>Display Format:</p>
+        <input id="ncache_interval" type="radio" value="interval">Interval</input>
+        <input id="ncache_total" type="radio" value="total">Total</input>
+      </td>
     </tr>
   </table>
-  <form id="cache_form" method="post" action="statistics.rb">
-    <fieldset id="cache_date_range">
+  <form id="ncache_form" method="post" action="statistics.rb">
+    <fieldset id="ncache_date_range">
       <legend>Date Range</legend>
       
     </fieldset>
-    <fieldset id="cache_display_format">
-      <legend>Display Format</legend>
-        <input id="cache_interval" type="radio" value="interval">
-        <label for="cache_interval">Interval</label>
-        <input id="cache_total" type="radio" value="total">
-        <label for="cache_total">Total</label>
-    </fieldset>
   </form>
+  <script language="javascript" type="text/javascript" src="js/negativecache_datasets.js"></script>
 </div>
 
 
@@ -56,6 +58,10 @@
     <tr>
       <td><div id="hit_graph" style="width:700px;height:400px;"></td>
       <td><p id="hit_type">Type:</p></td>
+      <td>
+        <input id="hit_interval" type="radio" value="interval">Interval</input>
+        <input id="hit_total" type="radio" value="total">Total</input>
+      </td>
     </tr>
   </table>
   <form id="cache_form" method="post" action="statistics.rb">
@@ -63,14 +69,8 @@
       <legend>Date Range</legend>
       
     </fieldset>
-    <fieldset id="cache_display_format">
-      <legend>Display Format</legend>
-        <input id="cache_interval" type="radio" value="interval">
-        <label for="cache_interval">Interval</label>
-        <input id="cache_total" type="radio" value="total">
-        <label for="cache_total">Total</label>
-    </fieldset>
   </form>
+  <script language="javascript" type="text/javascript" src="js/hitrate_datasets.js"></script>
 </div>
 
 
@@ -80,6 +80,10 @@
     <tr>
       <td><div id="query_graph" style="width:700px;height:400px;"></td>
       <td><p id="query_type">Type:</p></td>
+      <td>
+        <input id="query_interval" type="radio" value="interval">Interval</input>
+        <input id="query_total" type="radio" value="total">Total</input>
+      </td>
     </tr>
   </table>
   <form id="cache_form" method="post" action="statistics.rb">
@@ -87,12 +91,6 @@
       <legend>Date Range</legend>
       
     </fieldset>
-    <fieldset id="cache_display_format">
-      <legend>Display Format</legend>
-        <input id="cache_interval" type="radio" value="interval">
-        <label for="cache_interval">Interval</label>
-        <input id="cache_total" type="radio" value="total">
-        <label for="cache_total">Total</label>
-    </fieldset>
   </form>
+  <script language="javascript" type="text/javascript" src="js/query_datasets.js"></script>
 </div>
