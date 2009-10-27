@@ -50,9 +50,8 @@ class WebServer
       :Port => @conf['port'],
       :CGIInterpreter => rubybin,
       :Logger => WEBrick::Log.new(@conf['serverlog'], WEBrick::BasicLog::DEBUG),
-      :AccessLog => [
-        [accesslog_io, WEBrick::AccessLog::COMBINED_LOG_FORMAT]
-      ]
+      :AccessLog => [[accesslog_io, WEBrick::AccessLog::COMBINED_LOG_FORMAT]],
+      :MimeTypes => WEBrick::HTTPUtils::DefaultMimeTypes.merge({"js" => "application/javascript"})
     })
     mount_cgi(@docroot)
     signal_setup
