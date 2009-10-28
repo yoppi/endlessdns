@@ -1,0 +1,103 @@
+h1 {
+  margin: 0;
+  padding: 0;
+}
+
+h2, h3 {
+  border-bottom: 1px solid #bbbbbb;
+}
+
+#main {
+  background-color: #FFFFFF;
+}
+
+#header {
+  height: 5.3em;
+  margin: 0;
+  background-color: #507AAA;
+  color: #f8f8f8;
+  padding: 4px 8px 0px 6px;
+  position: relative;
+}
+
+#main-menu {
+  position: absolute;
+  bottom: 0px;
+  left: 6px;
+  margin-right: -500px;
+}
+
+#main-menu ul {
+  margin: 0;
+  padding: 0;
+}
+
+#main-menu li {
+  float: left;
+  list-style-type: none;
+  margin: 0px 2px 0px 0px;
+  padding: 0px 0px 0px 0px;
+  white-space: nowrap;
+}
+
+#main-menu li a {
+  display: block;
+  color: #fff;
+  text-decoration: none;
+  font-weight: bold;
+  margin: 0;
+  padding: 4px 10px 4px 10px;
+}
+
+#main-menu li a:hover {
+  background: #759FCF;
+  color: #fff;
+}
+
+#main-menu li a.selected, #main-menu li a.selected:hover {
+  background: #fff;
+  color: #555;
+}
+
+#content {
+  background-color: #fff;
+}
+
+table.home {
+  border: 1px solid #E4E4E4;
+  border-collapse: collpase;
+  width: 100%;
+  margin-bottom: 4px;
+}
+
+table.home th {
+  background-color: #EEEEEE;
+  padding: 4px;
+}
+
+table.home td {
+  vertical-align: top;
+}
+
+table.home .up  {
+  background-color: #228B22;
+}
+
+table.home .down {
+  background-color: #DC143C;
+}
+
+table.home tr:hover {
+  background-color: #FFFFDD;
+}
+
+#footer {
+  clear: both;
+  border-top: 1px solid #bbb;
+  font-size: 0.9em;
+  color: #aaa;
+  padding: 5px;
+  text-align: center;
+  background: #fff;
+}
+
