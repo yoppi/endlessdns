@@ -128,7 +128,7 @@ module EndlessDNS
     def push(diff)
       diff.each do |name_type, rdatas|
         rdatas.each do |rdata|
-          cache.add(name_type[0], name_type[1], rdata)
+          recache.invoke(name_type[0], name_type[1])
         end
       end
     end
@@ -217,7 +217,7 @@ module EndlessDNS
     def update_self_cashe(diff)
       diff.each do |name_type, rdatas|
         rdatas.each do |rdata|
-          cache.add(name_type[0], name_type[1], rdata)
+          recache.invoke(name_type[0], name_type[1])
         end
       end
     end
