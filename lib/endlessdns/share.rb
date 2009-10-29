@@ -229,7 +229,7 @@ module EndlessDNS
     def status
       @status[:host_type] = "slave"
       @status[:ip] = host_ipaddr()
-      @status[:cache] = dnscache_process()
+      @status[:cache] = dnscache_process_status()
       @status[:mcon] = master_conectivity()
       @status
     end
