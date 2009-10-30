@@ -44,11 +44,11 @@
       <th>Update</th>
     </tr>
     <tr>
-      <td><a href="http://<%= @self_status[:ip] %>:9999/cgi/home.rb"><%= master_status[:ip] %></a></td>
+      <td><a href="http://<%= master_status[:ip] %>:9999/cgi/home.rb"><%= master_status[:ip] %></a></td>
       <% if master_status[:cache] == "up" %>
-        <td class="cache up"><%= @self_status[:cache] %></td>
+        <td class="cache up"><%= master_status[:cache] %></td>
       <% else %>
-        <td class="cache down"><%= @self_status[:cache] %></td>
+        <td class="cache down"><%= master_status[:cache] %></td>
       <% end %>
       <td><%= master_status[:snum] %></td>
       <td><%= master_status[:update] %></td>
@@ -63,16 +63,16 @@
   <tr>
     <th>IP Address</th>
     <th>DNS Cache Server</th>
-    <th>Slave Number</th>
+    <th>Master Conectivity</th>
     <th>Update</th>
   </tr>
   <% another_status.each do |status| %>
     <tr>
-      <td><a href="http://<%= @self_status[:ip] %>:9999/cgi/home.rb"><%= status[:ip] %></a></td>
+      <td><a href="http://<%= status[:ip] %>:9999/cgi/home.rb"><%= status[:ip] %></a></td>
       <% if status[:cache] == "up" %>
-        <td class="cache up"><%= @self_status[:cache] %></td>
+        <td class="cache up"><%= status[:cache] %></td>
       <% else %>
-        <td class="cache down"><%= @self_status[:cache] %></td>
+        <td class="cache down"><%= status[:cache] %></td>
       <% end %>
       <td><%= status[:mcon] %></td>
       <td><%= status[:update] %></td>
