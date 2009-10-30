@@ -15,6 +15,8 @@ class Home
   def initialize(cgi)
     @cgi = cgi
     @selected = 'home'
+    @self_status = nil
+    @another_status = nil
   end
 
   def get_statuses
@@ -56,44 +58,7 @@ class Home
   end
 
   def content_erb
-    <<-EOS
-<h2>self host status</h2>
-<% if @self_status %>
-<h3><%= @self_status[:host_type] %></h3>
-<table class="home">
-  <tr>
-    <th>IP Address</th>
-    <th>DNS Cache Server</th>
-    <% if @self_status[:host_type] == "master" %>
-      <th>Slave Number</th>
-    <% else %>
-      <th>Master Conectivity</th>
-    <% end %>
-    <th>Update</th>
-  </tr>
-  <tr>
-    <td><a href="http://<%= @self_status[:ip] %>:9999/cgi/home.rb"><%= @self_status[:ip] %></a></td>
-    <% if @self_status[:cache] == "up" %>
-      <td class="cache up" ><%= @self_status[:cache] %></td>
-    <% else %>
-      <td class="cache down" ><%= @self_status[:cache] %></td>
-    <% end %>
-    <% if @self_status[:host_type] == "master" %>
-      <td><%= @self_status[:snum] %></td>
-    <% else %>
-      <td><%= @self_status[:mcon] %></td>
-    <% end %>
-    <td><%=  @self_status[:update] %></td>
-  </tr>
-</table>
-<% end %>
-<h2>another host status</h2>
-<% if @another_status %>
-<h3></h3>
-<% else %>
-nothing
-<% end %>
-    EOS
+    File.read("home.rhtml")
   end
 
   def html_title
