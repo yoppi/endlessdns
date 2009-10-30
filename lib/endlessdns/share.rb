@@ -255,7 +255,10 @@ module EndlessDNS
     end
 
     def update_another_status
-      @another_statuses = @master.another_status
+      _ = @master.another_status
+      _.each do |s|
+        @another_statuses << if s[:ip] != host_ipaddr()
+      end
     end
 
     def refresh_self_status
