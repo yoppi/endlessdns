@@ -120,11 +120,11 @@ module EndlessDNS
       @slave_statuses = []
     end
 
-    def pull
+    def get_cache
       cache.deep_copy_cache
     end
 
-    def push(diff)
+    def add_cache(diff)
       diff.each do |name_type, rdatas|
         rdatas.each do |rdata|
           recache.invoke(name_type[0], name_type[1])
@@ -178,18 +178,8 @@ module EndlessDNS
       loop do
         sleep @refresh
         begin
-          master_cache = @master.pull
-          self_cache = cache.deep_copy_cache
-
-          diff_self = get_diff(master_cache, self_cache)
-          diff_master = get_diff(self_cache, master_cache)
-
-          update_self_cashe(diff_self)
-          update_master_cache(diff_master)
-
-          update_conectivity(Time.now)
-          update_self_status(@status)
-          update_master_status
+          update_cache
+          update_status
         rescue => e
           log.puts("cannot connect master server!", "warn")
           update_conectivity("down")
@@ -198,7 +188,26 @@ module EndlessDNS
 
           retry
         end
+        update_conectivity(Time.now)
       end
+    end
+
+    def update_cache
+      master_cache = @master.get_cache
+      self_cache = cache.deep_copy_cache
+      diff_self = get_diff(master_cache, self_cache)
+      diff_master = get_diff(self_cache, master_cache)
+      update_self_cashe(diff_self)
+      update_master_cache(diff_master)
+    end
+
+    def update_status
+      update_self_status(@status)
+      update_master_status
+    end
+
+    def update_conectivity(arg)
+      @master_conectivity = arg
     end
 
     # hash1 - hash2
@@ -224,7 +233,7 @@ module EndlessDNS
     end
 
     def update_master_cache(diff)
-      @master.push(diff)
+      @master.add_cache(diff)
     end
 
     def status
@@ -243,9 +252,6 @@ module EndlessDNS
       @master_status
     end
 
-    def update_conectivity(arg)
-      @master_conectivity = arg
-    end
 
     def update_self_status(status)
       @master.add_slave_status(status)
