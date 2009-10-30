@@ -5,7 +5,6 @@ require 'drb/drb'
 
 module EndlessDNS
   class Share
-    RETRY_SEC = 300
     PORT = 9998
 
     def self.instance
@@ -156,6 +155,8 @@ module EndlessDNS
   end
 
   class Slave < Host
+    RETRY_SEC = 300
+
     def initialize(master, refresh)
       @master = master
       @refresh = refresh
