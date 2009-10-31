@@ -76,11 +76,11 @@ module EndlessDNS
     end
 
     # slaveのみ
-    def share_interval
+    def interval
       @self_host.share_interval
     end
 
-    def set_share_interval(interval)
+    def set_interval(interval)
       @self_host.set_share_interval(interval)
     end
   end
@@ -258,11 +258,11 @@ module EndlessDNS
       @master_status = @master.status
     end
 
-    def share_interval
+    def interval
       @share_interval
     end
 
-    def set_share_interval(interval)
+    def set_interval(interval)
       @share_interval = interval
     end
   end # Slave END
