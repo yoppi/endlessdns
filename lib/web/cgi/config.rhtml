@@ -1,26 +1,39 @@
 <div id="recache_type">
   <h2>ReCache Type</h2>
-  <form method="post">
-    <% @types.each do |type| %>
-      <input type="checkbox" ><%= type %></input>
+  <form action="config.rb" method="post">
+    <% @configs[:recache_type].each do |type, val| %>
+      <input type="checkbox" name="<%= type %>" value="checked"><%= type %></input>
     <% end %>
   </form>
 </div>
 
 <div id="recache_method">
   <h2>ReCache Method</h2>
-  <form method="post">
+  <form action="config.rb" method="post">
+    <input type="radiobox">all</input>
+    <input type="radiobox">ref</input>
+    <input type="radiobox">non</input>
   </form>
 </div>
 
 <div id="snooping">
   <h2>Snooping</h2>
-  <form method="post">
+  <form action="config.rb" method="post">
+    <input type="radiobox" checked="">stop</input>
+    <input type="radiobox" checked="">start</input>
   </form>
 </div>
 
-<div id="interval">
-  <h2>Interval</h2>
-  <form method="post">
+<div id="stats_interval">
+  <h2>Statistics Interval</h2>
+  <form action="config.rb" method="post">
+    <input type="text" value="<%= @configs[:stats_interval] %>"></input>
+  </form>
+</div>
+
+<div id="share_interval">
+  <h2>Share Interval</h2>
+  <form action="config.rb" method="post">
+    <input type="text" value="<%= @configs[:share_interval] %>"></input>
   </form>
 </div>
