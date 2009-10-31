@@ -1,10 +1,23 @@
 #
-# レコードの再cache
-#   統計情報からそのexpireされたレコードを再cache(DNSキャッシュサーバに問い合わせる)かどうか
+# レコードの再キャッシュ
+#   o 統計情報からそのexpireされたレコードを再cache(DNSキャッシュサーバに問い合わせる)かどうか
 #   を判断する
+#   o TYPE別に再キャッシュするかどうか判断
 #
 module EndlessDNS
   class Recache
+
+    # 再キャッシュするタイプ
+    TYPES = [
+      'A',
+      'AAAA',
+      'SOA',
+      'NS',
+      'PTR',
+      'CNAME',
+      'MX'
+    ]
+
     class << self
       def instance
         @instance ||= self.new
@@ -14,6 +27,7 @@ module EndlessDNS
     def initialize
       @resolver = Net::DNS::Resolver.new
       @resolver.nameservers = config.get("dnsip") # localDNSを探索リストに追加
+      @recache_types = default_types()
     end
 
     def invoke(name, type)
@@ -62,6 +76,14 @@ module EndlessDNS
 
     def init_cache_ref(name, type)
       cache.init_cache_ref(name, type)
+    end
+
+    def default_types
+      ret = {}
+      TYPES.each do |type|
+        ret[type] = true
+      end
+      ret
     end
   end
 end
