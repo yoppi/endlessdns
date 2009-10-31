@@ -30,6 +30,8 @@ module EndlessDNS
       end
     end
 
+    attr_reader :recache_types, :recache_method
+
     def initialize
       @resolver = Net::DNS::Resolver.new
       @resolver.nameservers = config.get("dnsip") # localDNSを探索リストに追加
