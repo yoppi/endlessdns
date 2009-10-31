@@ -18,6 +18,12 @@ module EndlessDNS
       'MX'
     ]
 
+    METHODS = [
+      'no',
+      'all',
+      'ref'
+    ]
+
     class << self
       def instance
         @instance ||= self.new
@@ -27,6 +33,7 @@ module EndlessDNS
     def initialize
       @resolver = Net::DNS::Resolver.new
       @resolver.nameservers = config.get("dnsip") # localDNSを探索リストに追加
+      @recache_method = default_method()
       @recache_types = default_types()
     end
 
@@ -56,7 +63,7 @@ module EndlessDNS
         false
       when "all"
         true
-      when "nonref"
+      when "ref"
         check_cache_ref(name, type)
       end
     end
@@ -84,6 +91,10 @@ module EndlessDNS
         ret[type] = true
       end
       ret
+    end
+
+    def default_method
+      config.get("recache-method") ? config.get("recache-method") : 'all'
     end
   end
 end
