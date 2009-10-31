@@ -3,7 +3,6 @@
 #
 module EndlessDNS
   class Cache
-    DEFAULT_MAINTAIN = "all"
 
     class << self
       def instance
