@@ -18,6 +18,24 @@ module EndlessDNS
       end
     end
 
+    def start
+      port = config.get("port") ? config.get("port") : SNOOP_PORT
+      dump("udp and port #{port}")
+    end
+
+    def stop
+      @handle.close
+      @snoop_th.kill
+    end
+
+    def setfilter(filter, optimize=true)
+      @handle.setfilter(filter, optimize)
+    end
+
+    def status
+      @snoop_th.status
+    end
+
     def dump(filter, count=-1, snaplen=1518, promisc=0)
       @handle = Pcap::Capture.open_live(@device, snaplen, promisc)
       @handle.filter(filter)
@@ -27,24 +45,6 @@ module EndlessDNS
         end
         @handle.close
       end
-    end
-
-    def setfilter(filter, optimize=true)
-      @handle.setfilter(filter, optimize)
-    end
-
-    def stop
-      @handle.close
-      @snoop_th.kill
-    end
-
-    def start
-      port = config.get("port") ? config.get("port") : SNOOP_PORT
-      dump("udp and port #{port}")
-    end
-
-    def status
-      @snoop_th.status
     end
   end
 end
