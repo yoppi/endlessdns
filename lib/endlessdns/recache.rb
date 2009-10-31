@@ -55,17 +55,19 @@ module EndlessDNS
     end
 
     def need_recache?(name, type)
-      maintain = config.get("cache-maintain") ? config.get("cache-maintain") :
-                                                EndlessDNS::Cache::DEFAULT_MAINTAIN
-      # 統計データからfalseかtrueを判断
-      case maintain
-      when "no" # for monitoring and experiments
-        false
-      when "all"
-        true
-      when "ref"
-        check_cache_ref(name, type)
+      # typeの判断
+      if @recache_types[type]
+        # 再キャッシュ方法
+        case @recache_method
+        when "no" # for monitoring and experiments
+          return false
+        when "all"
+          return true
+        when "ref"
+          return check_cache_ref(name, type)
+        end
       end
+      false
     end
 
     def check_cache_ref(name, type)
@@ -95,6 +97,16 @@ module EndlessDNS
 
     def default_method
       config.get("recache-method") ? config.get("recache-method") : 'all'
+    end
+
+    def set_recache_type(types)
+      tyeps.each do |type, v|
+        @recache_types[type] = v
+      end
+    end
+
+    def set_recache_method(method)
+      @recache_method = method
     end
   end
 end
