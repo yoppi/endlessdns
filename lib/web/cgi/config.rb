@@ -19,7 +19,7 @@ class Config
     # { :recache_types => { :a => true, :aaaa => true, ...},
     #   :recache_method => 'no',
     #   :snooping => 'start',
-    #   :stats_interval => 500,
+    #   :stats_interval => 300,
     #   :share_interval => 300
     # }
     @configs = {}
@@ -45,12 +45,34 @@ class Config
   def collect_configs
     configs = {}
     configs.merge! collect_recache_configs()
+    configs.merge! collect_snoop_configs()
+    configs.merge! collect_stats_configs()
+    configs.merge! collect_share_configs()
+    configs
   end
 
   def collect_recache_configs
     ret = {}
     ret[:recache_types] = frontcgi.call('recache', 'recache_types')
     ret[:recache_method] = frontcgi.call('recache', 'recache_method')
+    ret
+  end
+
+  def collect_snoop_configs
+    ret = {}
+    ret[:snooping] = frontcgi.call('snoop', 'status')
+    ret
+  end
+
+  def collect_stats_configs
+    ret = {}
+    ret[:stats_interval] = frontcgi.call('statistics', 'interval')
+    ret
+  end
+
+  def collect_share_configs
+    ret = {}
+    ret[:share_interval] = frontcgi.call('share', 'interval')
     ret
   end
 
