@@ -63,11 +63,7 @@ module EndlessDNS
       end
 
       def snoop_start
-        @snoop = EndlessDNS::Snoop.new
-        @snoop.setfilter("udp and port #{config.get("port")}")
-        @snoop_th = Thread.new do
-          @snoop.dump
-        end
+        snoop.start
       end
 
       def packet_analy
