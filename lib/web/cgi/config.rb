@@ -100,6 +100,10 @@ class Config
   def to_html
     @erb.result(binding)
   end
+
+  def html_title
+    "Config"
+  end
 end
 
 cgi = CGI.new
