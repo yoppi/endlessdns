@@ -5,6 +5,7 @@
 #   o snoopingの停止/再開
 #   o 統計情報のdumpする間隔の設定
 #   o masterとslaveの通信間隔の設定
+require 'erb'
 require 'cgi'
 require 'menu'
 require 'frontcgi'
@@ -17,8 +18,8 @@ class Config
     @cgi = cgi
     @selected = 'config'
     # { :recache_types => { :a => true, :aaaa => true, ...},
-    #   :recache_method => 'no',
-    #   :snooping => 'start',
+    #   :recache_method => 'no' or 'all' or 'ref',
+    #   :snooping => 'start' or 'stop',
     #   :stats_interval => 300,
     #   :share_interval => 300
     # }
@@ -35,11 +36,21 @@ class Config
 
   def do_post
     # ユーザからの設定の変更を処理してその値を設定したページを返す
+    # また他の設定項目の情報を取得する
   end
 
   def do_get
     # 現在の設定を取得する
     @configs = collect_configs()
+  end
+
+  def setup
+    base = File.read("base.rhtml")
+    @erb = ERB.new(base)
+  end
+
+  def render_content
+    ERB.new(File.read("config.rhtml")).result(binding)
   end
 
   def collect_configs
@@ -74,11 +85,6 @@ class Config
     ret = {}
     ret[:share_interval] = frontcgi.call('share', 'interval')
     ret
-  end
-
-  def setup
-    base = File.read("base.rhtml")
-    @erb = ERB.new(base)
   end
 
   def out

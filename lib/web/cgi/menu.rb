@@ -7,7 +7,7 @@ module MenuHelper
   MENUS = %w[Home Statistics Config]
 
   def render_main_menu
-    menu_erb
+    ERB.new(menu_erb).result(binding)
   end
 
   def menu_erb

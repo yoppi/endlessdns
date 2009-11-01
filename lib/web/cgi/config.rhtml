@@ -2,7 +2,7 @@
   <h2>ReCache Type</h2>
   <form action="config.rb" method="post">
     <% @configs[:recache_type].each do |type, val| %>
-      <input type="checkbox" name="<%= type %>" value="checked"><%= type %></input>
+      <input type="checkbox" name="recache_type" value="<%= type %>" "<%= val ? "checked" : "" %>"><%= type %></input>
     <% end %>
   </form>
 </div>
@@ -10,30 +10,30 @@
 <div id="recache_method">
   <h2>ReCache Method</h2>
   <form action="config.rb" method="post">
-    <input type="radiobox">all</input>
-    <input type="radiobox">ref</input>
-    <input type="radiobox">non</input>
+    <input type="radio" name="recache_method" value="all" <%= @configs[:recache_method] == 'all' ? "checked" : "" %>>all</input>
+    <input type="radio" name="recache_method" value="ref" <%= @configs[:recache_method] == 'ref' ? "checked" : "" %>>ref</input>
+    <input type="radio" name="recache_method" value="no" <%= @configs[:recache_method] == 'no' ? "checked" : "" %>>no</input>
   </form>
 </div>
 
 <div id="snooping">
   <h2>Snooping</h2>
   <form action="config.rb" method="post">
-    <input type="radiobox" checked="">stop</input>
-    <input type="radiobox" checked="">start</input>
+    <input type="radio" name="snooping" value="stop" <%= @configs[:snooping] == 'stop' ? "checked" : ""%>>stop</input>
+    <input type="radio" name="snooping" value="start" <%= @configs[:snooping] == 'start' ? "checked" : ""%>>start</input>
   </form>
 </div>
 
 <div id="stats_interval">
   <h2>Statistics Interval</h2>
   <form action="config.rb" method="post">
-    <input type="text" value="<%= @configs[:stats_interval] %>"></input>
+    <input type="text" name="stats_interval" value="<%= @configs[:stats_interval] %>"></input>
   </form>
 </div>
 
 <div id="share_interval">
   <h2>Share Interval</h2>
   <form action="config.rb" method="post">
-    <input type="text" value="<%= @configs[:share_interval] %>"></input>
+    <input type="text" name="share_interval" value="<%= @configs[:share_interval] %>"></input>
   </form>
 </div>
