@@ -5,7 +5,6 @@ require 'drb/drb'
 
 module EndlessDNS
   class Share
-    RETRY_SEC = 300
     PORT = 9998
 
     def self.instance
@@ -131,13 +130,14 @@ module EndlessDNS
       # }
       @status = {}
       @slave_statuses = []
+      refresh_self_status
     end
 
-    def pull
+    def get_cache
       cache.deep_copy_cache
     end
 
-    def push(diff)
+    def add_cache(diff)
       diff.each do |name_type, rdatas|
         rdatas.each do |rdata|
           recache.invoke(name_type[0], name_type[1])
@@ -145,7 +145,10 @@ module EndlessDNS
       end
     end
 
-    def add_slave_status(status)
+    def update_slave_status(status)
+      @slave_statuses.delete_if do |slave_status|
+        slave_status[:ip] == status[:ip]
+      end
       @slave_statuses << status
     end
 
@@ -153,22 +156,28 @@ module EndlessDNS
       true
     end
 
-    def status
+    def refresh_self_status
       @status[:host_type] = "master"
       @status[:ip] = host_ipaddr()
       @status[:cache] = dnscache_process_status()
       @status[:snum] = @slave_statuses.size
       @status[:update] = Time.now
+    end
+
+    def status
+      refresh_self_status
       @status
     end
 
     def another_status
-      @slave_statuses.empty? ? nil : @slave_statuses
+      @slave_statuses
     end
   end
 
   class Slave < Host
     def initialize(master, share_interval)
+    RETRY_SEC = 300
+
       @master = master
       @share_interval = share_interval
       # status => {
@@ -176,31 +185,21 @@ module EndlessDNS
       #   :ip => ip address,
       #   :cache  => 'up' or 'down'
       #   :mcon => nil or time
-      #   :update => last connected time with master
+      #   :update => user access time
       # }
-      #
       @status = {}
       @master_status = nil
-      # 前回に通信した時間
-      @master_conectivity = nil
+      @another_statuses = [] # 他のslaveのステータス
+      @master_conectivity = nil # 前回に通信した時間
+      refresh_self_status
     end
 
     def run
       loop do
         sleep @share_interval
         begin
-          master_cache = @master.pull
-          self_cache = cache.deep_copy_cache
-
-          diff_self = get_diff(master_cache, self_cache)
-          diff_master = get_diff(self_cache, master_cache)
-
-          update_self_cashe(diff_self)
-          update_master_cache(diff_master)
-
-          update_conectivity(Time.now)
-          update_self_status(@status)
-          update_master_status
+          update_cache
+          update_status
         rescue => e
           log.puts("cannot connect master server!", "warn")
           update_conectivity("down")
@@ -209,11 +208,31 @@ module EndlessDNS
 
           retry
         end
+        update_conectivity(Time.now)
       end
     end
 
+    def update_cache
+      master_cache = @master.get_cache
+      self_cache = cache.deep_copy_cache
+      diff_self = diff_cache(master_cache, self_cache)
+      diff_master = diff_cache(self_cache, master_cache)
+      update_self_cashe(diff_self)
+      update_master_cache(diff_master)
+    end
+
+    def update_status
+      update_self_status(@status)
+      update_master_status
+      update_another_status
+    end
+
+    def update_conectivity(arg)
+      @master_conectivity = arg
+    end
+
     # hash1 - hash2
-    def get_diff(h1, h2)
+    def diff_cache(h1, h2)
       diff = {}
       h1.each do |key, val|
         if h2.has_key?(key)
@@ -235,14 +254,34 @@ module EndlessDNS
     end
 
     def update_master_cache(diff)
-      @master.push(diff)
+      @master.add_cache(diff)
     end
 
-    def status
+    def update_self_status(status)
+      refresh_self_status
+      @master.update_slave_status(status)
+    end
+
+    def update_master_status
+      @master_status = @master.status
+    end
+
+    def update_another_status
+      _ = @master.another_status
+      _.each do |s|
+        @another_statuses << if s[:ip] != host_ipaddr()
+      end
+    end
+
+    def refresh_self_status
       @status[:host_type] = "slave"
       @status[:ip] = host_ipaddr()
       @status[:cache] = dnscache_process_status()
       @status[:mcon] = master_conectivity()
+      @status[:update] = Time.now
+    end
+
+    def status
       @status
     end
 
@@ -251,19 +290,7 @@ module EndlessDNS
     end
 
     def another_status
-      @master_status
-    end
-
-    def update_conectivity(arg)
-      @master_conectivity = arg
-    end
-
-    def update_self_status(status)
-      @master.add_slave_status(status)
-    end
-
-    def update_master_status
-      @master_status = @master.status
+      { :master => @master_status, :another => @another_statuses }
     end
 
     def interval
