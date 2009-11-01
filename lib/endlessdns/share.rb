@@ -107,7 +107,7 @@ module EndlessDNS
     # topコマンドを使うと遅いが回収可能
     def process_status(pid)
       _ = `ps p #{pid}`.split("\n")
-      if _[1].split(" ")[0] == pid
+      if _[1] && _[1].split(" ")[0] == pid
         "up"
       else
         "down"
