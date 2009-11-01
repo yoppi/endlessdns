@@ -34,6 +34,10 @@ class Config
     end
   end
 
+  def post?
+    @cgi.request_method == "POST"    
+  end
+
   def do_post
     # ユーザからの設定の変更を処理してその値を設定したページを返す
     # また他の設定項目の情報を取得する
