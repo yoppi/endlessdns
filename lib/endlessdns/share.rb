@@ -77,11 +77,19 @@ module EndlessDNS
 
     # slaveのみ
     def interval
-      @self_host.share_interval
+      if @host_type == "master"
+        return nil
+      else
+        @self_host.share_interval
+      end
     end
 
     def set_interval(interval)
-      @self_host.set_share_interval(interval)
+      if @host_type == "master"
+        return nil
+      else
+        @self_host.set_share_interval(interval)
+      end
     end
   end
 
