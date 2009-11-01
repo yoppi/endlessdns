@@ -1,8 +1,8 @@
-<div id="recache_type">
+<div id="recache_types">
   <h2>ReCache Type</h2>
   <form action="config.rb" method="post">
-    <% @configs[:recache_type].each do |type, val| %>
-      <input type="checkbox" name="recache_type" value="<%= type %>" "<%= val ? "checked" : "" %>"><%= type %></input>
+    <% @configs[:recache_types].each do |type, val| %>
+      <input type="checkbox" name="recache_types" value="<%= type %>" "<%= val ? "checked" : "" %>"><%= type %></input>
     <% end %>
   </form>
 </div>
