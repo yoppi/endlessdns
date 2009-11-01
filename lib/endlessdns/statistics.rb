@@ -87,7 +87,7 @@ module EndlessDNS
       end
       Thread.new do
         loop do
-          sleep refresh()
+          sleep @stats_interval
           Thread.new do # 統計情報を吐くのに時間がかかるとtimerがずれる
             update_statistics
           end
