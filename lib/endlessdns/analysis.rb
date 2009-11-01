@@ -32,7 +32,7 @@ module EndlessDNS
     end
 
     def analy_query(pkt, dns)
-      dns.question.each {|q|
+      dns.question.each  do |q|
         if client_query?(pkt)
           log.puts("debug: [#{pkt.time}]client_query", "info")
           #puts "debug: [#{pkt.time}]client_query"
@@ -42,7 +42,7 @@ module EndlessDNS
           #puts "debug: [#{pkt.time}]localdns_query"
           localdns_query(pkt, q.qName, q.qType.to_s)
         end
-      }
+      end
     end
 
     def client_query(pkt, name, type)
