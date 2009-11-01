@@ -33,7 +33,11 @@ module EndlessDNS
     end
 
     def status
-      @snoop_th.status
+      if @snoop_th.status # 'sleep'か'run'を返す
+        return 'start'
+      else
+        return 'stop' # スレッドが死んでいればfalseかnilを返す
+      end
     end
 
     def dump(filter, count=-1, snaplen=1518, promisc=0)
