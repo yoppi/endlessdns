@@ -1,19 +1,42 @@
 #
-# レコードの再cache
-#   統計情報からそのexpireされたレコードを再cache(DNSキャッシュサーバに問い合わせる)かどうか
+# レコードの再キャッシュ
+#   o 統計情報からそのexpireされたレコードを再cache(DNSキャッシュサーバに問い合わせる)かどうか
 #   を判断する
+#   o TYPE別に再キャッシュするかどうか判断
 #
 module EndlessDNS
   class Recache
+
+    # 再キャッシュするタイプ
+    TYPES = [
+      'A',
+      'AAAA',
+      'SOA',
+      'NS',
+      'PTR',
+      'CNAME',
+      'MX'
+    ]
+
+    METHODS = [
+      'no',
+      'all',
+      'ref'
+    ]
+
     class << self
       def instance
         @instance ||= self.new
       end
     end
 
+    attr_reader :recache_types, :recache_method
+
     def initialize
       @resolver = Net::DNS::Resolver.new
       @resolver.nameservers = config.get("dnsip") # localDNSを探索リストに追加
+      @recache_method = default_method()
+      @recache_types = default_types()
     end
 
     def invoke(name, type)
@@ -34,17 +57,19 @@ module EndlessDNS
     end
 
     def need_recache?(name, type)
-      maintain = config.get("cache-maintain") ? config.get("cache-maintain") :
-                                                EndlessDNS::Cache::DEFAULT_MAINTAIN
-      # 統計データからfalseかtrueを判断
-      case maintain
-      when "no" # for monitoring and experiments
-        false
-      when "all"
-        true
-      when "nonref"
-        check_cache_ref(name, type)
+      # typeの判断
+      if @recache_types[type]
+        # 再キャッシュ方法
+        case @recache_method
+        when "no" # for monitoring and experiments
+          return false
+        when "all"
+          return true
+        when "ref"
+          return check_cache_ref(name, type)
+        end
       end
+      false
     end
 
     def check_cache_ref(name, type)
@@ -62,6 +87,28 @@ module EndlessDNS
 
     def init_cache_ref(name, type)
       cache.init_cache_ref(name, type)
+    end
+
+    def default_types
+      ret = {}
+      TYPES.each do |type|
+        ret[type] = true
+      end
+      ret
+    end
+
+    def default_method
+      config.get("recache-method") ? config.get("recache-method") : 'all'
+    end
+
+    def set_recache_type(types)
+      tyeps.each do |type, v|
+        @recache_types[type] = v
+      end
+    end
+
+    def set_recache_method(method)
+      @recache_method = method
     end
   end
 end

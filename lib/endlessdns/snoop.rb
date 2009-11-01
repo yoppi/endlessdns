@@ -1,29 +1,58 @@
 require 'pcap'
 
 module EndlessDNS
-
-  attr_reader :device
-
   class Snoop
-    def initialize(device=nil, snaplen=1518, promisc=0)
+    SNOOP_PORT = 53
+
+    class <<  self
+      def instance
+        @instance ||= self.new
+      end
+    end
+
+    attr_reader :device
+
+    def initialize(device=nil)
       unless device
         @device = Pcap.lookupdev
       end
-      @handle = Pcap::Capture.open_live(@device, snaplen, promisc)
     end
 
-    def dump(count=-1)
-      # NOTE: 途中でdumpのstop、またstratができるようにする
-      #       そうすると、何かしらのrdbmsを使わないと、学習データを残せない
-      #       汎用的にするために、ActiveRecordを使って、依存しないようにする
-      @handle.each_packet(count) do |pkt|
-         packet.enq(pkt)
-      end
+    def start
+      port = config.get("port") ? config.get("port") : SNOOP_PORT
+      dump("udp and port #{port}")
+    end
+
+    def stop
       @handle.close
+      @snoop_th.kill
     end
 
     def setfilter(filter, optimize=true)
       @handle.setfilter(filter, optimize)
     end
+
+    def status
+      if @snoop_th.status # 'sleep'か'run'を返す
+        return 'start'
+      else
+        return 'stop' # スレッドが死んでいればfalseかnilを返す
+      end
+    end
+
+    def dump(filter, count=-1, snaplen=1518, promisc=0)
+      @handle = Pcap::Capture.open_live(@device, snaplen, promisc)
+      @handle.setfilter(filter)
+      @snoop_th = Thread.new do
+        @handle.each_packet(count) do |pkt|
+          packet.enq(pkt)
+        end
+        @handle.close
+      end
+    end
   end
+end
+
+def snoop
+  EndlessDNS::Snoop.instance
 end

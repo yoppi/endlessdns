@@ -7,7 +7,7 @@
 # にアクセスする
 module EndlessDNS
   class Front
-    SERVICE_INSTANCES = %w[cache statistics recach snoop share]
+    SERVICE_INSTANCES = %w[cache statistics recache snoop share]
     def initialize
     end
 

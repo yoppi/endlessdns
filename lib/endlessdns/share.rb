@@ -41,8 +41,8 @@ module EndlessDNS
         raise "must be set master-addr" unless @master_addr
         @master_port = share['master-port']
         raise "must be set master-port" unless @master_port
-        @refresh = share['refresh']
-        raise "must be set refresh" unless @refresh
+        @share_interval = share['share-interval']
+        raise "must be set share-interval" unless @share_interval
       else
         raise "Unknown host type [#{@host_type}]"
       end
@@ -63,7 +63,7 @@ module EndlessDNS
 
     def slave_setup
       master = DRbObject.new_with_uri("druby://#{@master_addr}:#{@master_port}")
-      @self_host = EndlessDNS::Slave.new(master, @refresh)
+      @self_host = EndlessDNS::Slave.new(master, @share_interval)
       @self_host.run
     end
 
@@ -76,8 +76,20 @@ module EndlessDNS
     end
 
     # slaveのみ
-    def self_refresh
-      @self_host.refresh
+    def interval
+      if @host_type == "master"
+        return nil
+      else
+        @self_host.share_interval
+      end
+    end
+
+    def set_interval(interval)
+      if @host_type == "master"
+        return nil
+      else
+        @self_host.set_share_interval(interval)
+      end
     end
   end
 
@@ -156,9 +168,9 @@ module EndlessDNS
   end
 
   class Slave < Host
-    def initialize(master, refresh)
+    def initialize(master, share_interval)
       @master = master
-      @refresh = refresh
+      @share_interval = share_interval
       # status => {
       #   :host_type => 'slave'
       #   :ip => ip address,
@@ -175,7 +187,7 @@ module EndlessDNS
 
     def run
       loop do
-        sleep @refresh
+        sleep @share_interval
         begin
           master_cache = @master.pull
           self_cache = cache.deep_copy_cache
@@ -252,6 +264,14 @@ module EndlessDNS
 
     def update_master_status
       @master_status = @master.status
+    end
+
+    def interval
+      @share_interval
+    end
+
+    def set_interval(interval)
+      @share_interval = interval
     end
   end # Slave END
 end # Share END

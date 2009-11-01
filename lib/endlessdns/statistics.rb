@@ -6,7 +6,7 @@ require 'pstore'
 module EndlessDNS
   class Statistics
 
-    REFRESH = 60 * 5 # 5分をデフォルトにする
+    INTERVAL = 60 * 5 # 5分をデフォルトにする
 
     class << self
       def instance
@@ -34,6 +34,7 @@ module EndlessDNS
       @hit = {}
 
       @stat_dir = config.get("statdir") ? config.get("statdir") : EndlessDNS::STAT_DIR
+      @stats_interval = config.get("stats-interval") ? config.get("stats-interval") : INTERVAL
 
       @mutex = Mutex.new
     end
@@ -86,7 +87,7 @@ module EndlessDNS
       end
       Thread.new do
         loop do
-          sleep refresh()
+          sleep @stats_interval
           Thread.new do # 統計情報を吐くのに時間がかかるとtimerがずれる
             update_statistics
           end
@@ -94,8 +95,12 @@ module EndlessDNS
       end
     end
 
-    def refresh
-      config.get("refresh") ? config.get("refresh") : REFRESH
+    def interval
+      @stats_interval
+    end
+
+    def set_interval(interval)
+      @stats_interval = interval
     end
 
     def update_statistics
