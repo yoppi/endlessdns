@@ -175,9 +175,9 @@ module EndlessDNS
   end
 
   class Slave < Host
-    def initialize(master, share_interval)
     RETRY_SEC = 300
 
+    def initialize(master, share_interval)
       @master = master
       @share_interval = share_interval
       # status => {
