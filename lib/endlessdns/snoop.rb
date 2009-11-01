@@ -42,7 +42,7 @@ module EndlessDNS
 
     def dump(filter, count=-1, snaplen=1518, promisc=0)
       @handle = Pcap::Capture.open_live(@device, snaplen, promisc)
-      @handle.filter(filter)
+      @handle.setfilter(filter)
       @snoop_th = Thread.new do
         @handle.each_packet(count) do |pkt|
           packet.enq(pkt)
