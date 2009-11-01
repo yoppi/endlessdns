@@ -69,20 +69,14 @@ class Statistics
 
   def setup
     base = File.read("base.rhtml")
-    embeded = embed_menu(base)
-    embeded = embed_contents(embeded)
-    @erb = ERB.new(embeded)
-  end
-
-  def embed_menu(text)
-    text.gsub(/render_main_menu/, render_main_menu)
-  end
-
-  def embed_contents(text)
-    text.gsub(/render_content/, render_content)
+    @erb = ERB.new(base)
   end
 
   def render_content
+    ERB.new(content_erb).result(binding)
+  end
+
+  def content_erb
     File.read("statistics.rhtml")
   end
 
