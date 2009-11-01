@@ -90,7 +90,7 @@ module EndlessDNS
         @self_host.set_share_interval(interval)
       end
     end
-  end
+  end # Share end
 
   class Host
     def dnscache_process_status
@@ -269,7 +269,7 @@ module EndlessDNS
     def update_another_status
       _ = @master.another_status
       _.each do |s|
-        @another_statuses << if s[:ip] != host_ipaddr()
+        @another_statuses << s if s[:ip] != host_ipaddr()
       end
     end
 
@@ -301,7 +301,7 @@ module EndlessDNS
       @share_interval = interval
     end
   end # Slave END
-end # Share END
+end # EndlessDNS END
 
 def share
   EndlessDNS::Share.instance
