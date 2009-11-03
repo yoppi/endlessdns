@@ -16,7 +16,6 @@ class FrontCGI
   end
 
   def call(obj, cmd, args=nil)
-    #eval("@front.#{obj} '#{cmd}'")
     begin
       if args
         ret = @front.call(obj, cmd, args)
