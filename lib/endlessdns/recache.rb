@@ -102,6 +102,7 @@ module EndlessDNS
     end
 
     def set_recache_types(types)
+      reset_recache_types
       unless types.class == Array
         log.puts("set_recache_types is faild [#{types}]")
         return
@@ -109,6 +110,12 @@ module EndlessDNS
       offtypes = (TYPES - types)
       offtypes.each do |type|
         @recache_types[type] = false
+      end
+    end
+
+    def reset_recache_types
+      @recache_types.each do |type, _|
+        @recache_types[type] = true
       end
     end
 
