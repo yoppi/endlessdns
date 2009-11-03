@@ -100,7 +100,9 @@ module EndlessDNS
     end
 
     def set_interval(interval)
-      @stats_interval = interval
+      if interval.to_i >= 60
+        @stats_interval = interval.to_i
+      end
     end
 
     def update_statistics
