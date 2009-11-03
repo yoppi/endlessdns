@@ -87,7 +87,7 @@ module EndlessDNS
       if @host_type == "master"
         return nil
       else
-        @self_host.set_share_interval(interval)
+        @self_host.set_interval(interval.to_i)
       end
     end
   end # Share end
