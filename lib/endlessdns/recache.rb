@@ -101,9 +101,14 @@ module EndlessDNS
       config.get("recache-method") ? config.get("recache-method") : 'all'
     end
 
-    def set_recache_type(types)
-      tyeps.each do |type, v|
-        @recache_types[type] = v
+    def set_recache_types(types)
+      unless types.class == Array
+        log.puts("set_recache_types is faild [#{types}]")
+        return
+      end
+      offtypes = (TYPES - types)
+      offtypes.each do |type|
+        @recache_types[type] = false
       end
     end
 
