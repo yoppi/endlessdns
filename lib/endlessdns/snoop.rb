@@ -40,6 +40,15 @@ module EndlessDNS
       end
     end
 
+    def set_status(arg)
+      return if status() == arg
+      if arg == "stop"
+        stop
+      elsif arg == "start"
+        start
+      end
+    end
+
     def dump(filter, count=-1, snaplen=1518, promisc=0)
       @handle = Pcap::Capture.open_live(@device, snaplen, promisc)
       @handle.setfilter(filter)
