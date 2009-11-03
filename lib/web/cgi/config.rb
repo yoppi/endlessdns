@@ -35,17 +35,50 @@ class Config
   end
 
   def post?
-    @cgi.request_method == "POST"    
+    @cgi.request_method == "POST"
   end
 
   def do_post
     # ユーザからの設定の変更を処理してその値を設定したページを返す
     # また他の設定項目の情報を取得する
+    params = @cgi.params
+    change_configs(params)
+    @configs = collect_configs()
   end
 
   def do_get
     # 現在の設定を取得する
     @configs = collect_configs()
+  end
+
+  def change_configs(params)
+    change_recache_types(params['recache_types'])
+    change_recache_method(params['recache_method'][0])
+    change_snooping(params['snooping'][0])
+    change_stats_interval(params['stats_interval'][0])
+    change_share_interval(params['share_interval'][0])
+  end
+
+  def change_recache_types(new)
+    frontcgi.call('recache', 'set_recache_types', new)
+  end
+
+  def change_recache_method(new)
+    frontcgi.call('recache', 'set_recache_method', new)
+  end
+
+  def change_snooping(new)
+    frontcgi.call('snoop', 'set_status', new)
+  end
+
+  def change_stats_interval(new)
+    frontcgi.call('statistics', 'set_interval', new)
+  end
+
+  def change_share_interval(new)
+    if new
+      frontcgi.call('share', 'set_interval', new)
+    end
   end
 
   def setup
