@@ -24,8 +24,12 @@ module EndlessDNS
     end
 
     def stop
-      @handle.close
-      @snoop_th.kill
+      begin
+        @snoop_th.kill
+        @handle.close
+      rescue => e
+        log.puts("stop snooping", "warn")
+      end
     end
 
     def setfilter(filter, optimize=true)
