@@ -21,6 +21,9 @@ module EndlessDNS
         set_min_expire(expire_time)
         add_table(expire_time, name, type)
         set_timer(ttl, expire_time)
+        if run_timer?
+          stop_timer
+        end
         start_timer
       elsif @min_expire_time > expire_time
         set_min_expire(expire_time)

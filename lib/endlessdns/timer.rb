@@ -9,18 +9,35 @@ module EndlessDNS
     end
 
     def initialize
-      #@running = false  
+      @running = false
       @cnt = 0
+      @force_stop = false
       @mutex = Mutex.new
-      #run
+      run
     end
 
     def run
       @timer_th = Thread.new do
-        sleep @cnt
-        changed
-        notify_observers(@expire)
+        loop do
+          if @running
+            while @running && @cnt > 0
+              sleep 1
+              @cnt -= 1
+            end
+            unless @force_stop
+              stop
+              changed
+              notify_observers(@expire)
+            end
+          end
+          sleep 1
+        end
       end
+      #@timer_th = Thread.new do
+      #  sleep @cnt
+      #  changed
+      #  notify_observers(@expire)
+      #end
       #  loop do
       #    while @cnt > 0
       #      if @running
@@ -37,31 +54,33 @@ module EndlessDNS
     end
 
     def run?
-      #@runnning
-      case @timer_th.status
-      when "run"
-        return true
-      when "sleep"
-        return true
-      when "aborting"
-        return false
-      else
-        return false
-      end
+      @runnning
+      #case @timer_th.status
+      #when "run"
+      #  return true
+      #when "sleep"
+      #  return true
+      #when "aborting"
+      #  return false
+      #else
+      #  return false
+      #end
     end
 
     def start
-      #@mutex.synchronize do
-      #  @running = true
-      #end
-      run
+      @mutex.synchronize do
+        @running = true
+        @force_stop = false
+      end
+      #run
     end
 
     def stop
-      #@mutex.synchronize do
-      #  @running = false
-      #end
-      @timer_th.kill
+      @mutex.synchronize do
+        @running = false
+        @force_stop = true
+      end
+      #@timer_th.kill
     end
 
     def set(cnt, expire)
