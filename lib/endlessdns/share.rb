@@ -54,14 +54,21 @@ module EndlessDNS
     end
 
     def master_setup
-      @self_host = EndlessDNS::Master.new
-      DRb.start_service("druby://#{@serv_addr}:#{@serv_port}", @self_host)
+      start_master_service(@serv_addr, @serv_port)
     end
 
     def slave_setup
       master = DRbObject.new_with_uri("druby://#{@master_addr}:#{@master_port}")
       @self_host = EndlessDNS::Slave.new(master)
       @self_host.run
+
+      # loopを抜けたらmasterとの通信が切れ自身がmasterになる
+      start_master_service(config.get['dnsip'], PORT)
+    end
+
+    def start_master_service(addr, port)
+      @self_host = EndlessDNS::Master.new
+      DRb.start_service("druby://#{addr}:#{port}", @self_host)
     end
 
     def self_status
@@ -128,6 +135,7 @@ module EndlessDNS
       # }
       @status = {}
       @slave_statuses = []
+      @priorities = {}
       refresh_self_status
     end
 
@@ -148,6 +156,26 @@ module EndlessDNS
         slave_status[:ip] == status[:ip]
       end
       @slave_statuses << status
+    end
+
+    def update_priority(ip, priority)
+      @priorities[ip] = priority
+      if @priorities.size == 1
+        return @priorities.keys[0]
+      else
+        elect_priority()
+      end
+    end
+
+    def elect_priority
+      min = @priorities.min {|a, b| a[1] <=> b[1] }
+      mins = @priorities.select {|_, val| min[1] == val }
+      if mins.size == 1
+        return mins.shift[0]
+      else
+        # TODO: より適切なmetric値を選ぶ
+        return mins[rand(mins.size)][0]
+      end
     end
 
     def connected?
@@ -176,6 +204,7 @@ module EndlessDNS
     RETRY_SEC = 300
     SHARE_INT = 300
     PRIORITY = 10
+    RETRY_MAX = 5
 
     def initialize(master)
       @master = master
@@ -188,32 +217,41 @@ module EndlessDNS
       #   :cache  => 'up' or 'down'
       #   :mcon => nil or time
       #   :update => user access time
-      #   :priority => smaller is weighted
       # }
       @status = {}
       @master_status = nil
       @another_statuses = [] # 他のslaveのステータス
       @master_conectivity = nil # 前回に通信した時間
+      @retry_num = 0
+      @next_master = nil
       refresh_self_status
     end
 
     def run
-      loop do
-        sleep @share_interval
-        begin
-          update_cache
-          update_status
-          update_priority
-        rescue => e
-          log.puts("cannot connect master server!", "warn")
-          update_conectivity("down")
+      catch(:exit) do
+        loop do
+          sleep @share_interval
+          begin
+            update_cache
+            update_status
+            update_priority
+          rescue => e
+            log.puts("cannot connect master server!", "warn")
+            update_conectivity("down")
 
-          sleep RETRY_SEC
+            sleep @retry_sec
+            @retry_num += 1
 
-          retry
+            if @retry_num > RETRY_MAX
+              change_master
+            end
+
+            retry
+          end
+          update_conectivity(Time.now)
         end
-        update_conectivity(Time.now)
       end
+      log.puts("master is down. self to be master", "warn")
     end
 
     def update_cache
@@ -232,6 +270,18 @@ module EndlessDNS
     end
 
     def update_priority
+      @next_master = @master.update_priority(host_ipaddr(), @priority)
+    end
+
+    def change_master
+      if @next_master
+        if @next_master != host_ipaddr()
+          @master = DRbObject.new_with_uri("druby://#{@next_master}:#{EndlessDNS::Share::PORT}")
+          log.puts("master is down. change master[#{@next_master}]", "warn")
+        else
+          throw :exit
+        end
+      end
     end
 
     def update_conectivity(arg)
