@@ -40,8 +40,6 @@ module EndlessDNS
         raise "must be set master-addr" unless @master_addr
         @master_port = share['master-port']
         raise "must be set master-port" unless @master_port
-        @share_interval = share['share-interval']
-        raise "must be set share-interval" unless @share_interval
       else
         raise "Unknown host type [#{@host_type}]"
       end
@@ -62,7 +60,7 @@ module EndlessDNS
 
     def slave_setup
       master = DRbObject.new_with_uri("druby://#{@master_addr}:#{@master_port}")
-      @self_host = EndlessDNS::Slave.new(master, @share_interval)
+      @self_host = EndlessDNS::Slave.new(master)
       @self_host.run
     end
 
@@ -176,16 +174,21 @@ module EndlessDNS
 
   class Slave < Host
     RETRY_SEC = 300
+    SHARE_INT = 300
+    PRIORITY = 10
 
-    def initialize(master, share_interval)
+    def initialize(master)
       @master = master
-      @share_interval = share_interval
+      @share_interval = default_share_interval()
+      @retry_sec = default_retry_sec()
+      @priority = default_priority()
       # status => {
       #   :host_type => 'slave'
       #   :ip => ip address,
       #   :cache  => 'up' or 'down'
       #   :mcon => nil or time
       #   :update => user access time
+      #   :priority => smaller is weighted
       # }
       @status = {}
       @master_status = nil
@@ -200,6 +203,7 @@ module EndlessDNS
         begin
           update_cache
           update_status
+          update_priority
         rescue => e
           log.puts("cannot connect master server!", "warn")
           update_conectivity("down")
@@ -225,6 +229,9 @@ module EndlessDNS
       update_self_status(@status)
       update_master_status
       update_another_status
+    end
+
+    def update_priority
     end
 
     def update_conectivity(arg)
@@ -279,6 +286,7 @@ module EndlessDNS
       @status[:cache] = dnscache_process_status()
       @status[:mcon] = master_conectivity()
       @status[:update] = Time.now
+      @status[:priority] = priority()
     end
 
     def status
@@ -299,6 +307,34 @@ module EndlessDNS
 
     def set_interval(interval)
       @share_interval = interval
+    end
+
+    def default_share_interval
+      config.get['share']['share-interval'] ? config.get['share']['share-interval'] : SHARE_INT
+    end
+
+    def retry_sec
+      @retry_sec
+    end
+
+    def set_retry_sec(retry_sec)
+      @retry_sec = retry_sec
+    end
+
+    def default_retry_sec
+      config.get['share']['retry'] ? config.get['share']['retry'] : RETRY_SEC
+    end
+
+    def priority
+      @priority
+    end
+
+    def set_priority(priority)
+      @priority = priority
+    end
+
+    def default_priority
+      config.get['share']['priority'] ? config.get['share']['priority'] : PRIORITY
     end
   end # Slave END
 end # EndlessDNS END
