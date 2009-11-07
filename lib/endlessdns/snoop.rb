@@ -53,7 +53,7 @@ module EndlessDNS
       end
     end
 
-    def dump(filter, count=-1, snaplen=1518, promisc=0)
+    def dump(filter, count=-1, snaplen=1518, promisc=false)
       @handle = Pcap::Capture.open_live(@device, snaplen, promisc)
       @handle.setfilter(filter)
       @snoop_th = Thread.new do
