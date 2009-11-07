@@ -61,24 +61,22 @@ module EndlessDNS
     end
 
     def set_next_expire
-      Thread.new do
-        if @table.size > 0
-          # FIXME: ここが遅いしかも大量にttlテーブルは存在するので現実的ではない
-          #       memoizeか、B木, red black treeなど、高速に最小値を探索できる
-          #       ものを実装する
-          #       ruby1.9だとhashに100万個データがあっても0.08secで終了する
-          # NOTE: min(expire_time)をテーブルから取得したとき、すでにexpireの時
-          #       間、もしくは過ぎていることがある
-          #       時間を過ぎていたらただちにrecache処理にうつる
-          min = @table.keys.sort[0]
-          if past? min
-            do_recache(min)
-            set_next_expire
-          else
-            set_min_expire(min)
-            set_timer(min - Time.now.tv_sec, min)
-            start_timer
-          end
+      if @table.size > 0
+        # FIXME: ここが遅いしかも大量にttlテーブルは存在するので現実的ではない
+        #       memoizeか、B木, red black treeなど、高速に最小値を探索できる
+        #       ものを実装する
+        #       ruby1.9だとhashに100万個データがあっても0.08secで終了する
+        # NOTE: min(expire_time)をテーブルから取得したとき、すでにexpireの時
+        #       間、もしくは過ぎていることがある
+        #       時間を過ぎていたらただちにrecache処理にうつる
+        min = @table.keys.sort[0]
+        if past? min
+          do_recache(min)
+          set_next_expire
+        else
+          set_min_expire(min)
+          set_timer(min - Time.now.tv_sec, min)
+          start_timer
         end
       end
     end
