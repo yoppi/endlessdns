@@ -76,6 +76,7 @@ module EndlessDNS
         dns.question.each do |q|
           log.puts("negative cache[#{pkt.ip_dst.to_num_s} is #{q.qName.to_s}]", "warn")
           add_negative_cache_client(pkt.ip_dst.to_num_s, q.qName.to_s, q.qType.to_s)
+          add_negative_cache_ref(q.qName, q.qType.to_s)
         end
       else
         (dns.answer + dns.authority + dns.additional).each do |rr|
@@ -119,6 +120,10 @@ module EndlessDNS
 
     def add_negative_cache_client(client, qname, qtype)
       cache.add_negative_cache_client(client, qname, qtype)
+    end
+
+    def add_negative_cache_ref(qname, qtype)
+      cache.add_negative_cache_ref(qname, qtype)
     end
 
     def add_cache_ref(name, type)
