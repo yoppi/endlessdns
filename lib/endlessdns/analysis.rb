@@ -16,9 +16,13 @@ module EndlessDNS
 
     def analy(pkt)
       begin
-        dns = Net::DNS::Packet.parse(pkt.udp_data)
+        if defined? JRUBY_VERSION
+          dns = Net::DNS::Packet.parse(pkt.data.to_a.pack('C*'))
+        else
+          dns = Net::DNS::Packet.parse(pkt.udp_data)
+        end
       rescue => e
-        log.puts("src: #{pkt.ip_src} unknown packet", "error")
+        log.puts("src: #{pkt.ip_src} unknown packet[#{e}]", "error")
         return
       end
 
