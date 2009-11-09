@@ -44,6 +44,7 @@ module EndlessDNS
       @hit[type] += 1
     end
 
+    # TODO: client_queryを統計情報を書き出すときにクリアする
     def add_client_query(src, name, type)
       @mutex.synchronize do
         @client_query[src] ||= Hash.new
@@ -54,6 +55,7 @@ module EndlessDNS
       end
     end
 
+    # TODO: localdns_queryを統計情報を書き出すときに書き出しクリアする
     def add_localdns_query(src, name, type)
       @mutex.synchronize do
         @localdns_query[src] ||= Hash.new

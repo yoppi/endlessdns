@@ -34,12 +34,10 @@ module EndlessDNS
     def analy_query(pkt, dns)
       dns.question.each  do |q|
         if client_query?(pkt)
-          log.puts("debug: [#{pkt.time}]client_query", "info")
-          #puts "debug: [#{pkt.time}]client_query"
+          log.puts("[#{pkt.time}]client_query", "debug")
           client_query(pkt, q.qName, q.qType.to_s)
         elsif localdns_query?(pkt)
-          log.puts("debug: [#{pkt.time}]localdns_query", "info")
-          #puts "debug: [#{pkt.time}]localdns_query"
+          log.puts("[#{pkt.time}]localdns_query", "debug")
           localdns_query(pkt, q.qName, q.qType.to_s)
         end
       end
@@ -48,9 +46,7 @@ module EndlessDNS
     def client_query(pkt, name, type)
       if cached?(name, type)
         statistics.hit(type)
-        log.puts("cached!", "info")
-      else
-        log.puts("not cached...", "info")
+        log.puts("cached!", "debug")
       end
       statistics.add_client_query(pkt.ip_src.to_num_s, name, type)
     end
@@ -61,23 +57,17 @@ module EndlessDNS
 
     def analy_response(pkt, dns)
       if localdns_response?(pkt)
-        log.puts("debug: [#{pkt.time}]localdns_response", "info")
-        #puts "debug: [#{pkt.time}]localdns_response"
+        log.puts("[#{pkt.time}]localdns_response", "debug")
         localdns_response(pkt, dns)
       elsif outside_response?(pkt)
-        log.puts("debug: [#{pkt.time}]outside_response", "info")
-        #puts "debug: [#{pkt.time}]outside_response"
+        log.puts("[#{pkt.time}]outside_response", "debug")
         outside_response(pkt, dns)
       end
     end
 
     def localdns_response(pkt, dns)
       if nxdomain?(dns) # negativeキャッシュの処理
-        dns.question.each do |q|
-          log.puts("negative cache[#{pkt.ip_dst.to_num_s} is #{q.qName.to_s}]", "warn")
-          add_negative_cache_client(pkt.ip_dst.to_num_s, q.qName.to_s, q.qType.to_s)
-          add_negative_cache_ref(q.qName, q.qType.to_s)
-        end
+        dispose_negative(pkt.ip_dst.to_num_s, dns)
       else
         (dns.answer + dns.authority + dns.additional).each do |rr|
           name = root?(rr.name) ? '.' : rr.name
@@ -89,13 +79,7 @@ module EndlessDNS
 
     def outside_response(pkt, dns)
       if nxdomain?(dns)
-        if dns.header.qdCount == 1 && dns.header.nsCount == 1
-          q = dns.question.first
-          authority = dns.authority.first
-          add_negative_cache(q.qName.to_s, q.qType, authority)
-        else
-          log.puts("More than one question or authority parts were received", "warn")
-        end
+        dispose_negative(pkt.ip_dst.to_num_s, dns)
       else
         (dns.answer + dns.authority + dns.additional).each do |rr|
           next if rr.type.to_s == "OPT" # OPTは疑似レコードなのでスキップ
@@ -110,12 +94,28 @@ module EndlessDNS
       end
     end
 
+    def dispose_negative(dst, dns)
+      if dns.header.qdCount == 1 && dns.header.nsCount == 1
+        q = dns.question.first
+        add_negative_cache_client(dst, q.qName, q.qType.to_s)
+        add_negative_cache_ref(q.qName, q.qType.to_s)
+        add_negative_cache(q.qName, q.qType.to_s)
+        log.puts("negative cache[#{pkt.ip_dst.to_num_s} send #{q.qName.to_s}/#{q.qType.to_s}]", "warn")
+      else
+        log.puts("More than one question or authority parts were received", "warn")
+      end
+    end
+
     def add_cache(name, type, rr)
       cache.add(name, type, rdata(rr))
     end
 
-    def add_negative_cache(qname, qtype, authority)
-      cache.add_negative(qname, qtype, rdata(authority))
+    def add_cache_ref(name, type)
+      cache.add_cache_ref(name, type)
+    end
+
+    def add_negative_cache(qname, qtype)
+      cache.add_negative(qname, qtype)
     end
 
     def add_negative_cache_client(client, qname, qtype)
@@ -124,10 +124,6 @@ module EndlessDNS
 
     def add_negative_cache_ref(qname, qtype)
       cache.add_negative_cache_ref(qname, qtype)
-    end
-
-    def add_cache_ref(name, type)
-      cache.add_cache_ref(name, type)
     end
 
     def rdata(rr)
