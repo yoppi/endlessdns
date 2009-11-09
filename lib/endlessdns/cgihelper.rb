@@ -20,7 +20,13 @@ module EndlessDNS
 
     def setup_webserver
       if defined? JRUBY_VERSION
-        `jruby #{EndlessDNS::LIB_DIR + "/" + "web/webserver.rb"}`
+        Thread.new do
+          require '../web/webserver' 
+          docroot = File.expand_path("../web")
+          webserver = WebServer.new(docroot)
+          webserver.setup
+          webserver.start
+        end
       else
         fork do
           exec(EndlessDNS::LIB_DIR + "/" + "web/webserver.rb")

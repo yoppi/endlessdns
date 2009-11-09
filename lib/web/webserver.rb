@@ -70,7 +70,9 @@ class WebServer
   end
 end
 
-docroot = File.expand_path(File.dirname(__FILE__))
-webserver = WebServer.new(docroot)
-webserver.setup
-webserver.start
+if __FILE__ == $0
+  docroot = File.expand_path(File.dirname(__FILE__))
+  webserver = WebServer.new(docroot)
+  webserver.setup
+  webserver.start
+end
