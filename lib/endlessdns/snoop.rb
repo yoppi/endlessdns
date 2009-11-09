@@ -75,7 +75,7 @@ module EndlessDNS
     def dump(filter, count=-1, snaplen=1518, promisc=false, to_ms=20)
       if defined? JRUBY_VERSION
         @handle = Java::jpcap.JpcapCaptor.openDevice(@device, snaplen, promisc, to_ms)
-        @handle.setFilter filter
+        @handle.setFilter(filter, true)
         @snoop_th = Thread.new do
           @handle.loopPacket(count, PacketHandler.new)
         end
