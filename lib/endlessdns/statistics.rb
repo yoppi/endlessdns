@@ -230,7 +230,7 @@ module EndlessDNS
     def hit_rate_stat
       ret = {}
       @hit.each do |type, n|
-        hit_rate = (@client_query_num[type] == 0) ? 0 : n.fdiv(@client_query_num[type])
+        hit_rate = (@client_query_num[type] == 0) ? 0 : n/(@client_query_num[type]).to_f
         ret['hit_rate'] ||= {}
         ret['hit_rate'][type] = hit_rate
       end
