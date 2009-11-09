@@ -22,7 +22,7 @@ module EndlessDNS
       end
       @logname = config.get("logname") ? config.get("logname") :
                                          EndlessDNS::LOG_NAME
-      @logger = Logger.new("#{@logdir}/#{@logname}")
+      @logger = Logger.new("#{@logdir}/#{@logname}", 'daily')
       @loglevel = config.get("loglevel") ? config.get("loglevel") :
                                            LOG_LEVEL
       @logger.level = @loglevel
