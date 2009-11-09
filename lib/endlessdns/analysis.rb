@@ -28,7 +28,7 @@ module EndlessDNS
           time = pkt.time
         end
       rescue => e
-        log.puts("src: #{pkt.ip_src} unknown packet[#{e}]", "error")
+        log.puts("src: #{src} unknown packet[#{e}]", "error")
         return
       end
 
