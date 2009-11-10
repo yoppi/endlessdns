@@ -239,7 +239,11 @@ module EndlessDNS
 
     def deep_copy(obj)
       @mutex.synchronize do
-        Marshal.load(Marshal.dump(obj))
+        begin
+          Marshal.load(Marshal.dump(obj))
+        rescue => e
+          log.puts(e, "warn")
+        end
       end
     end
 
