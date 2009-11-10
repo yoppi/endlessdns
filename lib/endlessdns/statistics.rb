@@ -197,7 +197,8 @@ module EndlessDNS
     # NOTE: 最初からこの形で統計情報を集めるか?
     def client_query_stat
       ret = {}
-      client_query = deep_copy(@client_query)
+      #client_query = deep_copy(@client_query)
+      client_query = @client_query
       client_query.each do |src, val|
         ret['num_of_client'] ||= 0
         ret['num_of_client'] += 1
@@ -212,13 +213,15 @@ module EndlessDNS
 
     def cache_stat
       ret = {}
-      cache_tmp = deep_copy(cache.cache)
+      #cache_tmp = deep_copy(cache.cache)
+      cache_tmp = cache.cache
       cache_tmp.each do |name_type, val|
         ret['num_of_cache'] ||= {}
         ret['num_of_cache'][name_type[1]] ||= 0
         ret['num_of_cache'][name_type[1]] += val.size
       end
-      ncache_ref = deep_copy(cache.negative_cache_ref)
+      #ncache_ref = deep_copy(cache.negative_cache_ref)
+      ncache_ref = cache.negative_cache_ref
       ncache_ref.each do |name_type, cnt|
         ret['num_of_negative'] ||= {}
         ret['num_of_negative'][name_type[1]] ||= 0
@@ -239,7 +242,11 @@ module EndlessDNS
 
     def deep_copy(obj)
       @mutex.synchronize do
-        Marshal.load(Marshal.dump(obj))
+        begin
+          Marshal.load(Marshal.dump(obj))
+        rescue => e
+          log.puts(e, "warn")
+        end
       end
     end
 
