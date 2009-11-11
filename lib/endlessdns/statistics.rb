@@ -121,29 +121,45 @@ module EndlessDNS
 
     def update_cache(date, cache)
       db = PStore.new(cache_db())
-      db.transaction do
-        db[date] = cache
+      begin
+        db.transaction do
+          db[date] = cache
+        end
+      rescue => e
+        log.puts(e, "warn")
       end
     end
 
     def update_negative_cash(date, negative_cache)
       db = PStore.new(negative_cache_db())
-      db.transaction do
-        db[date] = negative_cache
+      begin
+        db.transaction do
+          db[date] = negative_cache
+        end
+      rescue => e
+        log.puts(e, "warn")
       end
     end
 
     def update_hit_rate(date, hit_rate)
       db = PStore.new(hit_rate_db())
-      db.transaction do
-        db[date] = hit_rate
+      begin
+        db.transaction do
+          db[date] = hit_rate
+        end
+      rescue => e
+        log.puts(e, "warn")
       end
     end
 
     def update_query(date, query)
       db = PStore.new(query_db())
-      db.transaction do
-        db[date] = query
+      begin
+        db.transaction do
+          db[date] = query
+        end
+      rescue => e
+        log.puts(e, "warn")
       end
     end
 
