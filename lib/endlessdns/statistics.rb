@@ -26,6 +26,9 @@ module EndlessDNS
       # {type => n, ...}
       @client_query_num = {}
 
+      # {[name, type] => n, ...}
+      @recache = {}
+
       @localdns_query_num = 0
       @localdns_response_num = 0
       @outside_response_num = 0
@@ -80,6 +83,13 @@ module EndlessDNS
         @outside_response[dst][[name, type]] ||= 0
         @outside_response[dst][[name, type]] += 1
         @outside_response_num += 1
+      end
+    end
+
+    def add_recache(name, type)
+      @mutex.synchronize do
+        @recache[[name, type]] ||= 0
+        @recache[[name, type]] += 1
       end
     end
 
