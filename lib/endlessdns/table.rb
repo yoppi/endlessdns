@@ -31,6 +31,7 @@ module EndlessDNS
         start_timer
       elsif @min_expire_time <= expire_time
         add_table(expire_time, name, type)
+        add_ttl(expire_time)
       end
     end
 
@@ -57,7 +58,7 @@ module EndlessDNS
     end
 
     def set_next_expire
-      if @table.size > 0
+      if @table.size > 0 and @ttl_table.size > 0
         min = @ttl_table.pop
         # priority queueに同一valueが含まれるため
         loop do
