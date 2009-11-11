@@ -9,25 +9,21 @@ module EndlessDNS
     def initialize
       # { expire_time => [key, ...], ...}
       @table = {}
+      @ttl_table = PQueue.new(proc {|x, y| x < y})
       @min_expire_time = nil
+
       @mutex = Mutex.new
+
       timer.add_observer(self)
     end
 
     def add(name, type, ttl)
       now = Time.now.tv_sec
       expire_time = ttl + now
-      if @min_expire_time == nil
+      if @min_expire_time == nil or @min_expire_time > expire_time
         set_min_expire(expire_time)
         add_table(expire_time, name, type)
-        set_timer(ttl, expire_time)
-        if run_timer?
-          stop_timer
-        end
-        start_timer
-      elsif @min_expire_time > expire_time
-        set_min_expire(expire_time)
-        add_table(expire_time, name, type)
+        add_ttl(expire_time)
         if run_timer?
           stop_timer
         end
@@ -62,14 +58,12 @@ module EndlessDNS
 
     def set_next_expire
       if @table.size > 0
-        # FIXME: ここが遅いしかも大量にttlテーブルは存在するので現実的ではない
-        #       memoizeか、B木, red black treeなど、高速に最小値を探索できる
-        #       ものを実装する
-        #       ruby1.9だとhashに100万個データがあっても0.08secで終了する
-        # NOTE: min(expire_time)をテーブルから取得したとき、すでにexpireの時
-        #       間、もしくは過ぎていることがある
-        #       時間を過ぎていたらただちにrecache処理にうつる
-        min = @table.keys.sort[0]
+        min = @ttl_table.pop
+        # priority queueに同一valueが含まれるため
+        loop do
+          break if min != @ttl_table.top
+          @ttl_table.pop
+        end
         if past? min
           do_recache(min)
           set_next_expire
@@ -115,6 +109,12 @@ module EndlessDNS
     def delete_table(expire_time)
       @mutex.synchronize do
         @table.delete(expire_time)
+      end
+    end
+
+    def add_ttl(expire_time)
+      @mutex.synchronize do
+        @ttl_table.push(expire_time)
       end
     end
 
