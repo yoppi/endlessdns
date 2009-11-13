@@ -16,15 +16,11 @@ module EndlessDNS
     def initialize
       @store = Hash.new
       @conf_dir = default_confdir()
-      @conf_file = default_conffile()
+      @conf_file = @conf_dir + "/" + CONF_FILE
     end
 
     def default_confdir
       EndlessDNS::APP_DIR + "/" + CONF_DIR
-    end
-
-    def default_conffile
-      CONF_DIR + "/" + CONF_FILE
     end
 
     def setup
