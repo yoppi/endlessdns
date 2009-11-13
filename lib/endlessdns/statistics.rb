@@ -7,6 +7,7 @@ module EndlessDNS
   class Statistics
 
     INTERVAL = 60 * 5 # 5分をデフォルトにする
+    STAT_DIR = "stat"
 
     class << self
       def instance
@@ -15,28 +16,20 @@ module EndlessDNS
     end
 
     def initialize
-      # {src => {[name, type] => n}, ...}
-      @client_query = {}
-      @localdns_query = {}
-
-      # {dst => {[name, type] => n}, ...}
-      @outside_response = {}
-      @localdns_response = {}
-
-      # {type => n, ...}
-      @client_query_num = {}
-
-      @localdns_query_num = 0
-      @localdns_response_num = 0
-      @outside_response_num = 0
-
       # { type => n, ...}
       @hit = {}
 
-      @stat_dir = config.get("statdir") ? config.get("statdir") : EndlessDNS::STAT_DIR
+      @stat_dir = config.get("statdir") ? config.get("statdir") : default_statdir()
       @stats_interval = config.get("stats-interval") ? config.get("stats-interval") : INTERVAL
 
+      @query = Query.new
+      @response = Response.new
+
       @mutex = Mutex.new
+    end
+
+    def default_statdir
+      EndlessDNS::APP_DIR + "/" + STAT_DIR
     end
 
     def hit(type)
@@ -46,41 +39,68 @@ module EndlessDNS
 
     # TODO: client_queryを統計情報を書き出すときにクリアする
     def add_client_query(src, name, type)
-      @mutex.synchronize do
-        @client_query[src] ||= Hash.new
-        @client_query[src][[name, type]] ||= 0
-        @client_query[src][[name, type]] += 1
-        @client_query_num[type] ||= 0
-        @client_query_num[type] += 1
-      end
+      @query.add_client_query(src, name, type)
+    end
+
+    def clear_client_query
+      @query.clear_client_query
+    end
+
+    def client_query
+      @query.client_query
+    end
+
+    def client_query_num
+      @query.client_query_num
     end
 
     # TODO: localdns_queryを統計情報を書き出すときに書き出しクリアする
     def add_localdns_query(src, name, type)
-      @mutex.synchronize do
-        @localdns_query[src] ||= Hash.new
-        @localdns_query[src][[name, type]] ||= 0
-        @localdns_query[src][[name, type]] += 1
-        @localdns_query_num += 1
-      end
+      @query.add_localdns_query(src, name, type)
+    end
+
+    def clear_localdns_query
+      @query.clear_localdns_query
+    end
+
+    def localdns_query
+      @query.localdns_query
+    end
+
+    def localdns_query_num
+      @query.localdns_query_num
     end
 
     def add_localdns_response(dst, name, type)
-      @mutex.synchronize do
-        @localdns_response[dst] ||= Hash.new
-        @localdns_response[dst][[name, type]] ||= 0
-        @localdns_response[dst][[name, type]] += 1
-        @localdns_response_num += 1
-      end
+      @response.add_localdns_response(dst, name, type)
+    end
+    
+    def clear_localdns_response
+      @response.clear_localdns_response
+    end
+
+    def localdns_response
+      @response.localdns_response
+    end
+
+    def localdns_response_num
+      @response.localdns_response_num
     end
 
     def add_outside_response(dst, name, type)
-      @mutex.synchronize do
-        @outside_response[dst] ||= Hash.new
-        @outside_response[dst][[name, type]] ||= 0
-        @outside_response[dst][[name, type]] += 1
-        @outside_response_num += 1
-      end
+      @response.add_outside_response(dst, name, type)
+    end
+
+    def clear_outside_response
+      @response.clear_outside_response
+    end
+
+    def outside_response
+      @response.outside_response
+    end
+
+    def outside_response_num
+      @response.outside_response_num
     end
 
     def setup
@@ -108,7 +128,6 @@ module EndlessDNS
     end
 
     def update_statistics
-      #now = current_time()
       now = Time.new.tv_sec
       stat = collect_stat()
 
@@ -213,7 +232,7 @@ module EndlessDNS
     # NOTE: 最初からこの形で統計情報を集めるか?
     def client_query_stat
       ret = {}
-      client_query = deep_copy(@client_query)
+      client_query = @query.client_query
       client_query.each do |src, val|
         ret['num_of_client'] ||= 0
         ret['num_of_client'] += 1
@@ -228,13 +247,13 @@ module EndlessDNS
 
     def cache_stat
       ret = {}
-      cache_tmp = deep_copy(cache.cache)
+      cache_tmp = cache.cache
       cache_tmp.each do |name_type, val|
         ret['num_of_cache'] ||= {}
         ret['num_of_cache'][name_type[1]] ||= 0
         ret['num_of_cache'][name_type[1]] += val.size
       end
-      ncache_ref = deep_copy(cache.negative_cache_ref)
+      ncache_ref = cache.negative_cache_ref
       ncache_ref.each do |name_type, cnt|
         ret['num_of_negative'] ||= {}
         ret['num_of_negative'][name_type[1]] ||= 0
@@ -246,7 +265,7 @@ module EndlessDNS
     def hit_rate_stat
       ret = {}
       @hit.each do |type, n|
-        hit_rate = (@client_query_num[type] == 0) ? 0 : n.fdiv(@client_query_num[type])
+        hit_rate = (@query.client_query_num[type] == 0) ? 0 : n.fdiv(@query.client_query_num[type])
         ret['hit_rate'] ||= {}
         ret['hit_rate'][type] = hit_rate
       end
@@ -274,6 +293,100 @@ module EndlessDNS
       when 'query'
         query_db
       end
+    end
+  end
+
+  class Query
+
+    attr_reader :client_query, :client_query_num
+    attr_reader :localdns_query, :localdns_query_num
+
+    def initialize
+      @client_query = {}
+      @client_query_num = {}
+
+      @localdns_query = {}
+      @localdns_query_num = 0
+
+      @mutex = Mutex.new
+    end
+
+    def add_client_query(src, name, type)
+      @mutex.synchronize do
+        @client_query[src] ||= Hash.new
+        @client_query[src][[name, type]] ||= 0
+        @client_query[src][[name, type]] += 1
+        @client_query_num[type] ||= 0
+        @client_query_num[type] += 1
+      end
+    end
+
+    def clear_client_query
+      @client_query.clear
+      @client_query_num.clear
+    end
+
+    def add_localdns_query(src, name, type)
+      @mutex.synchronize do
+        @localdns_query[src] ||= Hash.new
+        @localdns_query[src][[name, type]] ||= 0
+        @localdns_query[src][[name, type]] += 1
+        @localdns_query_num += 1
+      end
+    end
+
+    def clear_localdns_query
+      @localdns_query.clear
+      @localdns_query_num = 0
+    end
+  end
+
+  class Response
+
+    attr_reader :localdns_response, :localdns_response_num
+    attr_reader :outside_response, :outside_response_num
+
+    def initialize
+      @localdns_response = {}
+      @localdns_response_num = 0
+
+      @outside_response = {}
+      @outside_response_num = 0
+
+      @mutex = Mutex.new
+    end
+
+    def add_localdns_response(dst, name, type)
+      @mutex.synchronize do
+        @localdns_response[dst] ||= Hash.new
+        @localdns_response[dst][[name, type]] ||= 0
+        @localdns_response[dst][[name, type]] += 1
+        @localdns_response_num += 1
+      end
+    end
+
+    def clear_localdns_response
+      @localdns_response.clear
+      @localdns_response_num = 0
+    end
+
+    def add_outside_response(dst, name, type)
+      @mutex.synchronize do
+        @outside_response[dst] ||= Hash.new
+        @outside_response[dst][[name, type]] ||= 0
+        @outside_response[dst][[name, type]] += 1
+        @outside_response_num += 1
+      end
+    end
+
+    def clear_outside_response
+      @outside_response.clear
+      @outside_response_num = 0
+    end
+  end
+
+  class Hit
+    def initialize
     end
   end
 end
