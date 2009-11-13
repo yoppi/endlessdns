@@ -3,6 +3,10 @@
 #
 module EndlessDNS
   class Config
+
+    CONF_DIR = "conf"
+    CONF_FILE = "endlessdns.conf"
+
     class << self
       def instance
         @instance ||= self.new
@@ -11,19 +15,29 @@ module EndlessDNS
 
     def initialize
       @store = Hash.new
+      @conf_dir = default_confdir()
+      @conf_file = default_conffile()
+    end
+
+    def default_confdir
+      EndlessDNS::APP_DIR + "/" + CONF_DIR
+    end
+
+    def default_conffile
+      CONF_DIR + "/" + CONF_FILE
     end
 
     def setup
       conf = interactive()
-      Dir.mkdir(EndlessDNS::CONF_DIR) unless File.exist? EndlessDNS::CONF_DIR
-      File.open(EndlessDNS::CONF_FILE, 'w') {|f|
+      Dir.mkdir(@conf_dir) unless File.exist? @conf_dir
+      File.open(@conf_file, 'w') {|f|
         f.puts YAML.dump(conf)
       }
     end
 
     def interactive
       conf = {}
-      EndlessDNS::CONFIG_ITEMS.each do |item|
+      config_items().each do |item|
         banner = item["banner"]
         banner += "(#{item["default"]})" if item["default"]
         print "#{banner}: "
@@ -34,8 +48,26 @@ module EndlessDNS
       conf
     end
 
+    def config_items
+      [{"item" => "port",
+        "banner" => "snoop port?",
+        "default" => "53"},
+       {"item" => "netaddress",
+        "banner" => "network address?"},
+       {"item" => "dnsip",
+        "banner" => "local dns ip address?"},
+       {"item" => "logdir",
+        "banner" => "log directory?",
+        "default" => log.default_logdir() },
+       {"item" => "statdir",
+        "banner" => "statistics directory?",
+        "default" => statistics.default_statdir() },
+       {"item" => "recache-method",
+        "banner" => "recache method"}]
+    end
+
     def load
-      conf = YAML.load_file(EndlessDNS::CONF_FILE)
+      conf = YAML.load_file(@conf_file)
       conf.each do |key, val|
         @store[key] = val
       end
