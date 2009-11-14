@@ -7,6 +7,7 @@ module EndlessDNS
   class Statistics
 
     INTERVAL = 60 * 5 # 5分をデフォルトにする
+    PKT_INTERVAL = 1000
     STAT_DIR = "stat"
 
     class << self
@@ -16,14 +17,13 @@ module EndlessDNS
     end
 
     def initialize
-      # { type => n, ...}
-      @hit = {}
-
       @stat_dir = config.get("statdir") ? config.get("statdir") : default_statdir()
       @stats_interval = config.get("stats-interval") ? config.get("stats-interval") : INTERVAL
 
       @query = Query.new
       @response = Response.new
+
+      @next_pktinterval = PKT_INTERVAL
 
       @mutex = Mutex.new
     end
@@ -32,14 +32,21 @@ module EndlessDNS
       EndlessDNS::APP_DIR + "/" + STAT_DIR
     end
 
-    def hit(type)
-      @hit[type] ||= 0
-      @hit[type] += 1
-    end
-
     # TODO: client_queryを統計情報を書き出すときにクリアする
     def add_client_query(src, name, type)
       @query.add_client_query(src, name, type)
+      if @query.interval_pkt_num == @next_pktinterval
+        io = File.open("#{@stat_dir}/hitrate_pktbase_total.log", "a+")
+        total_hit_query().each do |type, n|
+          if type == "A"
+            hitrate = (client_query_num()[type] == 0) ? 0 : n.to_f / client_query_num()[type]
+            io.puts "#{@query.interval_pkt_num} #{hit_rate}"
+          end
+        end
+        io.close
+        #io = File.open("#{@stat_dir}/hitrate_pktbase_interval.log", "a+")
+        @next_pktinterval += PKT_INTERVAL
+      end
     end
 
     def clear_client_query
@@ -74,7 +81,7 @@ module EndlessDNS
     def add_localdns_response(dst, name, type)
       @response.add_localdns_response(dst, name, type)
     end
-    
+
     def clear_localdns_response
       @response.clear_localdns_response
     end
@@ -103,6 +110,22 @@ module EndlessDNS
       @response.outside_response_num
     end
 
+    def add_hit_query(type)
+      @query.add_hit_query(type)
+    end
+
+    def total_hit_query
+      @query.total_hit_query
+    end
+
+    def timebase_hit_query
+      @query.timebase_hit_query
+    end
+
+    def pktbase_hit_query
+      @query.pktbase_hit_query
+    end
+
     def setup
       unless File.exist? @stat_dir
         Dir.mkdir @stat_dir
@@ -112,6 +135,9 @@ module EndlessDNS
           sleep @stats_interval
           Thread.new do # 統計情報を吐くのに時間がかかるとtimerがずれる
             update_statistics
+            clear_localdns_query
+            clear_localdns_response
+            clear_outside_response
           end
         end
       end
@@ -264,11 +290,10 @@ module EndlessDNS
 
     def hit_rate_stat
       ret = {}
-      @hit.each do |type, n|
-        hit_rate = (@query.client_query_num[type] == 0) ? 0 : n.fdiv(@query.client_query_num[type])
+      total_hit_query().each do |type, n|
+        hitrate = (client_query_num()[type] == 0) ? 0 : n.to_f / client_query_num()[type]
         ret['hit_rate'] ||= {}
-        ret['hit_rate'][type] = hit_rate
-      end
+        ret['hit_rate'][type] = hitrate
       ret
     end
 
@@ -300,13 +325,20 @@ module EndlessDNS
 
     attr_reader :client_query, :client_query_num
     attr_reader :localdns_query, :localdns_query_num
+    attr_reader :timebase_hit_query, :pktbase_hit_query, :total_hit_query
+    attr_accessor :interval_pkt_num
 
     def initialize
       @client_query = {}
       @client_query_num = {}
+      @interval_pkt_num = 0
 
       @localdns_query = {}
       @localdns_query_num = 0
+
+      @timebase_hit_query = {}
+      @pktbase_hit_query = {}
+      @total_hit_query = {}
 
       @mutex = Mutex.new
     end
@@ -318,6 +350,7 @@ module EndlessDNS
         @client_query[src][[name, type]] += 1
         @client_query_num[type] ||= 0
         @client_query_num[type] += 1
+        @interval_pkt_num += 1
       end
     end
 
@@ -338,6 +371,35 @@ module EndlessDNS
     def clear_localdns_query
       @localdns_query.clear
       @localdns_query_num = 0
+    end
+
+    def add_hit_query(type)
+      @mutex.synchronize do
+        @total_hit_query[type] ||= 0
+        @total_hit_query[type] += 1
+        @timebase_hit_query[type] ||= 0
+        @timebase_hit_query[type] += 1
+        @pktbase_hit_query[type] ||= 0
+        @pktbase_hit_query[type] += 1
+      end
+    end
+
+    def clear_total_hit_query
+      @mutex.synchronize do
+        @total_hit_query.clear
+      end
+    end
+
+    def clear_timebase_hit_query
+      @mutex.synchronize do
+        @timebase_hit_query.clear
+      end
+    end
+
+    def clear_pktbase_hit_query
+      @mutex.synchronize do
+        @pktbase_hit_query.clear
+      end
     end
   end
 
@@ -382,11 +444,6 @@ module EndlessDNS
     def clear_outside_response
       @outside_response.clear
       @outside_response_num = 0
-    end
-  end
-
-  class Hit
-    def initialize
     end
   end
 end
