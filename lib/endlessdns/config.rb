@@ -23,6 +23,13 @@ module EndlessDNS
       EndlessDNS::APP_DIR + "/" + CONF_DIR
     end
 
+    def load_config
+      unless File.exist? @conf_file
+        config.setup
+      end
+      config.load
+    end
+
     def setup
       conf = interactive()
       Dir.mkdir(@conf_dir) unless File.exist? @conf_dir

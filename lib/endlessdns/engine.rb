@@ -35,10 +35,7 @@ module EndlessDNS
       end
 
       def load_config
-        unless File.exist? EndlessDNS::CONF_FILE
-          config.setup
-        end
-        config.load
+        config.load_config
       end
 
       def log_setup
