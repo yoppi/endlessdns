@@ -1,4 +1,15 @@
-require 'pcap'
+if defined? JRUBY_VERSION
+  require '/usr/lib/jvm/java-6-sun/jre/lib/ext/jpcap.jar'
+  class PacketHandler
+    include Java::jpcap.PacketReceiver
+
+    def receivePacket(pkt)
+      packet.enq pkt
+    end
+  end
+else
+  require 'pcap'
+end
 
 module EndlessDNS
   class Snoop
@@ -14,7 +25,15 @@ module EndlessDNS
 
     def initialize(device=nil)
       unless device
-        @device = Pcap.lookupdev
+        @device = get_device()
+      end
+    end
+
+    def get_device
+      if defined? JRUBY_VERSION
+        Java::jpcap.JpcapCaptor.getDeviceList()[0]
+      else
+        Pcap.lookupdev
       end
     end
 
@@ -53,14 +72,22 @@ module EndlessDNS
       end
     end
 
-    def dump(filter, count=-1, snaplen=1518, promisc=false)
-      @handle = Pcap::Capture.open_live(@device, snaplen, promisc)
-      @handle.setfilter(filter)
-      @snoop_th = Thread.new do
-        @handle.each_packet(count) do |pkt|
-          packet.enq(pkt)
+    def dump(filter, count=-1, snaplen=1518, promisc=false, to_ms=20)
+      if defined? JRUBY_VERSION
+        @handle = Java::jpcap.JpcapCaptor.openDevice(@device, snaplen, promisc, to_ms)
+        @handle.setFilter(filter, true)
+        @snoop_th = Thread.new do
+          @handle.loopPacket(count, PacketHandler.new)
         end
-        @handle.close
+      else
+        @handle = Pcap::Capture.open_live(@device, snaplen, promisc, to_ms)
+        @handle.setfilter filter
+        @snoop_th = Thread.new do
+          @handle.each_packet(count) do |pkt|
+            packet.enq(pkt)
+          end
+          @handle.close
+        end
       end
     end
   end

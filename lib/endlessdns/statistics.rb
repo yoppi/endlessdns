@@ -294,6 +294,7 @@ module EndlessDNS
         hitrate = (client_query_num()[type] == 0) ? 0 : n.to_f / client_query_num()[type]
         ret['hit_rate'] ||= {}
         ret['hit_rate'][type] = hitrate
+      end
       ret
     end
 
