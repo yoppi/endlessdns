@@ -31,7 +31,7 @@ module EndlessDNS
         start_timer
       elsif @min_expire_time <= expire_time
         add_table(expire_time, name, type)
-        add_ttl(expire_time)
+        add_ttl(expire_time) if @min_expire_time != expire_time
       end
     end
 
