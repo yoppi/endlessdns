@@ -40,7 +40,7 @@ module EndlessDNS
         total_hit_query().each do |type, n|
           if type == "A"
             hitrate = (client_query_num()[type] == 0) ? 0 : n.to_f / client_query_num()[type]
-            io.puts "#{@query.interval_pkt_num} #{hit_rate}"
+            io.puts "#{@query.interval_pkt_num} #{hitrate}"
           end
         end
         io.close
