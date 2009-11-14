@@ -81,7 +81,7 @@ module EndlessDNS
         end
       else
         @handle = Pcap::Capture.open_live(@device, snaplen, promisc, to_ms)
-        @handle.setfilter filter
+        @handle.setfilter(filter, true)
         @snoop_th = Thread.new do
           @handle.each_packet(count) do |pkt|
             packet.enq(pkt)
