@@ -4,6 +4,8 @@
 module EndlessDNS
   class Log
     LOG_LEVEL = Logger::WARN
+    LOG_DIR = "log"
+    LOG_NAME = "endlessdns.log"
 
     class << self
       def instance
@@ -15,25 +17,30 @@ module EndlessDNS
     end
 
     def setup
-      @logdir = config.get("logdir") ? config.get("logdir") :
-                                      EndlessDNS::LOG_DIR
+      @logdir = config.get("logdir") ? config.get("logdir") : default_logdir()
       unless File.exist? @logdir
         Dir.mkdir @logdir
       end
-      @logname = config.get("logname") ? config.get("logname") :
-                                         EndlessDNS::LOG_NAME
+      @logname = config.get("logname") ? config.get("logname") : LOG_NAME
       @logger = Logger.new("#{@logdir}/#{@logname}", 'daily')
-      @loglevel = config.get("loglevel") ? config.get("loglevel") :
-                                           LOG_LEVEL
+      @loglevel = config.get("loglevel") ? config.get("loglevel") : LOG_LEVEL
       @logger.level = @loglevel
+    end
+
+    def default_logdir
+      EndlessDNS::APP_DIR + "/" + LOG_DIR
     end
 
     def puts(msg, level)
       eval("@logger.#{level}('#{msg}')")
     end
 
-    def loglevel(level)
+    def loglevel=(level)
       @logger.level = level
+    end
+
+    def loglevel
+      @logger.level
     end
   end
 end

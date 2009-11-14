@@ -45,7 +45,7 @@ module EndlessDNS
 
     def client_query(pkt, name, type)
       if cached?(name, type)
-        statistics.hit(type)
+        statistics.add_hit_query(type)
         log.puts("cached!", "debug")
       end
       statistics.add_client_query(pkt.ip_src.to_num_s, name, type)

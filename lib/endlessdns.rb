@@ -32,24 +32,4 @@ module EndlessDNS
   LIB_DIR = File.expand_path(File.dirname(__FILE__))
   HOME = ENV['HOME']
   APP_DIR = HOME + "/.endlessdns"
-  CONF_DIR = APP_DIR + '/conf'
-  CONF_FILE = CONF_DIR + "/endlessdns.conf"
-  LOG_DIR = APP_DIR + "/log"
-  LOG_NAME = "endlessdns.log"
-  STAT_DIR = APP_DIR + "/stat"
-  CONFIG_ITEMS = [{"item" => "port",
-                   "banner" => "snoop port?",
-                   "default" => "53"},
-                  {"item" => "netaddress",
-                   "banner" => "network address?"},
-                  {"item" => "dnsip",
-                   "banner" => "local dns ip address?"},
-                  {"item" => "logdir",
-                   "banner" => "log directory?",
-                   "default" => EndlessDNS::LOG_DIR},
-                  {"item" => "statdir",
-                   "banner" => "statistics directory?",
-                   "default" => EndlessDNS::STAT_DIR},
-                  {"item" => "recache-method",
-                   "banner" => "recache method"}]
 end
