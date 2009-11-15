@@ -188,7 +188,7 @@ class Graph
         max = data
       end
     end
-    ret [min, max]
+    return [min, max]
   end
 
   def select_date(date_sets)
