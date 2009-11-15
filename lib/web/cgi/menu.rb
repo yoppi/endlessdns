@@ -25,7 +25,7 @@ module MenuHelper
   end
 
   def make_link(menu)
-    menu.downcase + ".rb"
+    menu.downcase
   end
 end
 
