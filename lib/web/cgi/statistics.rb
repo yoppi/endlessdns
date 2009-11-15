@@ -44,16 +44,17 @@ class Statistics
       graph.get_statistics
       graph.convert_to_flot
       graph.write_datasets
+      graph.date_range
       #graph.embed_js
     end
   end
 
   def make_all_graphs
     ret = []
-    ret << Cache.new
-    ret << NegativeCache.new
-    ret << HitRate.new
-    ret << Query.new
+    ret << @cache = Cache.new
+    ret << @ncache = NegativeCache.new
+    ret << @hitrate =  HitRate.new
+    ret << @query = Query.new
     ret
   end
 
@@ -99,21 +100,26 @@ end
 class Graph
   DEFAULT_PERIOD = 60 * 60 * 12
 
+  attr_reader :start_time, :end_time
+  attr_reader :period_sec, :period_time
+
   def initialize(period=nil)
-    @period = period || get_period()
+    @period_sec = period || get_period()
     init_db
   end
 
   def get_period
-    e = Time.now
-    s = e - DEFAULT_PERIOD
-    e = e.tv_sec
-    s = s.tv_sec
-    [s, e]
+    e_time = Time.now
+    s_time = e_time - DEFAULT_PERIOD
+    @period_time = [s_time, e_time]
+    e_sec = e_time.tv_sec
+    s_sec = s_time.tv_sec
+    [s_sec, e_sec]
   end
 
   def get_keys
     all_dates = get_all_dates()
+    @start_sec, @end_sec = get_minmax(all_dates)
     @selected_keys = select_date(all_dates).sort
   end
 
@@ -157,6 +163,13 @@ class Graph
     end
   end
 
+  def date_range
+    # 各グラフが保持するデータの期間
+    @start_time = Time.at(@start_sec)
+    @end_time   = Time.at(@end_sec)
+    @year_range = @start_time.month..@end_time.month
+  end
+
   def get_all_dates
     date_sets = nil
     @db.transaction do
@@ -165,10 +178,23 @@ class Graph
     date_sets
   end
 
+  def get_minmax(date_sets)
+    min = max = date_sets[0]
+    for data in date_sets[1..-1]
+      if min > data
+        min = data
+      end
+      if max < data
+        max = data
+      end
+    end
+    ret [min, max]
+  end
+
   def select_date(date_sets)
     ret = []
     date_sets.select do |date|
-      ret << date if @period[0] <= date && date <= @period[1]
+      ret << date if @period_sec[0] <= date && date <= @period_sec[1]
     end
     ret
   end
