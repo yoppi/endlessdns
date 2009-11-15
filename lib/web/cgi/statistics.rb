@@ -102,6 +102,7 @@ class Graph
 
   attr_reader :start_time, :end_time
   attr_reader :period_sec, :period_time
+  attr_reader :year_range
 
   def initialize(period=nil)
     @period_sec = period || get_period()
