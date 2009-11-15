@@ -59,7 +59,7 @@ class WebServer
 
   def mount_cgi(docroot)
     Dir["#{docroot}/cgi/*.rb"].each do |cgi|
-      @server.mount("/cgi/#{File.basename(cgi)}", WEBrick::HTTPServlet::CGIHandler, docroot + "/cgi/" + File.basename(cgi))
+      @server.mount("/#{File.basename(cgi).gsub(/\.rb$/, '')}", WEBrick::HTTPServlet::CGIHandler, docroot + "/cgi/" + File.basename(cgi))
     end
   end
 
