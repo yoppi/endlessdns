@@ -1,6 +1,6 @@
-<script type="text/javascript" src="js/jquery.js"></script>
-<script type="text/javascript" src="js/jquery.flot.js"></script>
-<script type="text/javascript" src="js/graph.js"></script>
+<script type="text/javascript" src="cgi/js/jquery.js"></script>
+<script type="text/javascript" src="cgi/js/jquery.flot.js"></script>
+<script type="text/javascript" src="cgi/js/graph.js"></script>
 <div id="cache" class="stats">
 <h2>Cache</h2>
   <table>
@@ -33,7 +33,7 @@
               <option><%= year %></option>
             <% end %>
           <% end %>
-        </select>/
+        </select> /
         <select id="cache_month_form">
           <% (1..12).each do |month| %>
             <% if @cache.period_time[0].month  == month %>
@@ -42,7 +42,7 @@
               <option><%= month %></option> 
             <% end %>
           <% end %>
-        </select>/
+        </select> /
         <select id="cache_day_from">
           <% (1..31).each do |day| %>
             <% if @cache.period_time[0].day == day %>
@@ -51,7 +51,7 @@
               <option><%= day %></option>
             <% end %>
           <% end %>
-        </select>/
+        </select> /
         <select id="cache_hour_from">
           <% (1..24).each do |hour| %> 
             <% if @cache.period_time[0].hour == hour %>
@@ -73,7 +73,7 @@
               <option><%= year %></option>
             <% end %>
           <% end %>
-        </select>
+        </select> /
         <select id="cache_month_to">
           <% (1..12).each do |month| %>
             <% if @cache.period_time[1].month  == month %>
@@ -82,7 +82,7 @@
               <option><%= month %></option> 
             <% end %>
           <% end %>
-        </select>
+        </select> /
         <select id="cache_day_to">
           <% (1..31).each do |day| %>
             <% if @cache.period_time[0].day == day %>
@@ -91,7 +91,7 @@
               <option><%= day %></option>
             <% end %>
           <% end %>
-        </select>
+        </select> /
         <select id="cache_hour_to">
           <% (1..24).each do |hour| %> 
             <% if @cache.period_time[0].hour == hour %>
@@ -103,7 +103,7 @@
         </select>
     </fieldset>
   </form>
-  <script language="javascript" type="text/javascript" src="js/cache_datasets.js"></script>
+  <script language="javascript" type="text/javascript" src="cgi/js/cache_datasets.js"></script>
 </div>
 
 
@@ -135,7 +135,7 @@
               <option><%= year %></option>
             <% end %>
           <% end %>
-        </select>
+        </select> /
         <select id="ncache_month_form">
           <% (1..12).each do |month| %>
             <% if @ncache.period_time[0].month  == month %>
@@ -144,7 +144,7 @@
               <option><%= month %></option> 
             <% end %>
           <% end %>
-        </select>
+        </select> /
         <select id="ncache_day_from">
           <% (1..31).each do |day| %>
             <% if @ncache.period_time[0].day == day %>
@@ -153,7 +153,7 @@
               <option><%= day %></option>
             <% end %>
           <% end %>
-        </select>
+        </select> /
         <select id="ncache_hour_from">
           <% (1..24).each do |hour| %> 
             <% if @ncache.period_time[0].hour == hour %>
@@ -175,7 +175,7 @@
               <option><%= year %></option>
             <% end %>
           <% end %>
-        </select>
+        </select> /
         <select id="ncache_month_to">
           <% (1..12).each do |month| %>
             <% if @ncache.period_time[1].month  == month %>
@@ -184,7 +184,7 @@
               <option><%= month %></option> 
             <% end %>
           <% end %>
-        </select>
+        </select> /
         <select id="ncache_day_to">
           <% (1..31).each do |day| %>
             <% if @ncache.period_time[0].day == day %>
@@ -193,7 +193,7 @@
               <option><%= day %></option>
             <% end %>
           <% end %>
-        </select>
+        </select> /
         <select id="ncache_hour_to">
           <% (1..24).each do |hour| %> 
             <% if @ncache.period_time[0].hour == hour %>
@@ -206,7 +206,7 @@
 
     </fieldset>
   </form>
-  <script language="javascript" type="text/javascript" src="js/negativecache_datasets.js"></script>
+  <script language="javascript" type="text/javascript" src="cgi/js/negativecache_datasets.js"></script>
 </div>
 
 
@@ -237,7 +237,7 @@
               <option><%= year %></option>
             <% end %>
           <% end %>
-        </select>
+        </select> /
         <select id="hitrate_month_form">
           <% (1..12).each do |month| %>
             <% if @hitrate.period_time[0].month  == month %>
@@ -246,7 +246,7 @@
               <option><%= month %></option> 
             <% end %>
           <% end %>
-        </select>
+        </select> /
         <select id="hitrate_day_from">
           <% (1..31).each do |day| %>
             <% if @hitrate.period_time[0].day == day %>
@@ -255,7 +255,7 @@
               <option><%= day %></option>
             <% end %>
           <% end %>
-        </select>
+        </select> /
         <select id="hitrate_hour_from">
           <% (1..24).each do |hour| %> 
             <% if @hitrate.period_time[0].hour == hour %>
@@ -277,7 +277,7 @@
               <option><%= year %></option>
             <% end %>
           <% end %>
-        </select>
+        </select> /
         <select id="hitrate_month_to">
           <% (1..12).each do |month| %>
             <% if @hitrate.period_time[1].month  == month %>
@@ -286,7 +286,7 @@
               <option><%= month %></option> 
             <% end %>
           <% end %>
-        </select>
+        </select> /
         <select id="hitrate_day_to">
           <% (1..31).each do |day| %>
             <% if @hitrate.period_time[0].day == day %>
@@ -295,7 +295,7 @@
               <option><%= day %></option>
             <% end %>
           <% end %>
-        </select>
+        </select> /
         <select id="hitrate_hour_to">
           <% (1..24).each do |hour| %> 
             <% if @hitrate.period_time[0].hour == hour %>
@@ -307,7 +307,7 @@
         </select>
     </fieldset>
   </form>
-  <script language="javascript" type="text/javascript" src="js/hitrate_datasets.js"></script>
+  <script language="javascript" type="text/javascript" src="cgi/js/hitrate_datasets.js"></script>
 </div>
 
 
@@ -339,7 +339,7 @@
               <option><%= year %></option>
             <% end %>
           <% end %>
-        </select>
+        </select> /
         <select id="query_month_form">
           <% (1..12).each do |month| %>
             <% if @query.period_time[0].month  == month %>
@@ -348,7 +348,7 @@
               <option><%= month %></option> 
             <% end %>
           <% end %>
-        </select>
+        </select> /
         <select id="query_day_from">
           <% (1..31).each do |day| %>
             <% if @query.period_time[0].day == day %>
@@ -357,7 +357,7 @@
               <option><%= day %></option>
             <% end %>
           <% end %>
-        </select>
+        </select> /
         <select id="query_hour_from">
           <% (1..24).each do |hour| %> 
             <% if @query.period_time[0].hour == hour %>
@@ -379,7 +379,7 @@
               <option><%= year %></option>
             <% end %>
           <% end %>
-        </select>
+        </select> /
         <select id="query_month_to">
           <% (1..12).each do |month| %>
             <% if @query.period_time[1].month  == month %>
@@ -388,7 +388,7 @@
               <option><%= month %></option> 
             <% end %>
           <% end %>
-        </select>
+        </select> /
         <select id="query_day_to">
           <% (1..31).each do |day| %>
             <% if @query.period_time[0].day == day %>
@@ -397,7 +397,7 @@
               <option><%= day %></option>
             <% end %>
           <% end %>
-        </select>
+        </select> /
         <select id="query_hour_to">
           <% (1..24).each do |hour| %> 
             <% if @query.period_time[0].hour == hour %>
@@ -409,5 +409,5 @@
         </select>
     </fieldset>
   </form>
-  <script language="javascript" type="text/javascript" src="js/query_datasets.js"></script>
+  <script language="javascript" type="text/javascript" src="cgi/js/query_datasets.js"></script>
 </div>
