@@ -24,7 +24,7 @@
     <fieldset id="cache_date_range">
       <legend>Date Range</legend>
         <p><%= @cache.start_time %> - <%= @cache.end_time %></p>
-
+        From:
         <select id="cache_year_from">
           <% @cache.year_range.each do |year| %>
             <% if @cache.period_time[0].year == year %>
@@ -33,7 +33,7 @@
               <option><%= year %></option>
             <% end %>
           <% end %>
-        </select>
+        </select>/
         <select id="cache_month_form">
           <% (1..12).each do |month| %>
             <% if @cache.period_time[0].month  == month %>
@@ -42,7 +42,7 @@
               <option><%= month %></option> 
             <% end %>
           <% end %>
-        </select>
+        </select>/
         <select id="cache_day_from">
           <% (1..31).each do |day| %>
             <% if @cache.period_time[0].day == day %>
@@ -51,7 +51,7 @@
               <option><%= day %></option>
             <% end %>
           <% end %>
-        </select>
+        </select>/
         <select id="cache_hour_from">
           <% (1..24).each do |hour| %> 
             <% if @cache.period_time[0].hour == hour %>
@@ -61,8 +61,10 @@
             <% end %>
           <% end %> 
         </select>
+        
+        <br/>
 
-
+        To:
         <select id="cache_year_to">
           <% @cache.year_range.each do |year| %>
             <% if @cache.period_time[1].year == year %>
@@ -124,6 +126,7 @@
       <legend>Date Range</legend>
         <p><%= @ncache.start_time %> - <%= @ncache.end_time %></p>
 
+        From:
         <select id="ncache_year_from">
           <% @ncache.year_range.each do |year| %>
             <% if @ncache.period_time[0].year == year %>
@@ -161,7 +164,9 @@
           <% end %> 
         </select>
 
+        <br/>
 
+        To:
         <select id="ncache_year_to">
           <% @ncache.year_range.each do |year| %>
             <% if @ncache.period_time[1].year == year %>
@@ -223,7 +228,7 @@
     <fieldset id="cache_date_range">
       <legend>Date Range</legend>
         <p><%= @hitrate.start_time %> - <%= @hitrate.end_time %></p>
-
+        From:
         <select id="hitrate_year_from">
           <% @hitrate.year_range.each do |year| %>
             <% if @hitrate.period_time[0].year == year %>
@@ -261,7 +266,9 @@
           <% end %> 
         </select>
 
+        <br/>
 
+        To:
         <select id="hitrate_year_to">
           <% @hitrate.year_range.each do |year| %>
             <% if @hitrate.period_time[1].year == year %>
@@ -323,6 +330,7 @@
       <legend>Date Range</legend>
         <p><%= @query.start_time %> - <%= @query.end_time %></p>
 
+        From:
         <select id="query_year_from">
           <% @query.year_range.each do |year| %>
             <% if @query.period_time[0].year == year %>
@@ -360,7 +368,9 @@
           <% end %> 
         </select>
 
+        <br/>
 
+        To:
         <select id="query_year_to">
           <% @query.year_range.each do |year| %>
             <% if @query.period_time[1].year == year %>

@@ -168,7 +168,7 @@ class Graph
     # 各グラフが保持するデータの期間
     @start_time = Time.at(@start_sec)
     @end_time   = Time.at(@end_sec)
-    @year_range = @start_time.month..@end_time.month
+    @year_range = @start_time.year..@end_time.year
   end
 
   def get_all_dates
