@@ -25,9 +25,9 @@ module EndlessDNS
 
     def load_config
       unless File.exist? @conf_file
-        config.setup
+        setup
       end
-      config.load
+      load_config_file
     end
 
     def setup
@@ -69,7 +69,7 @@ module EndlessDNS
         "banner" => "recache method"}]
     end
 
-    def load
+    def load_config_file
       conf = YAML.load_file(@conf_file)
       conf.each do |key, val|
         @store[key] = val
