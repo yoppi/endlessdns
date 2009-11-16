@@ -5,7 +5,7 @@
 <h2>Cache</h2>
   <table>
     <tr>
-      <td><div id="cache_graph" style="width:700px;height:400px;"></td>
+      <td><div id="cache_graph" name="cache_graph_top" style="width:700px;height:400px;"></td>
         <td>
           <p id="cache_type">Type:</p>
         </td>
@@ -23,9 +23,10 @@
   <form id="cache_form" method="post" action="statistics.rb">
     <fieldset id="cache_date_range">
       <legend>Date Range</legend>
+      <input type="hidden" name="graph" value="cache" />
         <p><%= @cache.start_time %> - <%= @cache.end_time %></p>
         From:
-        <select id="cache_year_from">
+        <select name="year_from">
           <% @cache.year_range.each do |year| %>
             <% if @cache.period_time[0].year == year %>
               <option selected><%= year %></option>
@@ -34,7 +35,7 @@
             <% end %>
           <% end %>
         </select> /
-        <select id="cache_month_form">
+        <select name="month_from">
           <% (1..12).each do |month| %>
             <% if @cache.period_time[0].month  == month %>
               <option selected><%= month %></option>
@@ -43,7 +44,7 @@
             <% end %>
           <% end %>
         </select> /
-        <select id="cache_day_from">
+        <select name="day_from">
           <% (1..31).each do |day| %>
             <% if @cache.period_time[0].day == day %>
               <option selected><%= day %></option>
@@ -52,8 +53,8 @@
             <% end %>
           <% end %>
         </select> /
-        <select id="cache_hour_from">
-          <% (1..24).each do |hour| %> 
+        <select name="hour_from">
+          <% (0..23).each do |hour| %> 
             <% if @cache.period_time[0].hour == hour %>
               <option selected><%= hour %></option>
             <% else %>
@@ -65,7 +66,7 @@
         <br/>
 
         To:
-        <select id="cache_year_to">
+        <select name="year_to">
           <% @cache.year_range.each do |year| %>
             <% if @cache.period_time[1].year == year %>
               <option selected><%= year %></option>
@@ -74,7 +75,7 @@
             <% end %>
           <% end %>
         </select> /
-        <select id="cache_month_to">
+        <select name="month_to">
           <% (1..12).each do |month| %>
             <% if @cache.period_time[1].month  == month %>
               <option selected><%= month %></option>
@@ -83,25 +84,25 @@
             <% end %>
           <% end %>
         </select> /
-        <select id="cache_day_to">
+        <select name="day_to">
           <% (1..31).each do |day| %>
-            <% if @cache.period_time[0].day == day %>
+            <% if @cache.period_time[1].day == day %>
               <option selected><%= day %></option>
             <% else %>
               <option><%= day %></option>
             <% end %>
           <% end %>
         </select> /
-        <select id="cache_hour_to">
-          <% (1..24).each do |hour| %> 
-            <% if @cache.period_time[0].hour == hour %>
+        <select name="hour_to">
+          <% (0..23).each do |hour| %> 
+            <% if @cache.period_time[1].hour == hour %>
               <option selected><%= hour %></option>
             <% else %>
               <option><%= hour %></option>
             <% end %>
           <% end %> 
         </select>
-        <a id="cache_graph_change">apply</a>
+        <a id="cache_graph_change" href="#cache_graph_top">apply</a>
     </fieldset>
   </form>
   <script language="javascript" type="text/javascript" src="cgi/js/cache_datasets.js"></script>
@@ -125,10 +126,11 @@
   <form id="ncache_form" method="post" action="statistics.rb">
     <fieldset id="ncache_date_range">
       <legend>Date Range</legend>
+        <input type="hidden" name="graph" value="ncache"></input>
         <p><%= @ncache.start_time %> - <%= @ncache.end_time %></p>
 
         From:
-        <select id="ncache_year_from">
+        <select name="year_from">
           <% @ncache.year_range.each do |year| %>
             <% if @ncache.period_time[0].year == year %>
               <option selected><%= year %></option>
@@ -137,7 +139,7 @@
             <% end %>
           <% end %>
         </select> /
-        <select id="ncache_month_form">
+        <select name="month_from">
           <% (1..12).each do |month| %>
             <% if @ncache.period_time[0].month  == month %>
               <option selected><%= month %></option>
@@ -146,7 +148,7 @@
             <% end %>
           <% end %>
         </select> /
-        <select id="ncache_day_from">
+        <select name="day_from">
           <% (1..31).each do |day| %>
             <% if @ncache.period_time[0].day == day %>
               <option selected><%= day %></option>
@@ -155,8 +157,8 @@
             <% end %>
           <% end %>
         </select> /
-        <select id="ncache_hour_from">
-          <% (1..24).each do |hour| %> 
+        <select name="hour_from">
+          <% (0..23).each do |hour| %> 
             <% if @ncache.period_time[0].hour == hour %>
               <option selected><%= hour %></option>
             <% else %>
@@ -168,7 +170,7 @@
         <br/>
 
         To:
-        <select id="ncache_year_to">
+        <select name="year_to">
           <% @ncache.year_range.each do |year| %>
             <% if @ncache.period_time[1].year == year %>
               <option selected><%= year %></option>
@@ -177,7 +179,7 @@
             <% end %>
           <% end %>
         </select> /
-        <select id="ncache_month_to">
+        <select name="month_to">
           <% (1..12).each do |month| %>
             <% if @ncache.period_time[1].month  == month %>
               <option selected><%= month %></option>
@@ -186,25 +188,25 @@
             <% end %>
           <% end %>
         </select> /
-        <select id="ncache_day_to">
+        <select name="day_to">
           <% (1..31).each do |day| %>
-            <% if @ncache.period_time[0].day == day %>
+            <% if @ncache.period_time[1].day == day %>
               <option selected><%= day %></option>
             <% else %>
               <option><%= day %></option>
             <% end %>
           <% end %>
         </select> /
-        <select id="ncache_hour_to">
-          <% (1..24).each do |hour| %> 
-            <% if @ncache.period_time[0].hour == hour %>
+        <select name="hour_to">
+          <% (0..23).each do |hour| %> 
+            <% if @ncache.period_time[1].hour == hour %>
               <option selected><%= hour %></option>
             <% else %>
               <option><%= hour %></option>
             <% end %>
           <% end %> 
         </select>
-        <a id="ncache_graph_change">apply</a>
+        <a id="ncache_graph_change" href="#">apply</a>
     </fieldset>
   </form>
   <script language="javascript" type="text/javascript" src="cgi/js/negativecache_datasets.js"></script>
@@ -228,9 +230,10 @@
   <form id="hitrate_form" method="post" action="statistics.rb">
     <fieldset id="cache_date_range">
       <legend>Date Range</legend>
+        <input type="hidden" name="graph" value="hitrate"></input>
         <p><%= @hitrate.start_time %> - <%= @hitrate.end_time %></p>
         From:
-        <select id="hitrate_year_from">
+        <select name="year_from">
           <% @hitrate.year_range.each do |year| %>
             <% if @hitrate.period_time[0].year == year %>
               <option selected><%= year %></option>
@@ -239,7 +242,7 @@
             <% end %>
           <% end %>
         </select> /
-        <select id="hitrate_month_form">
+        <select name="month_from">
           <% (1..12).each do |month| %>
             <% if @hitrate.period_time[0].month  == month %>
               <option selected><%= month %></option>
@@ -248,7 +251,7 @@
             <% end %>
           <% end %>
         </select> /
-        <select id="hitrate_day_from">
+        <select name="day_from">
           <% (1..31).each do |day| %>
             <% if @hitrate.period_time[0].day == day %>
               <option selected><%= day %></option>
@@ -257,8 +260,8 @@
             <% end %>
           <% end %>
         </select> /
-        <select id="hitrate_hour_from">
-          <% (1..24).each do |hour| %> 
+        <select name="hour_from">
+          <% (0..23).each do |hour| %> 
             <% if @hitrate.period_time[0].hour == hour %>
               <option selected><%= hour %></option>
             <% else %>
@@ -270,7 +273,7 @@
         <br/>
 
         To:
-        <select id="hitrate_year_to">
+        <select name="year_to">
           <% @hitrate.year_range.each do |year| %>
             <% if @hitrate.period_time[1].year == year %>
               <option selected><%= year %></option>
@@ -279,7 +282,7 @@
             <% end %>
           <% end %>
         </select> /
-        <select id="hitrate_month_to">
+        <select name="month_to">
           <% (1..12).each do |month| %>
             <% if @hitrate.period_time[1].month  == month %>
               <option selected><%= month %></option>
@@ -288,25 +291,25 @@
             <% end %>
           <% end %>
         </select> /
-        <select id="hitrate_day_to">
+        <select name="day_to">
           <% (1..31).each do |day| %>
-            <% if @hitrate.period_time[0].day == day %>
+            <% if @hitrate.period_time[1].day == day %>
               <option selected><%= day %></option>
             <% else %>
               <option><%= day %></option>
             <% end %>
           <% end %>
         </select> /
-        <select id="hitrate_hour_to">
-          <% (1..24).each do |hour| %> 
-            <% if @hitrate.period_time[0].hour == hour %>
+        <select name="hour_to">
+          <% (0..23).each do |hour| %> 
+            <% if @hitrate.period_time[1].hour == hour %>
               <option selected><%= hour %></option>
             <% else %>
               <option><%= hour %></option>
             <% end %>
           <% end %> 
         </select>
-        <a id="hitrate_graph_change">apply</a>
+        <a id="hitrate_graph_change" href="#">apply</a>
     </fieldset>
   </form>
   <script language="javascript" type="text/javascript" src="cgi/js/hitrate_datasets.js"></script>
@@ -330,10 +333,11 @@
   <form id="query_form" method="post" action="statistics.rb">
     <fieldset id="query_date_range">
       <legend>Date Range</legend>
+      <input type="hidden" name="graph" value="query"></input>
         <p><%= @query.start_time %> - <%= @query.end_time %></p>
 
         From:
-        <select id="query_year_from">
+        <select name="year_from">
           <% @query.year_range.each do |year| %>
             <% if @query.period_time[0].year == year %>
               <option selected><%= year %></option>
@@ -342,7 +346,7 @@
             <% end %>
           <% end %>
         </select> /
-        <select id="query_month_form">
+        <select name="month_from">
           <% (1..12).each do |month| %>
             <% if @query.period_time[0].month  == month %>
               <option selected><%= month %></option>
@@ -351,7 +355,7 @@
             <% end %>
           <% end %>
         </select> /
-        <select id="query_day_from">
+        <select name="day_from">
           <% (1..31).each do |day| %>
             <% if @query.period_time[0].day == day %>
               <option selected><%= day %></option>
@@ -360,8 +364,8 @@
             <% end %>
           <% end %>
         </select> /
-        <select id="query_hour_from">
-          <% (1..24).each do |hour| %> 
+        <select name="hour_from">
+          <% (0..23).each do |hour| %> 
             <% if @query.period_time[0].hour == hour %>
               <option selected><%= hour %></option>
             <% else %>
@@ -373,7 +377,7 @@
         <br/>
 
         To:
-        <select id="query_year_to">
+        <select name="year_to">
           <% @query.year_range.each do |year| %>
             <% if @query.period_time[1].year == year %>
               <option selected><%= year %></option>
@@ -382,7 +386,7 @@
             <% end %>
           <% end %>
         </select> /
-        <select id="query_month_to">
+        <select name="month_to">
           <% (1..12).each do |month| %>
             <% if @query.period_time[1].month  == month %>
               <option selected><%= month %></option>
@@ -391,25 +395,25 @@
             <% end %>
           <% end %>
         </select> /
-        <select id="query_day_to">
+        <select name="day_to">
           <% (1..31).each do |day| %>
-            <% if @query.period_time[0].day == day %>
+            <% if @query.period_time[1].day == day %>
               <option selected><%= day %></option>
             <% else %>
               <option><%= day %></option>
             <% end %>
           <% end %>
         </select> /
-        <select id="query_hour_to">
-          <% (1..24).each do |hour| %> 
-            <% if @query.period_time[0].hour == hour %>
+        <select name="hour_to">
+          <% (0..23).each do |hour| %> 
+            <% if @query.period_time[1].hour == hour %>
               <option selected><%= hour %></option>
             <% else %>
               <option><%= hour %></option>
             <% end %>
           <% end %> 
         </select>
-        <a id=query_graph_change">apply</a>
+        <a id="query_graph_change" href="#">apply</a>
     </fieldset>
   </form>
   <script language="javascript" type="text/javascript" src="cgi/js/query_datasets.js"></script>

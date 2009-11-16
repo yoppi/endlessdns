@@ -25,13 +25,57 @@ class Statistics
     if from_ajax?
       # そのままJSON形式でリターンする
       do_ajax
+    #@cgi.out {
+    #  "{debug: function() {alert('ok');}}"
+    #}
     else
       do_top
+      setup
+      out
     end
   end
 
   def from_ajax?
     @cgi.request_method == "POST"
+  end
+
+  def do_ajax
+    # どのグラフなのか?
+    graph = make_graph(@cgi['graph'])
+    # 期間は?
+    start_time, end_time = get_time()
+    graph.set_period(start_time, end_time)
+    # dbからデータを集める
+    graph.get_keys
+    graph.get_statistics
+    graph.convert_to_flot
+    graph.convert_to_json
+    # jsonデータを出力する
+    @cgi.out {
+      graph.json
+    }
+  end
+
+  def get_time
+    s_time = get_start_time()
+    e_time = get_end_time()
+    return [s_time, e_time]
+  end
+
+  def get_start_time
+    s_year = @cgi['year_from']
+    s_month = @cgi['month_from']
+    s_day = @cgi['day_from']
+    s_hour = @cgi['hour_from']
+    Time.local(s_year, s_month, s_day, s_hour)
+  end
+
+  def get_end_time
+    e_year =  @cgi['year_to']
+    e_month = @cgi['month_to']
+    e_day = @cgi['day_to']
+    e_hour = @cgi['hour_to']
+    Time.local(e_year, e_month, e_day, e_hour)
   end
 
   # main menuからアクセスした場合
@@ -45,7 +89,19 @@ class Statistics
       graph.convert_to_flot
       graph.write_datasets
       graph.date_range
-      #graph.embed_js
+    end
+  end
+
+  def make_graph(graph)
+    case graph
+    when "cache"
+      return Cache.new
+    when "ncache"
+      return NegativeCache.new
+    when "hitrate"
+      return HitRate.new
+    when "query"
+      return Query.new
     end
   end
 
@@ -56,16 +112,6 @@ class Statistics
     ret << @hitrate =  HitRate.new
     ret << @query = Query.new
     ret
-  end
-
-  # jsonで指定された区間データを返却
-  def do_ajax
-    # どのグラフかをクエリから判断してその指定された区間データを集め返却
-    graph = which_graph?()
-  end
-
-  def which_graph?
-    # CGIのクエリから判断
   end
 
   def setup
@@ -103,6 +149,8 @@ class Graph
   attr_reader :start_time, :end_time
   attr_reader :period_sec, :period_time
   attr_reader :year_range
+  attr_reader :json
+  attr_reader :selected_keys
 
   def initialize(period=nil)
     @period_sec = period || get_period()
@@ -116,6 +164,12 @@ class Graph
     e_sec = e_time.tv_sec
     s_sec = s_time.tv_sec
     [s_sec, e_sec]
+  end
+
+  def set_period(s_time, e_time)
+    s_sec = s_time.tv_sec
+    e_sec = e_time.tv_sec
+    @period_sec = [s_sec, e_sec]
   end
 
   def get_keys
@@ -147,6 +201,17 @@ class Graph
     @flot.each do |type, val|
       val.sort! {|a, b| a[0] <=> b[0] }
     end
+  end
+
+  def convert_to_json
+    @json = " {datasets: {"
+    @flot.each do |type, data|
+      @json << "#{type.downcase}: {
+        label: \"#{type}\",
+        data: #{data.inspect}
+      },"
+    end
+    @json << "}}"
   end
 
   def write_datasets
@@ -246,5 +311,3 @@ end
 cgi = CGI.new
 stats = Statistics.new(cgi)
 stats.do_request
-stats.setup
-stats.out
