@@ -31,7 +31,8 @@ module EndlessDNS
       end
     end
 
-    attr_reader :recache_types, :recache_method
+    attr_reader :recache, :recache_types, :recache_method
+    attr_accessor :top_view
 
     def initialize
       @resolver = Resolv::DNS.new(:nameserver => config.get('dnsip'),
@@ -40,7 +41,9 @@ module EndlessDNS
       @recache_method = default_method()
       @recache_types = default_types()
       # {[name, type] => n, ...}
-      @recache = {}
+      @recaches = {}
+      @top_view = 20
+
       @mutex = Mutex.new
     end
 
@@ -59,14 +62,14 @@ module EndlessDNS
 
     def add_recache(name, type)
       @mutex.synchronize do
-        @recache[[name, type]] ||= 0
-        @recache[[name, type]] += 1
+        @recaches[[name, type]] ||= 0
+        @recaches[[name, type]] += 1
       end
     end
 
     def clear_recache
       @mutex.synchronize do
-        @recache.clear
+        @recaches.clear
       end
     end
 

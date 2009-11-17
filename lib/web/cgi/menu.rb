@@ -4,7 +4,7 @@
 require 'erb'
 
 module MenuHelper
-  MENUS = %w[Home Statistics Config]
+  MENUS = %w[Home Statistics Config ReCache]
 
   def render_main_menu
     ERB.new(menu_erb).result(binding)

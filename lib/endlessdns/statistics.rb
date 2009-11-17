@@ -163,6 +163,7 @@ module EndlessDNS
       update_negative_cash(now, stat['num_of_negative'])
       update_hit_rate(now, stat['hit_rate'])
       update_query(now, stat['num_of_query'])
+      update_recache()
     end
 
     def update_cache(date, cache)
@@ -209,6 +210,21 @@ module EndlessDNS
       end
     end
 
+    def update_recache
+      db = PStore.new(recache_db())
+      begin
+        db.transaction do
+          recache.recaches.each do |r, n|
+            db[r] ||= n
+            db[r] += n
+          end
+        end
+      rescue => e
+        log.puts(e, "warn")
+      end
+      recache.clear_recache
+    end
+
     def cache_db
       @stat_dir + '/' + 'cache.db'
     end
@@ -223,6 +239,10 @@ module EndlessDNS
 
     def query_db
       @stat_dir + '/' + 'query.db'
+    end
+
+    def recache_db
+      @stat_dir + '/' + 'recache.db'
     end
 
     def current_time
@@ -319,6 +339,8 @@ module EndlessDNS
         hit_rate_db
       when 'query'
         query_db
+      when 'recache'
+        recache_db
       end
     end
   end
