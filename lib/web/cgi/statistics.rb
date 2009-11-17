@@ -82,8 +82,8 @@ class Statistics
   def do_top
     # 各グラフの現在からデフォルトの期間分の区間統計データを取得する
     # jsを生成してhtmlに埋めこんで返す
-    graphs = make_all_graphs()
-    graphs.each do |graph|
+    @graphs = make_all_graphs()
+    @graphs.each do |graph|
       graph.get_keys
       graph.get_statistics
       graph.convert_to_flot
@@ -96,7 +96,7 @@ class Statistics
     case graph
     when "cache"
       return Cache.new
-    when "ncache"
+    when "negativecache"
       return NegativeCache.new
     when "hitrate"
       return HitRate.new
