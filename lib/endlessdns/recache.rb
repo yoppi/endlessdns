@@ -31,7 +31,7 @@ module EndlessDNS
       end
     end
 
-    attr_reader :recache, :recache_types, :recache_method
+    attr_reader :recaches, :recache_types, :recache_method
     attr_accessor :top_view
 
     def initialize
