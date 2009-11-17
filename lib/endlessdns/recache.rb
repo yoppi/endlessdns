@@ -1,3 +1,4 @@
+require 'resolv'
 #
 # レコードの再キャッシュ
 #   o 統計情報からそのexpireされたレコードを再cache(DNSキャッシュサーバに問い合わせる)かどうか
@@ -33,8 +34,9 @@ module EndlessDNS
     attr_reader :recache_types, :recache_method
 
     def initialize
-      @resolver = Net::DNS::Resolver.new
-      @resolver.nameservers = config.get("dnsip") # localDNSを探索リストに追加
+      @resolver = Resolv::DNS.new(:nameserver => config.get('dnsip'),
+                                  :search => nil,
+                                  :ndots => 1)
       @recache_method = default_method()
       @recache_types = default_types()
     end
@@ -42,13 +44,13 @@ module EndlessDNS
     def invoke(name, type)
       delete_cache(name, type)
       if need_recache?(name, type)
-        log.puts("recache: #{name}, #{type}", "info")
-        #puts "recache: #{name}, #{type}"
+        type_class = select_type_class(type)
         begin
-          ret = @resolver.search(name, type)
+          @resolver.getresource(name, type_class)
         rescue => e
           log.puts("#{e}", "warn")
         end
+        statistics.add_recache(name, type)
       end
     end
 
@@ -70,6 +72,37 @@ module EndlessDNS
         end
       end
       false
+    end
+
+    def select_type_class(type)
+      case type
+      when 'A'
+        return Resolv::DNS::Resource::IN::A
+      when 'AAAA'
+        return Resolv::DNS::Resource::IN::AAAA
+      when 'ANY'
+        return Resolv::DNS::Resource::IN::ANY
+      when 'CNAME'
+        return Resolv::DNS::Resource::IN::CNAME
+      when 'HINFO'
+        return Resolv::DNS::Resource::IN::HINFO
+      when 'MINFO'
+        return Resolv::DNS::Resource::IN::MINFO
+      when 'MX'
+        return Resolv::DNS::Resource::IN::MX
+      when 'NS'
+        return Resolv::DNS::Resource::IN::NS
+      when 'PTR'
+        return Resolv::DNS::Resource::IN::PTR
+      when 'SOA'
+        return Resolv::DNS::Resource::IN::SOA
+      when 'TXT'
+        return Resolv::DNS::Resource::IN::TXT
+      when 'WKS'
+        return Resolv::DNS::Resource::IN::WKS
+      else
+        return nil
+      end
     end
 
     def check_cache_ref(name, type)

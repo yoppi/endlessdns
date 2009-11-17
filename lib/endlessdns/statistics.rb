@@ -20,6 +20,9 @@ module EndlessDNS
       @stat_dir = config.get("statdir") ? config.get("statdir") : default_statdir()
       @stats_interval = config.get("stats-interval") ? config.get("stats-interval") : INTERVAL
 
+      # {[name, type] => n, ...}
+      @recache = {}
+
       @query = Query.new
       @response = Response.new
 
@@ -124,6 +127,13 @@ module EndlessDNS
 
     def pktbase_hit_query
       @query.pktbase_hit_query
+    end
+
+    def add_recache(name, type)
+      @mutex.synchronize do
+        @recache[[name, type]] ||= 0
+        @recache[[name, type]] += 1
+      end
     end
 
     def setup
