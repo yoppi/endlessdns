@@ -39,6 +39,9 @@ module EndlessDNS
                                   :ndots => 1)
       @recache_method = default_method()
       @recache_types = default_types()
+      # {[name, type] => n, ...}
+      @recache = {}
+      @mutex = Mutex.new
     end
 
     def invoke(name, type)
@@ -50,7 +53,20 @@ module EndlessDNS
         rescue => e
           log.puts("#{e}", "warn")
         end
-        statistics.add_recache(name, type)
+        add_recache(name, type)
+      end
+    end
+
+    def add_recache(name, type)
+      @mutex.synchronize do
+        @recache[[name, type]] ||= 0
+        @recache[[name, type]] += 1
+      end
+    end
+
+    def clear_recache
+      @mutex.synchronize do
+        @recache.clear
       end
     end
 
