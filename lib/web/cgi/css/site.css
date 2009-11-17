@@ -91,6 +91,27 @@ table.home tr:hover {
   background-color: #FFFFDD;
 }
 
+table.recache {
+  border: 1px solid #E4E4E4;
+  border-collapse: collpase;
+  width: 100%;
+  margin-bottom: 4px;
+}
+
+table.recache th {
+  background-color: #EEEEEE;
+  padding: 4px;
+}
+
+table.recache td {
+  vertical-align: top;
+}
+
+table.recache tr:hover {
+  background-color: #FFFFDD;
+}
+
+
 #footer {
   clear: both;
   border-top: 1px solid #bbb;
