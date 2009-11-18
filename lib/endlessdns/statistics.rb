@@ -35,10 +35,12 @@ module EndlessDNS
       @query.add_client_query(src, name, type)
       if @query.interval?(src)
         io = File.open("#{@stat_dir}/hitrate_pktbase_total_#{src}.log", "a+")
-        total_hit_query(src).each do |type, n|
-          if type == "A"
-            hitrate = (client_query_num(src)[type] == 0) ? 0 : n.to_f / client_query_num(src)[type]
-            io.puts "#{@query.interval_pkt_num[src]} #{hitrate}"
+        if total_hit_query(src)
+          total_hit_query(src).each do |type, n|
+            if type == "A"
+              hitrate = (client_query_num(src)[type] == 0) ? 0 : n.to_f / client_query_num(src)[type]
+              io.puts "#{@query.interval_pkt_num[src]} #{hitrate}"
+            end
           end
         end
         io.close
