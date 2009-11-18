@@ -43,7 +43,6 @@ module EndlessDNS
         end
         io.close
         #io = File.open("#{@stat_dir}/hitrate_pktbase_interval.log", "a+")
-        @next_pktinterval += PKT_INTERVAL
       end
     end
 
@@ -440,7 +439,11 @@ module EndlessDNS
     end
 
     def interval?(src)
-      @interval_pkt_num[src] % PKT_INTERVAL == 0
+      if @interval_pkt_num[src] && @interval_pkt_num[src] > 0
+        @interval_pkt_num[src] % PKT_INTERVAL == 0
+      else
+        false
+      end
     end
 
     def total_hit_query(src)
