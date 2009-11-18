@@ -7,7 +7,6 @@ module EndlessDNS
   class Statistics
 
     INTERVAL = 60 * 5 # 5分をデフォルトにする
-    PKT_INTERVAL = 1000
     STAT_DIR = "stat"
 
     class << self
@@ -24,8 +23,6 @@ module EndlessDNS
       @query = Query.new
       @response = Response.new
 
-      @next_pktinterval = PKT_INTERVAL
-
       @mutex = Mutex.new
     end
 
@@ -36,12 +33,12 @@ module EndlessDNS
     # TODO: client_queryを統計情報を書き出すときにクリアする
     def add_client_query(src, name, type)
       @query.add_client_query(src, name, type)
-      if @query.interval_pkt_num == @next_pktinterval
-        io = File.open("#{@stat_dir}/hitrate_pktbase_total.log", "a+")
-        total_hit_query().each do |type, n|
+      if @query.interval?(src)
+        io = File.open("#{@stat_dir}/hitrate_pktbase_total_#{src}.log", "a+")
+        total_hit_query(src).each do |type, n|
           if type == "A"
-            hitrate = (client_query_num()[type] == 0) ? 0 : n.to_f / client_query_num()[type]
-            io.puts "#{@query.interval_pkt_num} #{hitrate}"
+            hitrate = (client_query_num(src)[type] == 0) ? 0 : n.to_f / client_query_num(src)[type]
+            io.puts "#{@query.interval_pkt_num[src]} #{hitrate}"
           end
         end
         io.close
@@ -58,8 +55,8 @@ module EndlessDNS
       @query.client_query
     end
 
-    def client_query_num
-      @query.client_query_num
+    def client_query_num(src=nil)
+      @query.client_query_num(src)
     end
 
     # TODO: localdns_queryを統計情報を書き出すときに書き出しクリアする
@@ -111,12 +108,12 @@ module EndlessDNS
       @response.outside_response_num
     end
 
-    def add_hit_query(type)
-      @query.add_hit_query(type)
+    def add_hit_query(src, type)
+      @query.add_hit_query(src, type)
     end
 
-    def total_hit_query
-      @query.total_hit_query
+    def total_hit_query(src=nil)
+      @query.total_hit_query(src)
     end
 
     def timebase_hit_query
@@ -311,8 +308,10 @@ module EndlessDNS
 
     def hit_rate_stat
       ret = {}
-      total_hit_query().each do |type, n|
-        hitrate = (client_query_num()[type] == 0) ? 0 : n.to_f / client_query_num()[type]
+      hit = total_hit_query.values.inject({}) {|ret, e| ret.merge e }
+      query = client_query_num.values.inject({}) {|ret, e| ret.merge e }
+      hit.each do |type, n|
+        hitrate = (query[type] == 0) ? 0 : n.to_f / query[type]
         ret['hit_rate'] ||= {}
         ret['hit_rate'][type] = hitrate
       end
@@ -347,6 +346,8 @@ module EndlessDNS
 
   class Query
 
+    PKT_INTERVAL = 1000
+
     attr_reader :client_query, :client_query_num
     attr_reader :localdns_query, :localdns_query_num
     attr_reader :timebase_hit_query, :pktbase_hit_query, :total_hit_query
@@ -355,7 +356,8 @@ module EndlessDNS
     def initialize
       @client_query = {}
       @client_query_num = {}
-      @interval_pkt_num = 0
+
+      @interval_pkt_num = {}
 
       @localdns_query = {}
       @localdns_query_num = 0
@@ -372,15 +374,21 @@ module EndlessDNS
         @client_query[src] ||= Hash.new
         @client_query[src][[name, type]] ||= 0
         @client_query[src][[name, type]] += 1
-        @client_query_num[type] ||= 0
-        @client_query_num[type] += 1
-        @interval_pkt_num += 1
+
+        @client_query_num[src] ||= {}
+        @client_query_num[src][type] ||= 0
+        @client_query_num[src][type] += 1
+
+        @interval_pkt_num[src] ||= 0
+        @interval_pkt_num[src] += 1
       end
     end
 
     def clear_client_query
-      @client_query.clear
-      @client_query_num.clear
+      @mutex.synchronize do
+        @client_query.clear
+        @client_query_num.clear
+      end
     end
 
     def add_localdns_query(src, name, type)
@@ -397,14 +405,19 @@ module EndlessDNS
       @localdns_query_num = 0
     end
 
-    def add_hit_query(type)
+    def add_hit_query(src, type)
       @mutex.synchronize do
-        @total_hit_query[type] ||= 0
-        @total_hit_query[type] += 1
-        @timebase_hit_query[type] ||= 0
-        @timebase_hit_query[type] += 1
-        @pktbase_hit_query[type] ||= 0
-        @pktbase_hit_query[type] += 1
+        @total_hit_query[src] ||= {}
+        @total_hit_query[src][type] ||= 0
+        @total_hit_query[src][type] += 1
+
+        #@timebase_hit_query[src] ||= {}
+        #@timebase_hit_query[src][type] ||= 0
+        #@timebase_hit_query[src][type] += 1
+
+        #@pktbase_hit_query[src] ||= {}
+        #@pktbase_hit_query[src][type] ||= 0
+        #@pktbase_hit_query[src][type] += 1
       end
     end
 
@@ -423,6 +436,26 @@ module EndlessDNS
     def clear_pktbase_hit_query
       @mutex.synchronize do
         @pktbase_hit_query.clear
+      end
+    end
+
+    def interval?(src)
+      @interval_pkt_num[src] % PKT_INTERVAL == 0
+    end
+
+    def total_hit_query(src)
+      if src
+        @total_hit_query[src]
+      else
+        @total_hit_query
+      end
+    end
+
+    def client_query_num(src)
+      if src
+        @client_query_num[src]
+      else
+        @client_query_num
       end
     end
   end

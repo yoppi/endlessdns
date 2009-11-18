@@ -53,7 +53,7 @@ module EndlessDNS
 
     def client_query(src, name, type)
       if cached?(name, type)
-        statistics.add_hit_query(type)
+        statistics.add_hit_query(src, type)
         log.puts("cached!", "debug")
       end
       statistics.add_client_query(src, name, type)
@@ -79,7 +79,7 @@ module EndlessDNS
       else
         (dns.answer + dns.authority + dns.additional).each do |rr|
           name = root?(rr.name) ? '.' : rr.name
-          add_cache_ref(name, rr.type)
+          cache.add_cache_ref(name, rr.type)
           statistics.add_localdns_response(dst, name, rr.type)
         end
       end
@@ -94,7 +94,7 @@ module EndlessDNS
 
           name = root?(rr.name) ? '.' : rr.name # NOTE: namesのdn_expandで対処すべきか?
           unless cached?(name, rr.type)
-            add_cache(name, rr.type, rr)
+            cache.add_cache(name, rr.type, rr)
             add_table(name, rr.type, rr.ttl)
           end
           statistics.add_outside_response(src, name, rr.type)
@@ -105,33 +105,13 @@ module EndlessDNS
     def dispose_negative(dst, dns)
       if dns.header.qdCount == 1 && dns.header.nsCount == 1
         q = dns.question.first
-        add_negative_cache_client(dst, q.qName, q.qType.to_s)
-        add_negative_cache_ref(q.qName, q.qType.to_s)
-        add_negative_cache(q.qName, q.qType.to_s)
+        cache.add_negative_cache_client(dst, q.qName, q.qType.to_s)
+        cache.add_negative_cache_ref(q.qName, q.qType.to_s)
+        cache.add_negative_cache(q.qName, q.qType.to_s)
         log.puts("negative cache[#{dst} send #{q.qName}/#{q.qType.to_s}]", "warn")
       else
         log.puts("More than one question or authority parts were received", "warn")
       end
-    end
-
-    def add_cache(name, type, rr)
-      cache.add(name, type, rdata(rr))
-    end
-
-    def add_cache_ref(name, type)
-      cache.add_cache_ref(name, type)
-    end
-
-    def add_negative_cache(qname, qtype)
-      cache.add_negative(qname, qtype)
-    end
-
-    def add_negative_cache_client(client, qname, qtype)
-      cache.add_negative_cache_client(client, qname, qtype)
-    end
-
-    def add_negative_cache_ref(qname, qtype)
-      cache.add_negative_cache_ref(qname, qtype)
     end
 
     def rdata(rr)
