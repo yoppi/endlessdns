@@ -107,7 +107,7 @@ module EndlessDNS
         q = dns.question.first
         cache.add_negative_cache_client(dst, q.qName, q.qType.to_s)
         cache.add_negative_cache_ref(q.qName, q.qType.to_s)
-        cache.add_negative_cache(q.qName, q.qType.to_s)
+        cache.add_negative(q.qName, q.qType.to_s)
         log.puts("negative cache[#{dst} send #{q.qName}/#{q.qType.to_s}]", "warn")
       else
         log.puts("More than one question or authority parts were received", "warn")
