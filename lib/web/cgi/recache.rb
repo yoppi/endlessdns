@@ -47,12 +47,12 @@ class ReCache
 
   def collect_top_recache
     init
-    name_types = get_nametype()
+    name_types = get_nametypes()
     all_data = get_values(name_types)
     @top_data = get_topdata(all_data)
   end
 
-  def get_nametype()
+  def get_nametypes()
     ret = nil
     @db.transaction do
       ret = @db.roots
@@ -71,8 +71,7 @@ class ReCache
   end
 
   def get_topdata(all_data)
-    all_data.to_a.sort! {|a, b| b[1] <=> a[1] }
-    all_data.take(@top)
+    all_data.to_a.sort {|a, b| b[1] <=> a[1] }.take(@top)
   end
 
   def init
