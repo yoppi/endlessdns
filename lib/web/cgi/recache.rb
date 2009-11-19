@@ -3,12 +3,13 @@
 #
 require 'erb'
 require 'cgi'
-require 'store'
+require 'pstore'
 require 'menu'
 require 'frontcgi'
 
 class ReCache
-  TOP = 20
+  include MenuHelper
+  include ERB::Util
 
   def initialize(cgi)
     @cgi = cgi
@@ -24,6 +25,14 @@ class ReCache
   def setup
     base = File.read("base.rhtml")
     @erb = ERB.new(base)
+  end
+
+  def render_content
+    ERB.new(content_erb).result(binding)
+  end
+
+  def content_erb
+    File.read("recache.rhtml")
   end
 
   def out
@@ -77,6 +86,10 @@ class ReCache
 
   def top_view
     frontcgi.call("recache", "top_view")
+  end
+
+  def html_title
+    "ReCache"
   end
 end
 
