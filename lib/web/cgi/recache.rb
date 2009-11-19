@@ -3,6 +3,7 @@
 #
 require 'erb'
 require 'cgi'
+require 'store'
 require 'menu'
 require 'frontcgi'
 
