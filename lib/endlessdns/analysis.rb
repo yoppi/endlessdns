@@ -94,7 +94,7 @@ module EndlessDNS
 
           name = root?(rr.name) ? '.' : rr.name # NOTE: namesのdn_expandで対処すべきか?
           unless cached?(name, rr.type)
-            cache.add(name, rr.type, rr)
+            cache.add(name, rr.type, rdata(rr))
             add_table(name, rr.type, rr.ttl)
           end
           statistics.add_outside_response(src, name, rr.type)
