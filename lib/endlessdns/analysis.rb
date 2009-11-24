@@ -42,10 +42,10 @@ module EndlessDNS
     def analy_query(src, dst, time, dns)
       dns.question.each  do |q|
         if client_query?(dst)
-          log.puts("[#{time}]client_query", "debug")
+          #log.puts("[#{time}]client_query", "debug")
           client_query(src, q.qName, q.qType.to_s)
         elsif localdns_query?(src)
-          log.puts("[#{time}]localdns_query", "debug")
+          #log.puts("[#{time}]localdns_query", "debug")
           localdns_query(src, q.qName, q.qType.to_s)
         end
       end
@@ -54,7 +54,7 @@ module EndlessDNS
     def client_query(src, name, type)
       if cached?(name, type)
         statistics.add_hit_query(src, type)
-        log.puts("cached!", "debug")
+        #log.puts("cached!", "debug")
       end
       statistics.add_client_query(src, name, type)
     end
@@ -65,10 +65,10 @@ module EndlessDNS
 
     def analy_response(src, dst, time, dns)
       if localdns_response?(src)
-        log.puts("[#{time}]localdns_response", "debug")
+        #log.puts("[#{time}]localdns_response", "debug")
         localdns_response(dst, dns)
       elsif outside_response?(dst)
-        log.puts("[#{time}]outside_response", "debug")
+        #log.puts("[#{time}]outside_response", "debug")
         outside_response(src, dst, dns)
       end
     end
