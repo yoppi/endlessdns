@@ -5,6 +5,7 @@ module EndlessDNS
   class Analysis
 
     def initialize
+      @dnsip = config.get('dnsip')
     end
 
     def run
@@ -165,19 +166,19 @@ module EndlessDNS
     end
 
     def client_query?(dst)
-      dst == config.get("dnsip")
+      dst == @dnsip
     end
 
     def localdns_query?(src)
-      src == config.get("dnsip")
+      src == @dnsip
     end
 
     def localdns_response?(src)
-      src == config.get("dnsip")
+      src == @dnsip
     end
 
     def outside_response?(dst)
-      dst == config.get("dnsip")
+      dst == @dnsip
     end
   end
 end
