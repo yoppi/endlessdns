@@ -402,8 +402,10 @@ module EndlessDNS
     end
 
     def clear_localdns_query
-      @localdns_query.clear
-      @localdns_query_num = 0
+      @mutex.synchronize do
+        @localdns_query.clear
+        @localdns_query_num = 0
+      end
     end
 
     def add_hit_query(src, type)
@@ -490,8 +492,10 @@ module EndlessDNS
     end
 
     def clear_localdns_response
-      @localdns_response.clear
-      @localdns_response_num = 0
+      @mutex.synchronize do
+        @localdns_response.clear
+        @localdns_response_num = 0
+      end
     end
 
     def add_outside_response(dst, name, type)
@@ -504,8 +508,10 @@ module EndlessDNS
     end
 
     def clear_outside_response
-      @outside_response.clear
-      @outside_response_num = 0
+      @mutex.synchronize do
+        @outside_response.clear
+        @outside_response_num = 0
+      end
     end
   end
 end
