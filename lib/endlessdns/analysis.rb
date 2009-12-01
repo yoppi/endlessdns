@@ -2,34 +2,65 @@
 # DNSパケットの解析器
 #
 module EndlessDNS
-  class Analysis
+  class JrubySieve
+    def initialize
+    end
 
+    def analy(pkt)
+      begin
+        dns = Net::DNS::Packet.parse(pkt.udp_data)
+        src = pkt.ip_src.to_num_s
+        dst = pkt.ip_dst.to_num_s
+        time = pkt.time
+      rescue => e
+        log.puts("src: #{src} unknown packet[#{e}]", "error")
+        return false
+      end
+      [dns, src, dst, time]
+    end
+  end
+
+  class CrubySieve
+    def initialize
+    end
+
+    def analy(pkt)
+      begin
+        dns = Net::DNS::Packet.parse(pkt.data.to_a.pack('C*'))
+        src = pkt.src_ip.to_s[1..-1]
+        dst = pkt.dst_ip.to_s[1..-1]
+        time = pkt.sec + pkt.usec/100000.0
+      rescue => e
+        log.puts("src: #{src} unknown packet[#{e}]", "error")
+        return false
+      end
+      [dns, src, dst, time]
+    end
+    end
+  end
+
+  class Analysis
     def initialize
       @dnsip = config.get('dnsip')
+      if defined? JRUBY_VERSION
+        @sieve = JrubySieve.new()
+      else
+        @sieve = CrubySieve.new()
+      end
     end
 
     def run
       loop do
         pkt = packet.deq
-        analy(pkt)
+        do_analy(pkt)
       end
     end
 
-    def analy(pkt)
-      begin
-        if defined? JRUBY_VERSION
-          dns = Net::DNS::Packet.parse(pkt.data.to_a.pack('C*'))
-          src = pkt.src_ip.to_s[1..-1]
-          dst = pkt.dst_ip.to_s[1..-1]
-          time = pkt.sec + pkt.usec/100000.0
-        else
-          dns = Net::DNS::Packet.parse(pkt.udp_data)
-          src = pkt.ip_src.to_num_s
-          dst = pkt.ip_dst.to_num_s
-          time = pkt.time
-        end
-      rescue => e
-        log.puts("src: #{src} unknown packet[#{e}]", "error")
+    def do_analy(pkt)
+      ret = @sieve.analy(pkt)
+      if ret
+        dns, src, dst, time = ret
+      else
         return
       end
 
