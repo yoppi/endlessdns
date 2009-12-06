@@ -59,7 +59,6 @@ module EndlessDNS
       @query.client_query_num(src)
     end
 
-    # TODO: localdns_queryを統計情報を書き出すときに書き出しクリアする
     def add_localdns_query(src, name, type)
       @query.add_localdns_query(src, name, type)
     end
