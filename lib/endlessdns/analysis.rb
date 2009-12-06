@@ -8,10 +8,10 @@ module EndlessDNS
 
     def analy(pkt)
       begin
-        dns = Net::DNS::Packet.parse(pkt.udp_data)
-        src = pkt.ip_src.to_num_s
-        dst = pkt.ip_dst.to_num_s
-        time = pkt.time
+        dns = Net::DNS::Packet.parse(pkt.data.to_a.pack('C*'))
+        src = pkt.src_ip.to_s[1..-1]
+        dst = pkt.dst_ip.to_s[1..-1]
+        time = pkt.sec + pkt.usec/100000.0
       rescue => e
         log.puts("src: #{src} unknown packet[#{e}]", "error")
         return false
@@ -26,10 +26,10 @@ module EndlessDNS
 
     def analy(pkt)
       begin
-        dns = Net::DNS::Packet.parse(pkt.data.to_a.pack('C*'))
-        src = pkt.src_ip.to_s[1..-1]
-        dst = pkt.dst_ip.to_s[1..-1]
-        time = pkt.sec + pkt.usec/100000.0
+        dns = Net::DNS::Packet.parse(pkt.udp_data)
+        src = pkt.ip_src.to_num_s
+        dst = pkt.ip_dst.to_num_s
+        time = pkt.time
       rescue => e
         log.puts("src: #{src} unknown packet[#{e}]", "error")
         return false
