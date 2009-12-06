@@ -9,15 +9,20 @@ module EndlessDNS
   class Recache
 
     # 再キャッシュするタイプ
-    TYPES = [
-      'A',
-      'AAAA',
-      'SOA',
-      'NS',
-      'PTR',
-      'CNAME',
-      'MX'
-    ]
+    TYPES = {
+      'A' => Resolv::DNS::Resource::IN::A,
+      'AAAA' => Resolv::DNS::Resource::IN::AAAA,
+      'ANY' => Resolv::DNS::Resource::IN::ANY,
+      'CNAME' => Resolv::DNS::Resource::IN::CNAME,
+      'HINFO' => Resolv::DNS::Resource::IN::HINFO,
+      'MINFO' => Resolv::DNS::Resource::IN::MINFO,
+      'MX' => Resolv::DNS::Resource::IN::MX,
+      'NS' => Resolv::DNS::Resource::IN::NS,
+      'PTR' => Resolv::DNS::Resource::IN::PTR,
+      'SOA' => Resolv::DNS::Resource::IN::SOA,
+      'TXT' => Resolv::DNS::Resource::IN::TXT,
+      'WKS' => Resolv::DNS::Resource::IN::WKS
+    }
 
     METHODS = [
       'no',
@@ -94,34 +99,7 @@ module EndlessDNS
     end
 
     def select_type_class(type)
-      case type
-      when 'A'
-        return Resolv::DNS::Resource::IN::A
-      when 'AAAA'
-        return Resolv::DNS::Resource::IN::AAAA
-      when 'ANY'
-        return Resolv::DNS::Resource::IN::ANY
-      when 'CNAME'
-        return Resolv::DNS::Resource::IN::CNAME
-      when 'HINFO'
-        return Resolv::DNS::Resource::IN::HINFO
-      when 'MINFO'
-        return Resolv::DNS::Resource::IN::MINFO
-      when 'MX'
-        return Resolv::DNS::Resource::IN::MX
-      when 'NS'
-        return Resolv::DNS::Resource::IN::NS
-      when 'PTR'
-        return Resolv::DNS::Resource::IN::PTR
-      when 'SOA'
-        return Resolv::DNS::Resource::IN::SOA
-      when 'TXT'
-        return Resolv::DNS::Resource::IN::TXT
-      when 'WKS'
-        return Resolv::DNS::Resource::IN::WKS
-      else
-        return nil
-      end
+      TYPES[type]
     end
 
     def check_cache_ref(name, type)
@@ -143,7 +121,7 @@ module EndlessDNS
 
     def default_types
       ret = {}
-      TYPES.each do |type|
+      TYPES.keys.each do |type|
         ret[type] = true
       end
       ret
@@ -159,7 +137,7 @@ module EndlessDNS
         log.puts("set_recache_types is faild [#{types}]")
         return
       end
-      offtypes = (TYPES - types)
+      offtypes = (TYPES.keys - types)
       offtypes.each do |type|
         @recache_types[type] = false
       end
