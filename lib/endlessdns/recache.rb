@@ -27,7 +27,8 @@ module EndlessDNS
     METHODS = [
       'no',
       'all',
-      'ref'
+      'ref',
+      'prob'
     ]
 
     class << self
@@ -93,6 +94,8 @@ module EndlessDNS
           return true
         when "ref"
           return check_cache_ref(name, type)
+        when "prob"
+          return check_query_prob(name, type)
         end
       end
       false
@@ -117,6 +120,10 @@ module EndlessDNS
 
     def init_cache_ref(name, type)
       cache.init_cache_ref(name, type)
+    end
+
+    def check_query_prob(name, type)
+      return true
     end
 
     def default_types
