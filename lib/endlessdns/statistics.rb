@@ -21,54 +21,11 @@ module EndlessDNS
       @stat_dir = config.get("statdir") ? config.get("statdir") : default_statdir()
       @stats_interval = config.get("stats-interval") ? config.get("stats-interval") : INTERVAL
 
-      @query = Query.new
-      @response = Response.new
-
       @mutex = Mutex.new
     end
 
     def default_statdir
       EndlessDNS::APP_DIR + "/" + STAT_DIR
-    end
-
-    def add_localdns_response(dst, name, type)
-      @response.add_localdns_response(dst, name, type)
-    end
-
-    def clear_localdns_response
-      @response.clear_localdns_response
-    end
-
-    def localdns_response
-      @response.localdns_response
-    end
-
-    def localdns_response_num
-      @response.localdns_response_num
-    end
-
-    def add_outside_response(dst, name, type)
-      @response.add_outside_response(dst, name, type)
-    end
-
-    def clear_outside_response
-      @response.clear_outside_response
-    end
-
-    def outside_response
-      @response.outside_response
-    end
-
-    def outside_response_num
-      @response.outside_response_num
-    end
-
-    def timebase_hit_query
-      @query.timebase_hit_query
-    end
-
-    def pktbase_hit_query
-      @query.pktbase_hit_query
     end
 
     def setup

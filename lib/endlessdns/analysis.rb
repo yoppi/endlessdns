@@ -111,7 +111,7 @@ module EndlessDNS
         (dns.answer + dns.authority + dns.additional).each do |rr|
           name = root?(rr.name) ? '.' : rr.name
           cache.add_cache_ref(name, rr.type)
-          statistics.add_localdns_response(dst, name, rr.type)
+          #response.add_localdns_response(dst, name, rr.type)
         end
       end
     end
@@ -128,7 +128,7 @@ module EndlessDNS
             cache.add(name, rr.type, rdata(rr))
             add_table(name, rr.type, rr.ttl)
           end
-          statistics.add_outside_response(src, name, rr.type)
+          #response.add_outside_response(src, name, rr.type)
         end
       end
     end
