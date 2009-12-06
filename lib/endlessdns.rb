@@ -27,6 +27,7 @@ require 'endlessdns/share'
 require 'endlessdns/cgihelper'
 require 'endlessdns/front'
 require 'endlessdns/pqueue'
+require 'endlessdns/query'
 
 module EndlessDNS
   LIB_DIR = File.expand_path(File.dirname(__FILE__))
