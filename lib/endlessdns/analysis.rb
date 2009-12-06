@@ -36,7 +36,6 @@ module EndlessDNS
       end
       [dns, src, dst, time]
     end
-    end
   end
 
   class Analysis
