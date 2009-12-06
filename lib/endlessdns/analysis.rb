@@ -84,14 +84,14 @@ module EndlessDNS
 
     def client_query(src, name, type)
       if cached?(name, type)
-        statistics.add_hit_query(src, type)
+        query.add_hit_query(src, type)
         #log.puts("cached!", "debug")
       end
-      statistics.add_client_query(src, name, type)
+      query.add_client_query(src, name, type)
     end
 
     def localdns_query(src, name, type)
-      statistics.add_localdns_query(src, name, type)
+      #query.add_localdns_query(src, name, type)
     end
 
     def analy_response(src, dst, time, dns)

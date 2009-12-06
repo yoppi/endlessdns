@@ -15,6 +15,8 @@ module EndlessDNS
       end
     end
 
+    attr_reader :stat_dir
+
     def initialize
       @stat_dir = config.get("statdir") ? config.get("statdir") : default_statdir()
       @stats_interval = config.get("stats-interval") ? config.get("stats-interval") : INTERVAL
@@ -27,52 +29,6 @@ module EndlessDNS
 
     def default_statdir
       EndlessDNS::APP_DIR + "/" + STAT_DIR
-    end
-
-    # TODO: client_queryを統計情報を書き出すときにクリアする
-    def add_client_query(src, name, type)
-      @query.add_client_query(src, name, type)
-      if @query.interval?(src)
-        io = File.open("#{@stat_dir}/hitrate_pktbase_total_#{src}.log", "a+")
-        if total_hit_query(src)
-          total_hit_query(src).each do |type, n|
-            if type == "A"
-              hitrate = (client_query_num(src)[type] == 0) ? 0 : n.to_f / client_query_num(src)[type]
-              io.puts "#{@query.interval_pkt_num[src]} #{hitrate}"
-            end
-          end
-        end
-        io.close
-        #io = File.open("#{@stat_dir}/hitrate_pktbase_interval.log", "a+")
-      end
-    end
-
-    def clear_client_query
-      @query.clear_client_query
-    end
-
-    def client_query
-      @query.client_query
-    end
-
-    def client_query_num(src=nil)
-      @query.client_query_num(src)
-    end
-
-    def add_localdns_query(src, name, type)
-      @query.add_localdns_query(src, name, type)
-    end
-
-    def clear_localdns_query
-      @query.clear_localdns_query
-    end
-
-    def localdns_query
-      @query.localdns_query
-    end
-
-    def localdns_query_num
-      @query.localdns_query_num
     end
 
     def add_localdns_response(dst, name, type)
@@ -107,14 +63,6 @@ module EndlessDNS
       @response.outside_response_num
     end
 
-    def add_hit_query(src, type)
-      @query.add_hit_query(src, type)
-    end
-
-    def total_hit_query(src=nil)
-      @query.total_hit_query(src)
-    end
-
     def timebase_hit_query
       @query.timebase_hit_query
     end
@@ -132,9 +80,9 @@ module EndlessDNS
           sleep @stats_interval
           Thread.new do # 統計情報を吐くのに時間がかかるとtimerがずれる
             update_statistics
-            clear_localdns_query
-            clear_localdns_response
-            clear_outside_response
+            query.clear_localdns_query
+            query.clear_localdns_response
+            query.clear_outside_response
           end
         end
       end
@@ -275,7 +223,7 @@ module EndlessDNS
     # NOTE: 最初からこの形で統計情報を集めるか?
     def client_query_stat
       ret = {}
-      client_query = @query.client_query
+      client_query = query.client_query
       client_query.each do |src, val|
         ret['num_of_client'] ||= 0
         ret['num_of_client'] += 1
@@ -307,10 +255,10 @@ module EndlessDNS
 
     def hit_rate_stat
       ret = {}
-      hit = total_hit_query.values.inject({}) {|ret, e| ret.merge e }
-      query = client_query_num.values.inject({}) {|ret, e| ret.merge e }
-      hit.each do |type, n|
-        hitrate = (query[type] == 0) ? 0 : n.to_f / query[type]
+      total_h = query.total_hit_query.values.inject({}) {|ret, e| ret.merge e }
+      total_q = query.client_query_num.values.inject({}) {|ret, e| ret.merge e }
+      total_h.each do |type, n|
+        hitrate = (total_q[type] == 0) ? 0 : n.to_f / total_q[type]
         ret['hit_rate'] ||= {}
         ret['hit_rate'][type] = hitrate
       end
