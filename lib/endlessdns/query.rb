@@ -3,7 +3,7 @@ module EndlessDNS
 
     PKT_INTERVAL = 1000
 
-    attr_reader :client_query, :client_query_num
+    attr_reader :query_info, :client_query_num
     attr_reader :localdns_query, :localdns_query_num
     attr_reader :timebase_hit_query, :pktbase_hit_query, :total_hit_query
     attr_accessor :interval_query_num
@@ -15,9 +15,17 @@ module EndlessDNS
     end
 
     def initialize
-      @client_query = {}
+      # { 'name:type' => {
+      #     'begin_t' => Time, # 初めてこのクエリが出現した日時
+      #     'qnum' => Integer, # このクエリが索かれた回数
+      #     'qnday' => Integer,# クエリが出現した日数
+      #     'qntz' => Set,     # クエリが出現した時間帯
+      #     'qntz_total' => Integer # クエリが出現した時間帯の総数
+      #                               qndayを使って平均値を計算に使う
+      #     'today' => Time    # 今日の日付
+      # }}
+      @query_info = {}
       @client_query_num = {}
-
       @interval_query_num = {}
 
       @localdns_query = {}
@@ -32,9 +40,33 @@ module EndlessDNS
 
     def add_client_query(src, name, type, time)
       @mutex.synchronize do
-        @client_query[src] ||= {}
-        @client_query[src][[name, type]] ||= 0
-        @client_query[src][[name, type]] += 1
+        t = Time.at(time)
+        key = name + ":" + type
+
+        # 初回かどうか
+        unless @query_info[key]
+          o = {}
+          o['begin_t'] = t
+          o['today'] = t.to_s.split(' ')[0]
+          o['qnum'] = 1
+          o['qnday'] = 1
+          o['qntz'] = Set.new
+          o['qntz'] << t.hour
+          @query_info[key] = o
+        # 変更
+        elsif t.to_s.split(' ')[0] == @query_info[key]['today']
+          @query_info[key]['qnum'] += 1
+          @query_info[key]['qntz'] << t.hour
+        # 日付更新
+        else
+          o = @query_info[key]
+          o['today'] = t.to_s.split(' ')[0]
+          o['qnum'] += 1
+          o['qnday'] += 1
+          o['qntz_total'] ||= 0
+          o['qntz_total'] += o['qntz'].size
+          o['qntz'].clear
+        end
 
         @client_query_num[src] ||= {}
         @client_query_num[src][type] ||= 0
@@ -59,7 +91,6 @@ module EndlessDNS
 
     def clear_client_query
       @mutex.synchronize do
-        @client_query.clear
         @client_query_num.clear
       end
     end
