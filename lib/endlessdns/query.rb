@@ -6,7 +6,7 @@ module EndlessDNS
     attr_reader :client_query, :client_query_num
     attr_reader :localdns_query, :localdns_query_num
     attr_reader :timebase_hit_query, :pktbase_hit_query, :total_hit_query
-    attr_accessor :interval_pkt_num
+    attr_accessor :interval_query_num
 
     class << self
       def instance
@@ -18,7 +18,7 @@ module EndlessDNS
       @client_query = {}
       @client_query_num = {}
 
-      @interval_pkt_num = {}
+      @interval_query_num = {}
 
       @localdns_query = {}
       @localdns_query_num = 0
@@ -40,8 +40,8 @@ module EndlessDNS
         @client_query_num[src][type] ||= 0
         @client_query_num[src][type] += 1
 
-        @interval_pkt_num[src] ||= 0
-        @interval_pkt_num[src] += 1
+        @interval_query_num[src] ||= 0
+        @interval_query_num[src] += 1
       end
       if interval?(src)
         io = File.open("#{statistics.stat_dir}/hitrate_pktbase_total_#{src}.log", "a+")
@@ -49,7 +49,7 @@ module EndlessDNS
           total_hit_query(src).each do |type, n|
             if type == "A"
               hitrate = (client_query_num(src)[type] == 0) ? 0 : n.to_f / client_query_num(src)[type]
-              io.puts "#{interval_pkt_num(src)} #{hitrate}"
+              io.puts "#{interval_query_num(src)} #{hitrate}"
             end
           end
         end
@@ -115,8 +115,8 @@ module EndlessDNS
     end
 
     def interval?(src)
-      if @interval_pkt_num[src] && @interval_pkt_num[src] > 0
-        @interval_pkt_num[src] % PKT_INTERVAL == 0
+      if @interval_query_num[src] && @interval_query_num[src] > 0
+        @interval_query_num[src] % PKT_INTERVAL == 0
       else
         false
       end
@@ -130,8 +130,8 @@ module EndlessDNS
       src ? @client_query_num[src] : @client_query_num
     end
 
-    def interval_pkt_num(src=nil)
-      src ? @interval_pkt_num[src] : @interval_pkt_num
+    def interval_query_num(src=nil)
+      src ? @interval_query_num[src] : @interval_query_num
     end
   end
 end
