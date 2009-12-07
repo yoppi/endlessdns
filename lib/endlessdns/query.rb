@@ -30,9 +30,9 @@ module EndlessDNS
       @mutex = Mutex.new
     end
 
-    def add_client_query(src, name, type)
+    def add_client_query(src, name, type, time)
       @mutex.synchronize do
-        @client_query[src] ||= Hash.new
+        @client_query[src] ||= {}
         @client_query[src][[name, type]] ||= 0
         @client_query[src][[name, type]] += 1
 

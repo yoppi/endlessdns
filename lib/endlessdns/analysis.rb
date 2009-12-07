@@ -74,7 +74,7 @@ module EndlessDNS
       dns.question.each  do |q|
         if client_query?(dst)
           #log.puts("[#{time}]client_query", "debug")
-          client_query(src, q.qName, q.qType.to_s)
+          client_query(src, q.qName, q.qType.to_s, time)
         elsif localdns_query?(src)
           #log.puts("[#{time}]localdns_query", "debug")
           localdns_query(src, q.qName, q.qType.to_s)
@@ -82,12 +82,12 @@ module EndlessDNS
       end
     end
 
-    def client_query(src, name, type)
+    def client_query(src, name, type, time)
       if cached?(name, type)
         query.add_hit_query(src, type)
         #log.puts("cached!", "debug")
       end
-      query.add_client_query(src, name, type)
+      query.add_client_query(src, name, type, time)
     end
 
     def localdns_query(src, name, type)

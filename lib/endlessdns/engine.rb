@@ -6,9 +6,11 @@ module EndlessDNS
 
     class << self
       def invoke(options)
+        @start_time = Time.now
         @options = options
         load_config
         config.add('dnspid', @options[:pid])
+        config.add('start_time' @start_time)
 
         if @options[:daemonize]
           run_daemonize
