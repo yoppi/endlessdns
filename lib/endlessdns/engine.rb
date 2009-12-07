@@ -10,7 +10,7 @@ module EndlessDNS
         @options = options
         load_config
         config.add('dnspid', @options[:pid])
-        config.add('start_time' @start_time) # システムの開始時間
+        config.add('start_time', @start_time) # システムの開始時間
 
         if @options[:daemonize]
           run_daemonize
