@@ -38,8 +38,8 @@ module EndlessDNS
           Thread.new do # 統計情報を吐くのに時間がかかるとtimerがずれる
             update_statistics
             query.clear_localdns_query
-            query.clear_localdns_response
-            query.clear_outside_response
+            response.clear_localdns_response
+            response.clear_outside_response
           end
         end
       end
