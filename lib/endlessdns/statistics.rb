@@ -169,7 +169,7 @@ module EndlessDNS
           db[date] = cache
         end
       rescue => e
-        log.puts(e, "warn")
+        log.warn(e)
       end
     end
 
@@ -180,7 +180,7 @@ module EndlessDNS
           db[date] = negative_cache
         end
       rescue => e
-        log.puts(e, "warn")
+        log.warn(e)
       end
     end
 
@@ -191,7 +191,7 @@ module EndlessDNS
           db[date] = hit_rate
         end
       rescue => e
-        log.puts(e, "warn")
+        log.warn(e)
       end
     end
 
@@ -202,7 +202,7 @@ module EndlessDNS
           db[date] = query
         end
       rescue => e
-        log.puts(e, "warn")
+        log.warn(e)
       end
     end
 
@@ -216,7 +216,7 @@ module EndlessDNS
           end
         end
       rescue => e
-        log.puts(e, "warn")
+        log.warn(e)
       end
       recache.clear_recache
     end
@@ -322,7 +322,7 @@ module EndlessDNS
         begin
           Marshal.load(Marshal.dump(obj))
         rescue => e
-          log.puts(e, "warn")
+          log.warn(e)
         end
       end
     end

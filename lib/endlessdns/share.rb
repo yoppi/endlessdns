@@ -103,7 +103,7 @@ module EndlessDNS
       if pid
         process_status(pid)
       else
-        log.puts("cannot get pid")
+        log.warn("cannot get pid")
         "undefined"
       end
     end
@@ -236,7 +236,7 @@ module EndlessDNS
             update_status
             update_priority
           rescue => e
-            log.puts("cannot connect master server!", "warn")
+            log.warn("cannot connect master server!")
             update_conectivity("down")
 
             sleep @retry_sec
@@ -251,7 +251,7 @@ module EndlessDNS
           update_conectivity(Time.now)
         end
       end
-      log.puts("master is down. self to be master", "warn")
+      log.warn("master is down. self to be master")
     end
 
     def update_cache
@@ -277,7 +277,7 @@ module EndlessDNS
       if @next_master
         if @next_master != host_ipaddr()
           @master = DRbObject.new_with_uri("druby://#{@next_master}:#{EndlessDNS::Share::PORT}")
-          log.puts("master is down. change master[#{@next_master}]", "warn")
+          log.warn("master is down. change master[#{@next_master}]")
         else
           throw :exit
         end

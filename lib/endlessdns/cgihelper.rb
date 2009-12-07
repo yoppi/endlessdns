@@ -32,13 +32,13 @@ module EndlessDNS
           exec(EndlessDNS::LIB_DIR + "/" + "web/webserver.rb")
         end
       end
-      log.puts("launching webserver", "info")
+      log.info("launching webserver")
     end
 
     def setup_front
       front = Front.new
       DRb.start_service("druby://#{@front_addr}:#{@front_port}", front)
-      log.puts("start service for cgi", "info")
+      log.info("start service for cgi")
     end
   end
 end
