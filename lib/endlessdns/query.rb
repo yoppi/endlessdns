@@ -44,7 +44,7 @@ module EndlessDNS
         key = name + ":" + type
 
         # 初回かどうか
-        unless @query_info[key]
+        if !@query_info[key]
           o = {}
           o['begin_t'] = t
           o['today'] = t.to_s.split(' ')[0]
