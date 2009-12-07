@@ -180,14 +180,14 @@ module EndlessDNS
     # NOTE: 最初からこの形で統計情報を集めるか?
     def client_query_stat
       ret = {}
-      client_query = query.client_query
-      client_query.each do |src, val|
+      client_query = query.client_query_num
+      client_query.each do |src, type|
         ret['num_of_client'] ||= 0
         ret['num_of_client'] += 1
-        val.each do |name_type, cnt|
+        val.each do |type, cnt|
           ret['num_of_query'] ||= {}
-          ret['num_of_query'][name_type[1]] ||= 0
-          ret['num_of_query'][name_type[1]] += cnt
+          ret['num_of_query'][type] ||= 0
+          ret['num_of_query'][type] += cnt
         end
       end
       ret
