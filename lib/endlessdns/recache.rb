@@ -53,9 +53,9 @@ module EndlessDNS
       @mutex = Mutex.new
     end
 
-    def invoke(name, type)
+    def invoke(name, type, query)
       delete_cache(name, type)
-      if need_recache?(name, type)
+      if need_recache?(name, type, query)
         type_class = select_type_class(type)
         begin
           @resolver.getresource(name, type_class)
@@ -83,7 +83,7 @@ module EndlessDNS
       cache.delete(name, type)
     end
 
-    def need_recache?(name, type)
+    def need_recache?(name, type, query)
       # typeの判断
       if @recache_types[type]
         # 再キャッシュ方法
@@ -95,7 +95,7 @@ module EndlessDNS
         when "ref"
           return check_cache_ref(name, type)
         when "prob"
-          return check_query_prob(name, type)
+          return check_query_prob(name, type, query)
         end
       end
       false
@@ -122,7 +122,7 @@ module EndlessDNS
       cache.init_cache_ref(name, type)
     end
 
-    def check_query_prob(name, type)
+    def check_query_prob(name, type, query)
       return true
     end
 

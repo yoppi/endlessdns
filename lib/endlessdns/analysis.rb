@@ -120,13 +120,15 @@ module EndlessDNS
       if nxdomain?(dns)
         dispose_negative(dst, dns)
       else
+        q = dns.question.first
+        query = q.qName + ":" + q.qType.to_s
         (dns.answer + dns.authority + dns.additional).each do |rr|
           next if rr.type.to_s == "OPT" # OPTは疑似レコードなのでスキップ
 
           name = root?(rr.name) ? '.' : rr.name # NOTE: namesのdn_expandで対処すべきか?
           unless cached?(name, rr.type)
             cache.add(name, rr.type, rdata(rr))
-            add_table(name, rr.type, rr.ttl)
+            add_table(name, rr.type, rr.ttl, query)
           end
           #response.add_outside_response(src, name, rr.type)
         end
