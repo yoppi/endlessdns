@@ -123,7 +123,24 @@ module EndlessDNS
     end
 
     def check_query_prob(name, type, query)
-      return true
+      info = query.query_info(query)
+      prob = calc_prob(info) 
+      if rand() < prob
+        return true
+      else
+        check_cache_ref(name, type)
+      end
+    end
+
+    def calc_prob(info)
+      now = Time.now
+      #日付のnormalize
+      _now = Time.local(now.year, now.month, now.day)
+      _begin_t = Time.local(info['begin_t'].year, info['begin_t'].month, info['begin_t'].day)
+      elapse_day = _now - _begin_t / 86400 + 1
+      qnday_prob = info['qnday'] / elapse_day.to_f
+      qntz_prob = info['qntz_total'] ? (info['qntz_total']/info['qnday'].to_f)/24.0 : info['qntz'].size / 24.0
+      qnday_prob * qntz_prob
     end
 
     def default_types

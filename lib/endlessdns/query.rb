@@ -153,6 +153,10 @@ module EndlessDNS
       end
     end
 
+    def query_info(query)
+      @query_info[query]
+    end
+
     def total_hit_query(src=nil)
       src ? @total_hit_query[src] : @total_hit_query
     end
