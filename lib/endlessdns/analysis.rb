@@ -121,6 +121,10 @@ module EndlessDNS
         dispose_negative(dst, dns)
       else
         q = dns.question.first
+        unless q
+          log.warn("outside response has no question")
+          return
+        end
         query = q.qName + ":" + q.qType.to_s
         (dns.answer + dns.authority + dns.additional).each do |rr|
           next if rr.type.to_s == "OPT" # OPTは疑似レコードなのでスキップ
