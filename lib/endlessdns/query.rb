@@ -209,7 +209,7 @@ module EndlessDNS
     end
 
     def recache_stats
-      io = File.open("#{statistics.stat_dir}/recache_querybase_total.log" "a+")
+      io = File.open("#{statistics.stat_dir}/recache_querybase_total.log", "a+")
       total_recache = recache.recaches.values.inject(0) {|ret, e| ret += e }
       io.puts "#{@total_query_num} #{total_recache}"
       io.close
