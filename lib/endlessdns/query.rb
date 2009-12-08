@@ -36,6 +36,7 @@ module EndlessDNS
       @pktbase_hit_query = {}
       @total_hit_query = {}
 
+      @total_hit_query_num = 0
       @total_query_num = 0
 
       @mutex = Mutex.new
@@ -101,6 +102,9 @@ module EndlessDNS
         end
         io.close
       else
+        io = File.open("#{statistics.stat_dir}/hitrate_querybase_total.log", "a+")
+        io.puts "#{@total_query_num} #{@total_hit_query_num / @total_query_num.to_f}"
+        io.close
       end
     end
 
@@ -145,6 +149,8 @@ module EndlessDNS
         @total_hit_query[src] ||= {}
         @total_hit_query[src][type] ||= 0
         @total_hit_query[src][type] += 1
+
+        @total_hit_query_num += 1
 
         #@timebase_hit_query[src] ||= {}
         #@timebase_hit_query[src][type] ||= 0
