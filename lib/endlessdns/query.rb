@@ -47,30 +47,7 @@ module EndlessDNS
         t = Time.at(time)
         key = name + ":" + type
 
-        # 初回かどうか
-        if !@query_info[key]
-          o = {}
-          o['begin_t'] = t
-          o['today'] = t.to_s.split(' ')[0]
-          o['qnum'] = 1
-          o['qnday'] = 1
-          o['qntz'] = Set.new
-          o['qntz'] << t.hour
-          @query_info[key] = o
-        # 変更
-        elsif t.to_s.split(' ')[0] == @query_info[key]['today']
-          @query_info[key]['qnum'] += 1
-          @query_info[key]['qntz'] << t.hour
-        # 日付更新
-        else
-          o = @query_info[key]
-          o['today'] = t.to_s.split(' ')[0]
-          o['qnum'] += 1
-          o['qnday'] += 1
-          o['qntz_total'] ||= 0
-          o['qntz_total'] += o['qntz'].size
-          o['qntz'].clear
-        end
+        add_query_info(t, key)
 
         @client_query_num[src] ||= {}
         @client_query_num[src][type] ||= 0
@@ -128,14 +105,45 @@ module EndlessDNS
       end
     end
 
-    def add_localdns_query(src, name, type)
-      @mutex.synchronize do
-        @localdns_query[src] ||= {}
-        @localdns_query[src][[name, type]] ||= 0
-        @localdns_query[src][[name, type]] += 1
-        @localdns_query_num += 1
+    def add_query_info(t, key)
+      # 初回かどうか
+      if !@query_info[key]
+        o = {}
+        o['begin_t'] = t
+        o['today'] = t.to_s.split(' ')[0]
+        o['qnum'] = 1
+        o['qnday'] = 1
+        o['qntz'] = Set.new
+        o['qntz'] << t.hour
+        @query_info[key] = o
+      # 変更
+      elsif t.to_s.split(' ')[0] == @query_info[key]['today']
+        @query_info[key]['qnum'] += 1
+        @query_info[key]['qntz'] << t.hour
+      # 日付更新
+      else
+        o = @query_info[key]
+        o['today'] = t.to_s.split(' ')[0]
+        o['qnum'] += 1
+        o['qnday'] += 1
+        o['qntz_total'] ||= 0
+        o['qntz_total'] += o['qntz'].size
+        o['qntz'].clear
       end
     end
+
+    def add_localdns_query(dst, name, type, time)
+      t = Time.at(time)
+      key = name + ":" + type
+      add_query_info(t, key)
+      #@mutex.synchronize do
+      #  @localdns_query[dst] ||= {}
+      #  @localdns_query[dst][key] ||= 0
+      #  @localdns_query[dst][key] += 1
+      #  @localdns_query_num += 1
+      #end
+    end
+
 
     def clear_localdns_query
       @mutex.synchronize do

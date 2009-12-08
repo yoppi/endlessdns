@@ -77,7 +77,7 @@ module EndlessDNS
           client_query(src, q.qName, q.qType.to_s, time)
         elsif localdns_query?(src)
           #log.debug("[#{time}]localdns_query")
-          localdns_query(src, q.qName, q.qType.to_s)
+          localdns_query(dst, q.qName, q.qType.to_s, time)
         end
       end
     end
@@ -90,8 +90,8 @@ module EndlessDNS
       query.add_client_query(src, name, type, time)
     end
 
-    def localdns_query(src, name, type)
-      #query.add_localdns_query(src, name, type)
+    def localdns_query(dst, name, type, time)
+      query.add_localdns_query(dst, name, type, time)
     end
 
     def analy_response(src, dst, time, dns)
