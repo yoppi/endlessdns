@@ -13,7 +13,7 @@ module EndlessDNS
         dst = pkt.dst_ip.to_s[1..-1]
         time = pkt.sec + pkt.usec/100000.0
       rescue => e
-        log.puts("src: #{src} unknown packet[#{e}]", "error")
+        log.error("src: #{src} unknown packet[#{e}]")
         return false
       end
       [dns, src, dst, time]
@@ -31,7 +31,7 @@ module EndlessDNS
         dst = pkt.ip_dst.to_num_s
         time = pkt.time
       rescue => e
-        log.puts("src: #{src} unknown packet[#{e}]", "error")
+        log.error("src: #{src} unknown packet[#{e}]")
         return false
       end
       [dns, src, dst, time]
@@ -73,10 +73,10 @@ module EndlessDNS
     def analy_query(src, dst, time, dns)
       dns.question.each  do |q|
         if client_query?(dst)
-          #log.puts("[#{time}]client_query", "debug")
+          #log.debug("[#{time}]client_query")
           client_query(src, q.qName, q.qType.to_s, time)
         elsif localdns_query?(src)
-          #log.puts("[#{time}]localdns_query", "debug")
+          #log.debug("[#{time}]localdns_query")
           localdns_query(src, q.qName, q.qType.to_s)
         end
       end
@@ -85,7 +85,7 @@ module EndlessDNS
     def client_query(src, name, type, time)
       if cached?(name, type)
         query.add_hit_query(src, type)
-        #log.puts("cached!", "debug")
+        #log.debug("cached!")
       end
       query.add_client_query(src, name, type, time)
     end
@@ -96,10 +96,10 @@ module EndlessDNS
 
     def analy_response(src, dst, time, dns)
       if localdns_response?(src)
-        #log.puts("[#{time}]localdns_response", "debug")
+        #log.debug("[#{time}]localdns_response")
         localdns_response(dst, dns)
       elsif outside_response?(dst)
-        #log.puts("[#{time}]outside_response", "debug")
+        #log.debug("[#{time}]outside_response")
         outside_response(src, dst, dns)
       end
     end
@@ -141,9 +141,9 @@ module EndlessDNS
         cache.add_negative_cache_client(dst, q.qName, q.qType.to_s)
         cache.add_negative_cache_ref(q.qName, q.qType.to_s)
         cache.add_negative(q.qName, q.qType.to_s)
-        log.puts("negative cache[#{dst} send #{q.qName}/#{q.qType.to_s}]", "warn")
+        log.warn("negative cache[#{dst} send #{q.qName}/#{q.qType.to_s}]")
       else
-        log.puts("More than one question or authority parts were received", "warn")
+        log.warn("More than one question or authority parts were received")
       end
     end
 
@@ -175,7 +175,7 @@ module EndlessDNS
         data << rr.expire
         data << rr.minimum
       else
-        log.puts("unrecognized type record[#{rr.type}]", "warn")
+        log.warn("unrecognized type record[#{rr.type}]")
         return rr
       end
       data

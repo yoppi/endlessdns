@@ -82,17 +82,15 @@ module EndlessDNS
     # CNAMEでhitすれば、さらにその正規名とtypeで検索
     # hitしなければ存在しない
     def cached?(name, type)
-      @mutex.synchronize do
-        if @cache.has_key? [name, type]
-          return true
-        elsif check_cname(name, type)
-          return true
-        elsif check_negative(name, type)
-          add_negative_cache_ref(name, type)
-          return true
-        else
-          return false
-        end
+      if @cache.has_key? [name, type]
+        return true
+      elsif check_cname(name, type)
+        return true
+      elsif check_negative(name, type)
+        add_negative_cache_ref(name, type)
+        return true
+      else
+        return false
       end
     end
 

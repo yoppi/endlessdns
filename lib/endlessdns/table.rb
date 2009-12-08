@@ -45,13 +45,13 @@ module EndlessDNS
       delete_table(expire)
       if records
         records.each do |record|
-          #log.puts("update! #{expire}: #{record[0]}, #{record[1]}", "info")
+          #log.info("update! #{expire}: #{record[0]}, #{record[1]}")
           Thread.new do
             recache.invoke(record[0], record[1], record[2])
           end
         end
       else
-        log.puts("no records[#{expire}]", "warn")
+        log.warn("no records[#{expire}]")
       end
     end
 

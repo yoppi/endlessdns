@@ -47,7 +47,7 @@ module EndlessDNS
         @snoop_th.kill
         @handle.close
       rescue => e
-        log.puts("stop snooping", "warn")
+        log.warn("stop snooping")
       end
     end
 

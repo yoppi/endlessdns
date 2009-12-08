@@ -24,7 +24,7 @@ module EndlessDNS
           o.__send__(cmd)
         end
       else
-        log.puts("no #{instance}", "warn")
+        log.warn("no #{instance}")
       end
     end
   end

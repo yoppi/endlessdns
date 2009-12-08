@@ -60,7 +60,7 @@ module EndlessDNS
         begin
           @resolver.getresource(name, type_class)
         rescue => e
-          log.puts("#{e}", "warn")
+          log.warn("#{e}")
         end
         add_recache(name, type)
       end
@@ -108,7 +108,7 @@ module EndlessDNS
     def check_cache_ref(name, type)
       ref = cache.check_cache_ref(name, type)
       if ref == nil
-        log.puts("[#{name}, #{type}] is no reference", "warn")
+        log.warn("[#{name}, #{type}] is no reference")
         false
       elsif ref > 1
         cache.init_cache_ref(name, type)
@@ -158,7 +158,7 @@ module EndlessDNS
     def set_recache_types(types)
       reset_recache_types
       unless types.class == Array
-        log.puts("set_recache_types is faild [#{types}]")
+        log.warn("set_recache_types is faild [#{types}]")
         return
       end
       offtypes = (TYPES.keys - types)
