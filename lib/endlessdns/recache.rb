@@ -66,10 +66,21 @@ module EndlessDNS
       end
     end
 
+    # master, slave間でのキャッシュの共有に使用
+    def force_invoke(name, type)
+      begin
+        type_class = select_type_class(type)
+        @resolver.getresource(name, type_class)
+      rescue => e
+        log.warn("#{e}")
+      end
+    end
+
     def add_recache(name, type)
+      key = name + ":" + type
       @mutex.synchronize do
-        @recaches[[name, type]] ||= 0
-        @recaches[[name, type]] += 1
+        @recaches[key] ||= 0
+        @recaches[key] += 1
       end
     end
 

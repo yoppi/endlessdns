@@ -138,7 +138,7 @@ module EndlessDNS
     def dispose_negative(dst, dns)
       if dns.header.qdCount == 1 && dns.header.nsCount == 1
         q = dns.question.first
-        cache.add_negative_cache_client(dst, q.qName, q.qType.to_s)
+        #cache.add_negative_cache_client(dst, q.qName, q.qType.to_s)
         cache.add_negative_cache_ref(q.qName, q.qType.to_s)
         cache.add_negative(q.qName, q.qType.to_s)
         log.warn("negative cache[#{dst} send #{q.qName}/#{q.qType.to_s}]")
@@ -181,8 +181,8 @@ module EndlessDNS
       data
     end
 
-    def add_table(name, type, ttl)
-      table.add(name, type, ttl)
+    def add_table(name, type, ttl, query)
+      table.add(name, type, ttl, query)
     end
 
     def cached?(name, type)

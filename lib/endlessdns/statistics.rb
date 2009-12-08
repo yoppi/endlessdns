@@ -197,15 +197,17 @@ module EndlessDNS
       ret = {}
       cache_tmp = cache.cache
       cache_tmp.each do |name_type, val|
+        name, type = name_type.split(':')
         ret['num_of_cache'] ||= {}
-        ret['num_of_cache'][name_type[1]] ||= 0
-        ret['num_of_cache'][name_type[1]] += val.size
+        ret['num_of_cache'][type] ||= 0
+        ret['num_of_cache'][type] += val.size
       end
       ncache_ref = cache.negative_cache_ref
       ncache_ref.each do |name_type, cnt|
+        name, type = name_type.split(':')
         ret['num_of_negative'] ||= {}
-        ret['num_of_negative'][name_type[1]] ||= 0
-        ret['num_of_negative'][name_type[1]] += cnt
+        ret['num_of_negative'][type] ||= 0
+        ret['num_of_negative'][type] += cnt
       end
       ret
     end

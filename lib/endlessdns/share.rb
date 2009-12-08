@@ -144,10 +144,9 @@ module EndlessDNS
     end
 
     def add_cache(diff)
-      diff.each do |name_type, rdatas|
-        rdatas.each do |rdata|
-          recache.invoke(name_type[0], name_type[1])
-        end
+      diff.each do |name_type|
+        name, type = name_type.split(':')
+        recache.force_invoke(name, type)
       end
     end
 
@@ -290,23 +289,15 @@ module EndlessDNS
 
     # hash1 - hash2
     def diff_cache(h1, h2)
-      diff = {}
-      h1.each do |key, val|
-        if h2.has_key?(key)
-          val_diff = h1[key] - h2[key]
-          diff[key] = val_diff
-        else
-          diff[key] = h1[key]
-        end
-      end
-      diff
+      h1_keys = h1.keys
+      h2_keys = h2.keys
+      h1_keys - h2_keys
     end
 
     def update_self_cashe(diff)
-      diff.each do |name_type, rdatas|
-        rdatas.each do |rdata|
-          recache.invoke(name_type[0], name_type[1])
-        end
+      diff.each do |name_type|
+        name, type = name_type.split(':')
+        recache.force_invoke(name, type)
       end
     end
 
