@@ -181,10 +181,10 @@ module EndlessDNS
     def client_query_stat
       ret = {}
       client_query = query.client_query_num
-      client_query.each do |src, type|
+      client_query.each do |src, vals|
         ret['num_of_client'] ||= 0
         ret['num_of_client'] += 1
-        val.each do |type, cnt|
+        vals.each do |type, cnt|
           ret['num_of_query'] ||= {}
           ret['num_of_query'][type] ||= 0
           ret['num_of_query'][type] += cnt
