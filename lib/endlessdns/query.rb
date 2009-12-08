@@ -66,69 +66,9 @@ module EndlessDNS
       end
     end
 
-    def hitrate_stats(src=nil)
-      if src
-        io = File.open("#{statistics.stat_dir}/hitrate_querybase_total_#{src}.log", "a+")
-        if total_hit_query(src)
-          total_hit_query(src).each do |type, n|
-            if type == "A"
-              hitrate = (client_query_num(src)[type] == 0) ? 0 : n.to_f / client_query_num(src)[type]
-              io.puts "#{interval_query_num(src)} #{hitrate}"
-            end
-          end
-        end
-        io.close
-      else
-        io = File.open("#{statistics.stat_dir}/hitrate_querybase_total.log", "a+")
-        io.puts "#{@total_query_num} #{@total_hit_query_num / @total_query_num.to_f}"
-        io.close
-      end
-    end
-
-    def cache_stats
-      io = File.open("#{statistics.stat_dir}/cache_querybase_total.log", "a+")
-      total_cache = cache.cache.values.inject(0) {|ret, e| ret += e.size }
-      io.puts "#{@total_query_num} #{total_cache}"
-      io.close
-    end
-
-    def recache_stats
-      io = File.open("#{statistics.stat_dir}/recache_querybase_total.log" "a+")
-      total_recache = recache.recaches.values.inject(0) {|ret, e| ret += e }
-      io.puts "#{@total_query_num} #{total_recache}"
-      io.close
-    end
-
     def clear_client_query
       @mutex.synchronize do
         @client_query_num.clear
-      end
-    end
-
-    def add_query_info(t, key)
-      # 初回かどうか
-      if !@query_info[key]
-        o = {}
-        o['begin_t'] = t
-        o['today'] = t.to_s.split(' ')[0]
-        o['qnum'] = 1
-        o['qnday'] = 1
-        o['qntz'] = Set.new
-        o['qntz'] << t.hour
-        @query_info[key] = o
-      # 変更
-      elsif t.to_s.split(' ')[0] == @query_info[key]['today']
-        @query_info[key]['qnum'] += 1
-        @query_info[key]['qntz'] << t.hour
-      # 日付更新
-      else
-        o = @query_info[key]
-        o['today'] = t.to_s.split(' ')[0]
-        o['qnum'] += 1
-        o['qnday'] += 1
-        o['qntz_total'] ||= 0
-        o['qntz_total'] += o['qntz'].size
-        o['qntz'].clear
       end
     end
 
@@ -143,7 +83,6 @@ module EndlessDNS
       #  @localdns_query_num += 1
       #end
     end
-
 
     def clear_localdns_query
       @mutex.synchronize do
@@ -188,18 +127,6 @@ module EndlessDNS
       end
     end
 
-    def interval?(src=nil)
-      if src
-        if @interval_query_num[src] && @interval_query_num[src] > 0
-          return @interval_query_num[src] % QUERY_INTERVAL == 0
-        else
-          return false
-        end
-      else
-        return @total_query_num % QUERY_INTERVAL == 0
-      end
-    end
-
     def query_info(query)
       @query_info[query]
     end
@@ -214,6 +141,78 @@ module EndlessDNS
 
     def interval_query_num(src=nil)
       src ? @interval_query_num[src] : @interval_query_num
+    end
+
+    def add_query_info(t, key)
+      # 初回かどうか
+      if !@query_info[key]
+        o = {}
+        o['begin_t'] = t
+        o['today'] = t.to_s.split(' ')[0]
+        o['qnum'] = 1
+        o['qnday'] = 1
+        o['qntz'] = Set.new
+        o['qntz'] << t.hour
+        @query_info[key] = o
+      # 変更
+      elsif t.to_s.split(' ')[0] == @query_info[key]['today']
+        @query_info[key]['qnum'] += 1
+        @query_info[key]['qntz'] << t.hour
+      # 日付更新
+      else
+        o = @query_info[key]
+        o['today'] = t.to_s.split(' ')[0]
+        o['qnum'] += 1
+        o['qnday'] += 1
+        o['qntz_total'] ||= 0
+        o['qntz_total'] += o['qntz'].size
+        o['qntz'].clear
+      end
+    end
+
+    def interval?(src=nil)
+      if src
+        if @interval_query_num[src] && @interval_query_num[src] > 0
+          return @interval_query_num[src] % QUERY_INTERVAL == 0
+        else
+          return false
+        end
+      else
+        return @total_query_num % QUERY_INTERVAL == 0
+      end
+    end
+
+    def hitrate_stats(src=nil)
+      if src
+        io = File.open("#{statistics.stat_dir}/hitrate_querybase_total_#{src}.log", "a+")
+        if total_hit_query(src)
+          total_hit_query(src).each do |type, n|
+            if type == "A"
+              hitrate = (client_query_num(src)[type] == 0) ? 0 : n.to_f / client_query_num(src)[type]
+              io.puts "#{interval_query_num(src)} #{hitrate}"
+            end
+          end
+        end
+        io.close
+      else
+        io = File.open("#{statistics.stat_dir}/hitrate_querybase_total.log", "a+")
+        io.puts "#{@total_query_num} #{@total_hit_query_num / @total_query_num.to_f}"
+        io.close
+      end
+    end
+
+    def cache_stats
+      io = File.open("#{statistics.stat_dir}/cache_querybase_total.log", "a+")
+      total_cache = cache.cache.values.inject(0) {|ret, e| ret += e.size }
+      io.puts "#{@total_query_num} #{total_cache}"
+      io.close
+    end
+
+    def recache_stats
+      io = File.open("#{statistics.stat_dir}/recache_querybase_total.log" "a+")
+      total_recache = recache.recaches.values.inject(0) {|ret, e| ret += e }
+      io.puts "#{@total_query_num} #{total_recache}"
+      io.close
     end
   end
 end
