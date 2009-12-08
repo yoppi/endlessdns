@@ -135,6 +135,9 @@ module EndlessDNS
 
     def check_query_prob(name, type, query)
       info = query.query_info(query)
+      unless info
+        check_cache_ref(name, type)
+      end
       prob = calc_prob(info) 
       if rand() < prob
         return true
