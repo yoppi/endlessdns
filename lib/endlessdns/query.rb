@@ -75,18 +75,31 @@ module EndlessDNS
         @interval_query_num[src] ||= 0
         @interval_query_num[src] += 1
       end
+
       if interval?(src)
-        io = File.open("#{statistics.stat_dir}/hitrate_pktbase_total_#{src}.log", "a+")
-        if total_hit_query(src)
-          total_hit_query(src).each do |type, n|
-            if type == "A"
-              hitrate = (client_query_num(src)[type] == 0) ? 0 : n.to_f / client_query_num(src)[type]
-              io.puts "#{interval_query_num(src)} #{hitrate}"
-            end
+        hitrate_stats(src)
+        cache_stats()
+        recache_stats()
+      end
+    end
+
+    def hitrate_stats(src)
+      io = File.open("#{statistics.stat_dir}/hitrate_pktbase_total_#{src}.log", "a+")
+      if total_hit_query(src)
+        total_hit_query(src).each do |type, n|
+          if type == "A"
+            hitrate = (client_query_num(src)[type] == 0) ? 0 : n.to_f / client_query_num(src)[type]
+            io.puts "#{interval_query_num(src)} #{hitrate}"
           end
         end
-        io.close
       end
+      io.close
+    end
+
+    def cache_stats
+    end
+
+    def recache_stats
     end
 
     def clear_client_query
