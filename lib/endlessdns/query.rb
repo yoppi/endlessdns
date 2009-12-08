@@ -1,7 +1,7 @@
 module EndlessDNS
   class Query
 
-    PKT_INTERVAL = 1000
+    QUERY_INTERVAL = 1000
 
     attr_reader :query_info, :client_query_num
     attr_reader :localdns_query, :localdns_query_num
@@ -183,12 +183,12 @@ module EndlessDNS
     def interval?(src=nil)
       if src
         if @interval_query_num[src] && @interval_query_num[src] > 0
-          return @interval_query_num[src] % PKT_INTERVAL == 0
+          return @interval_query_num[src] % QUERY_INTERVAL == 0
         else
           return false
         end
       else
-        return @total_query_num % PKT_INTERVAL == 0
+        return @total_query_num % QUERY_INTERVAL == 0
       end
     end
 
