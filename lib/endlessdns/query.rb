@@ -6,6 +6,7 @@ module EndlessDNS
     attr_reader :query_info, :client_query_num
     attr_reader :localdns_query, :localdns_query_num
     attr_reader :timebase_hit_query, :pktbase_hit_query, :total_hit_query
+    attr_reader :total_query_num
     attr_accessor :interval_query_num
 
     class << self
@@ -34,6 +35,8 @@ module EndlessDNS
       @timebase_hit_query = {}
       @pktbase_hit_query = {}
       @total_hit_query = {}
+
+      @total_query_num = 0
 
       @mutex = Mutex.new
     end
@@ -74,34 +77,45 @@ module EndlessDNS
 
         @interval_query_num[src] ||= 0
         @interval_query_num[src] += 1
+
+        @total_query_num += 1
       end
 
-      if interval?(src)
-        hitrate_stats(src)
+      if interval?
+        hitrate_stats()
         cache_stats()
         recache_stats()
       end
     end
 
-    def hitrate_stats(src)
-      io = File.open("#{statistics.stat_dir}/hitrate_querybase_total_#{src}.log", "a+")
-      if total_hit_query(src)
-        total_hit_query(src).each do |type, n|
-          if type == "A"
-            hitrate = (client_query_num(src)[type] == 0) ? 0 : n.to_f / client_query_num(src)[type]
-            io.puts "#{interval_query_num(src)} #{hitrate}"
+    def hitrate_stats(src=nil)
+      if src
+        io = File.open("#{statistics.stat_dir}/hitrate_querybase_total_#{src}.log", "a+")
+        if total_hit_query(src)
+          total_hit_query(src).each do |type, n|
+            if type == "A"
+              hitrate = (client_query_num(src)[type] == 0) ? 0 : n.to_f / client_query_num(src)[type]
+              io.puts "#{interval_query_num(src)} #{hitrate}"
+            end
           end
         end
+        io.close
+      else
       end
-      io.close
     end
 
     def cache_stats
       io = File.open("#{statistics.stat_dir}/cache_querybase_total.log", "a+")
+      total_cache = cache.cache.values.inject(0) {|ret, e| ret += e.size }
+      io.puts "#{@total_query_num} #{total_cache}"
       io.close
     end
 
     def recache_stats
+      io = File.open("#{statistics.stat_dir}/recache_querybase_total.log" "a+")
+      total_recache = recache.recaches.values.inject(0) {|ret, e| ret += e }
+      io.puts "#{@total_query_num} #{total_recache}"
+      io.close
     end
 
     def clear_client_query
@@ -168,8 +182,7 @@ module EndlessDNS
           return false
         end
       else
-        qnum = @interval_query_num.values.inject(0) {|ret, e| ret += e }
-        return qnum % PKT_INTERVAL == 0
+        return @total_query_num % PKT_INTERVAL == 0
       end
     end
 
