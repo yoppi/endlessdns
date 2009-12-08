@@ -133,8 +133,8 @@ module EndlessDNS
       cache.init_cache_ref(name, type)
     end
 
-    def check_query_prob(name, type, query)
-      info = query.query_info(query)
+    def check_query_prob(name, type, q)
+      info = query.query_info(q)
       unless info
         check_cache_ref(name, type)
       end
