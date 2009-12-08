@@ -77,7 +77,7 @@ module EndlessDNS
     # CNAMEでhitすれば、さらにその正規名とtypeで検索
     # hitしなければ存在しない
     def cached?(name, type)
-      key = make_key(name, key)
+      key = make_key(name, type)
       if @cache.has_key? key
         return true
       elsif check_cname(name, type)
