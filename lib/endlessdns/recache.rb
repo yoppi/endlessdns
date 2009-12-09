@@ -153,7 +153,7 @@ module EndlessDNS
       _begin_t = Time.local(info['begin_t'].year, info['begin_t'].month, info['begin_t'].day)
       elapse_day = (_now - _begin_t) / 86400 + 1
       qnday_prob = info['qnday'] / elapse_day.to_f
-      qntz_prob = info['qntz_total'] ? (info['qntz_total']/info['qnday'].to_f)/24.0 : info['qntz'].size / 24.0
+      qntz_prob = info['qntz_total'] ? (info['qntz_total'].to_f/info['qnday'] - 1)/24.0 : info['qntz'].size / 24.0
       qnday_prob * qntz_prob
     end
 
