@@ -134,15 +134,19 @@ module EndlessDNS
     end
 
     def check_query_prob(name, type, q)
-      info = query.query_info(q)
-      unless info
-        check_cache_ref(name, type)
-      end
-      prob = calc_prob(info) 
-      if rand() < prob
+      if check_cache_ref(name, type)
         return true
       else
-        check_cache_ref(name, type)
+        info = query.query_info(q)
+        unless info
+          return false
+        end
+        prob = calc_prob(info)
+        if rand() < prob
+          return true
+        else
+          return false
+        end
       end
     end
 
