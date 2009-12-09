@@ -142,11 +142,7 @@ module EndlessDNS
           return false
         end
         prob = calc_prob(info)
-        if rand() < prob
-          return true
-        else
-          return false
-        end
+        return rand() <= prob
       end
     end
 
