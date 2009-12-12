@@ -152,8 +152,16 @@ module EndlessDNS
       _now = Time.local(now.year, now.month, now.day)
       _begin_t = Time.local(info['begin_t'].year, info['begin_t'].month, info['begin_t'].day)
       elapse_day = (_now - _begin_t) / 86400 + 1
-      qnday_prob = info['qnday'] / elapse_day.to_f
-      qntz_prob = info['qntz_total'] ? (info['qntz_total'].to_f/info['qnday'] - 1)/24.0 : info['qntz'].size / 24.0
+
+      begin
+        qnday_prob = info['qnday'] / elapse_day.to_f
+        qntz_prob =
+          info['qntz_total'] ?
+          (info['qntz_total'].to_f/(info['qnday'] - 1))/24.0 :
+          info['qntz'].size / 24.0
+      rescue => e
+        log.warn("calc prob failed: " + e)
+      end
       qnday_prob * qntz_prob
     end
 
