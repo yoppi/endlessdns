@@ -10,34 +10,79 @@ module EndlessDNS
       # { expire_time => [key, ...], ...}
       @table = {}
       @ttl_table = PQueue.new(proc {|x, y| x < y})
-      @min_expire_time = nil
+      #@min_expire_time = nil
 
       @mutex = Mutex.new
 
-      timer.add_observer(self)
+      #timer.add_observer(self)
+      ttl_cleaner
     end
 
     def add(name, type, ttl, query)
       now = Time.now.tv_sec
       expire_time = ttl + now
-      if @min_expire_time == nil or @min_expire_time > expire_time
-        set_min_expire(expire_time)
-        add_table(expire_time, name, type, query)
-        add_ttl(expire_time)
-        if run_timer?
-          stop_timer
+      add_table(expire_time, name, type, query)
+      add_ttl(expire_time)
+      #if @min_expire_time == nil or @min_expire_time > expire_time
+      #  set_min_expire(expire_time)
+      #  add_table(expire_time, name, type, query)
+      #  add_ttl(expire_time)
+      #  if run_timer?
+      #    stop_timer
+      #  end
+      #  set_timer(ttl, expire_time)
+      #  start_timer
+      #elsif @min_expire_time <= expire_time
+      #  add_table(expire_time, name, type, query)
+      #  add_ttl(expire_time) if @min_expire_time != expire_time
+      #end
+    end
+
+    def ttl_cleaner
+      @cleaner_th = Thread.new do
+        loop do
+          sleep 3 # 3秒おきにttlテーブルから超過しているものを取得する
+          expired_times = Set.new
+          now = Time.now.tv_sec
+          loop do
+            if @ttl_table.top <= now
+              expired_times << @ttl_table.pop
+            else
+              break
+            end
+          end
+          if expired_times.size > 0
+            update2(expired_times)
+          end
         end
-        set_timer(ttl, expire_time)
-        start_timer
-      elsif @min_expire_time <= expire_time
-        add_table(expire_time, name, type, query)
-        add_ttl(expire_time) if @min_expire_time != expire_time
       end
     end
 
     def update(expire_time)
       do_recache(expire_time)
       set_next_expire
+    end
+
+    def update2(expired_times)
+      expired_records = collect_expired_records(expired_times)
+      do_recache2(expired_records)
+    end
+
+    def collect_expired_records(expired_times)
+      ret = []
+      expired_times.each do |expired|
+        if @table.has_key? expired
+          ret += @table[expired]
+          delete_table(expired)
+        end
+      end
+      ret
+    end
+
+    def do_recache2(expired_records)
+      expired_records.each do |record|
+        recache.invoke(record[0], record[1], record[2])
+      end
     end
 
     def do_recache(expire)
