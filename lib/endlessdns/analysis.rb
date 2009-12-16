@@ -74,24 +74,24 @@ module EndlessDNS
       dns.question.each  do |q|
         if client_query?(dst)
           #log.debug("[#{time}]client_query")
-          client_query(src, q.qName, q.qType.to_s)
+          client_query(src, q.qName, q.qType.to_s, time)
         elsif localdns_query?(src)
           #log.debug("[#{time}]localdns_query")
-          localdns_query(src, q.qName, q.qType.to_s)
+          localdns_query(dst, q.qName, q.qType.to_s, time)
         end
       end
     end
 
-    def client_query(src, name, type)
+    def client_query(src, name, type, time)
       if cached?(name, type)
-        statistics.add_hit_query(src, type)
+        query.add_hit_query(src, type)
         #log.debug("cached!")
       end
-      statistics.add_client_query(src, name, type)
+      query.add_client_query(src, name, type, time)
     end
 
-    def localdns_query(src, name, type)
-      statistics.add_localdns_query(src, name, type)
+    def localdns_query(dst, name, type, time)
+      query.add_localdns_query(dst, name, type, time)
     end
 
     def analy_response(src, dst, time, dns)
@@ -111,7 +111,7 @@ module EndlessDNS
         (dns.answer + dns.authority + dns.additional).each do |rr|
           name = root?(rr.name) ? '.' : rr.name
           cache.add_cache_ref(name, rr.type)
-          statistics.add_localdns_response(dst, name, rr.type)
+          #response.add_localdns_response(dst, name, rr.type)
         end
       end
     end
@@ -120,15 +120,21 @@ module EndlessDNS
       if nxdomain?(dns)
         dispose_negative(dst, dns)
       else
+        q = dns.question.first
+        unless q
+          log.warn("outside response has no question")
+          return
+        end
+        query = q.qName + ":" + q.qType.to_s
         (dns.answer + dns.authority + dns.additional).each do |rr|
           next if rr.type.to_s == "OPT" # OPTは疑似レコードなのでスキップ
 
           name = root?(rr.name) ? '.' : rr.name # NOTE: namesのdn_expandで対処すべきか?
           unless cached?(name, rr.type)
             cache.add(name, rr.type, rdata(rr))
-            add_table(name, rr.type, rr.ttl)
+            add_table(name, rr.type, rr.ttl, query)
           end
-          statistics.add_outside_response(src, name, rr.type)
+          #response.add_outside_response(src, name, rr.type)
         end
       end
     end
@@ -136,7 +142,7 @@ module EndlessDNS
     def dispose_negative(dst, dns)
       if dns.header.qdCount == 1 && dns.header.nsCount == 1
         q = dns.question.first
-        cache.add_negative_cache_client(dst, q.qName, q.qType.to_s)
+        #cache.add_negative_cache_client(dst, q.qName, q.qType.to_s)
         cache.add_negative_cache_ref(q.qName, q.qType.to_s)
         cache.add_negative(q.qName, q.qType.to_s)
         log.warn("negative cache[#{dst} send #{q.qName}/#{q.qType.to_s}]")
@@ -179,8 +185,8 @@ module EndlessDNS
       data
     end
 
-    def add_table(name, type, ttl)
-      table.add(name, type, ttl)
+    def add_table(name, type, ttl, query)
+      table.add(name, type, ttl, query)
     end
 
     def cached?(name, type)

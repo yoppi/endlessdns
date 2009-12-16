@@ -17,12 +17,12 @@ module EndlessDNS
       timer.add_observer(self)
     end
 
-    def add(name, type, ttl)
+    def add(name, type, ttl, query)
       now = Time.now.tv_sec
       expire_time = ttl + now
       if @min_expire_time == nil or @min_expire_time > expire_time
         set_min_expire(expire_time)
-        add_table(expire_time, name, type)
+        add_table(expire_time, name, type, query)
         add_ttl(expire_time)
         if run_timer?
           stop_timer
@@ -30,7 +30,7 @@ module EndlessDNS
         set_timer(ttl, expire_time)
         start_timer
       elsif @min_expire_time <= expire_time
-        add_table(expire_time, name, type)
+        add_table(expire_time, name, type, query)
         add_ttl(expire_time) if @min_expire_time != expire_time
       end
     end
@@ -41,13 +41,13 @@ module EndlessDNS
     end
 
     def do_recache(expire)
-      records = @table[expire] # [[name, type], [name, type], ...]
+      records = @table[expire] # [[name, type, query], ...]
       delete_table(expire)
       if records
         records.each do |record|
           #log.info("update! #{expire}: #{record[0]}, #{record[1]}")
           Thread.new do
-            recache.invoke(record[0], record[1])
+            recache.invoke(record[0], record[1], record[2])
           end
         end
       else
@@ -96,12 +96,10 @@ module EndlessDNS
       timer.set(cnt, expire_time)
     end
 
-    def add_table(expire_time, name, type)
+    def add_table(expire_time, name, type, query)
       @mutex.synchronize do
-        @table[expire_time] ||= []
-        unless @table[expire_time].include? [name, type]
-          @table[expire_time] << [name, type]
-        end
+        @table[expire_time] ||= Set.new
+        @table[expire_time] << [name, type, query]
       end
     end
 

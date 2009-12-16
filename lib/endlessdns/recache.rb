@@ -27,7 +27,8 @@ module EndlessDNS
     METHODS = [
       'no',
       'all',
-      'ref'
+      'ref',
+      'prob'
     ]
 
     class << self
@@ -52,9 +53,9 @@ module EndlessDNS
       @mutex = Mutex.new
     end
 
-    def invoke(name, type)
+    def invoke(name, type, query)
       delete_cache(name, type)
-      if need_recache?(name, type)
+      if need_recache?(name, type, query)
         type_class = select_type_class(type)
         begin
           @resolver.getresource(name, type_class)
@@ -65,10 +66,21 @@ module EndlessDNS
       end
     end
 
+    # master, slave間でのキャッシュの共有に使用
+    def force_invoke(name, type)
+      begin
+        type_class = select_type_class(type)
+        @resolver.getresource(name, type_class)
+      rescue => e
+        log.warn("#{e}")
+      end
+    end
+
     def add_recache(name, type)
+      key = name + ":" + type
       @mutex.synchronize do
-        @recaches[[name, type]] ||= 0
-        @recaches[[name, type]] += 1
+        @recaches[key] ||= 0
+        @recaches[key] += 1
       end
     end
 
@@ -82,7 +94,7 @@ module EndlessDNS
       cache.delete(name, type)
     end
 
-    def need_recache?(name, type)
+    def need_recache?(name, type, query)
       # typeの判断
       if @recache_types[type]
         # 再キャッシュ方法
@@ -93,6 +105,8 @@ module EndlessDNS
           return true
         when "ref"
           return check_cache_ref(name, type)
+        when "prob"
+          return check_query_prob(name, type, query)
         end
       end
       false
@@ -117,6 +131,38 @@ module EndlessDNS
 
     def init_cache_ref(name, type)
       cache.init_cache_ref(name, type)
+    end
+
+    def check_query_prob(name, type, q)
+      if check_cache_ref(name, type)
+        return true
+      else
+        info = query.query_info(q)
+        unless info
+          return false
+        end
+        prob = calc_prob(info)
+        return rand() <= prob
+      end
+    end
+
+    def calc_prob(info)
+      now = Time.now
+      #日付のnormalize
+      _now = Time.local(now.year, now.month, now.day)
+      _begin_t = Time.local(info['begin_t'].year, info['begin_t'].month, info['begin_t'].day)
+      elapse_day = (_now - _begin_t) / 86400 + 1
+
+      begin
+        qnday_prob = info['qnday'] / elapse_day.to_f
+        qntz_prob =
+          info['qntz_total'] ?
+          (info['qntz_total'].to_f/(info['qnday'] - 1))/24.0 :
+          info['qntz'].size / 24.0
+      rescue => e
+        log.warn("calc prob failed: " + e)
+      end
+      qnday_prob * qntz_prob
     end
 
     def default_types
