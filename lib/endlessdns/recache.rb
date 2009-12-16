@@ -38,6 +38,7 @@ module EndlessDNS
     end
 
     attr_reader :recaches, :recache_types, :recache_method
+    attr_reader :querybase_recache_n
     attr_accessor :top_view
 
     def initialize
