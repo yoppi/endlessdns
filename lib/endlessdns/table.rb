@@ -72,7 +72,7 @@ module EndlessDNS
       ret = []
       expired_times.each do |expired|
         if @table.has_key? expired
-          ret += @table[expired]
+          ret += @table[expired].to_a
           delete_table(expired)
         end
       end
