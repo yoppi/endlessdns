@@ -49,6 +49,7 @@ module EndlessDNS
       # {[name, type] => n, ...}
       @recaches = {}
       @top_view = 20
+      @querybase_recache_n = 0
 
       @mutex = Mutex.new
     end
@@ -81,12 +82,20 @@ module EndlessDNS
       @mutex.synchronize do
         @recaches[key] ||= 0
         @recaches[key] += 1
+
+        @querybase_recache_n += 1
       end
     end
 
     def clear_recache
       @mutex.synchronize do
         @recaches.clear
+      end
+    end
+
+    def clear_querybase_recache
+      @mutex.synchronize do
+        @querybase_recache_n = 0
       end
     end
 
