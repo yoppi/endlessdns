@@ -71,14 +71,20 @@ module EndlessDNS
     end
 
     def analy_query(src, dst, time, dns)
-      dns.question.each  do |q|
-        if client_query?(dst)
-          #log.debug("[#{time}]client_query")
-          client_query(src, q.qName, q.qType.to_s, time)
-        elsif localdns_query?(src)
-          #log.debug("[#{time}]localdns_query")
-          localdns_query(dst, q.qName, q.qType.to_s, time)
-        end
+      r = get_query(dns)
+      if r
+        qname, qtype = r
+      else
+        log.warn("query has no question")
+        return
+      end
+
+      if client_query?(dst)
+        #log.debug("[#{time}]client_query")
+        client_query(src, qname, qtype, time)
+      elsif localdns_query?(src)
+        #log.debug("[#{time}]localdns_query")
+        localdns_query(dst, qname, qtype, time)
       end
     end
 
@@ -108,7 +114,16 @@ module EndlessDNS
       if nxdomain?(dns) # negativeキャッシュの処理
         dispose_negative(dst, dns)
       else
+        r = get_query(dns)
+        if r
+          qname, qtype = r
+        else
+          log.warn("localdns response has no question")
+          return
+        end
+        query = qname + ":" + qtype
         (dns.answer + dns.authority + dns.additional).each do |rr|
+
           name = root?(rr.name) ? '.' : rr.name
           cache.add_cache_ref(name, rr.type)
           #response.add_localdns_response(dst, name, rr.type)
@@ -120,12 +135,14 @@ module EndlessDNS
       if nxdomain?(dns)
         dispose_negative(dst, dns)
       else
-        q = dns.question.first
-        unless q
+        r = get_query(dns)
+        if r
+          qname, qtype = r
+        else
           log.warn("outside response has no question")
           return
         end
-        query = q.qName + ":" + q.qType.to_s
+        query = qname + ":" + qtype
         (dns.answer + dns.authority + dns.additional).each do |rr|
           next if rr.type.to_s == "OPT" # OPTは疑似レコードなのでスキップ
 
@@ -149,6 +166,14 @@ module EndlessDNS
       else
         log.warn("More than one question or authority parts were received")
       end
+    end
+
+    def get_query(dns)
+      q = dns.question.first
+      unless q
+        return nil
+      end
+      [q.qName, q.qType.to_s]
     end
 
     def rdata(rr)
