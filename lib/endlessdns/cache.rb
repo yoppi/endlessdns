@@ -26,6 +26,9 @@ module EndlessDNS
       # {src(client) => { name:type => n } }
       @negative_cache_client = {}
 
+      # {record => [query, query], ..}
+      @record_info = {}
+
       @mutex = Mutex.new
     end
 
@@ -59,6 +62,18 @@ module EndlessDNS
         @negative_cache_ref[key] ||= 0
         @negative_cache_ref[key] += 1
       end
+    end
+
+    def add_record_info(name, type, query)
+      key = make_key(name, type)
+      @mutex.synchronize do
+        @record_info[key] ||= Set.new
+        @record_info[key] << query
+      end
+    end
+
+    def record_info(record)
+      @record_info[record]
     end
 
     def delete(name, type)

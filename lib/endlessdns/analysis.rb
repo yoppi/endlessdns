@@ -143,6 +143,7 @@ module EndlessDNS
           return
         end
         query = qname + ":" + qtype
+
         (dns.answer + dns.authority + dns.additional).each do |rr|
           next if rr.type.to_s == "OPT" # OPTは疑似レコードなのでスキップ
 
