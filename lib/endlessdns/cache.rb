@@ -72,8 +72,9 @@ module EndlessDNS
       end
     end
 
-    def record_info(record)
-      @record_info[record]
+    def record_info(name, type)
+      key = make_key(name, type)
+      @record_info[key]
     end
 
     def delete(name, type)

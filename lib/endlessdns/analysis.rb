@@ -71,6 +71,16 @@ module EndlessDNS
     end
 
     def analy_query(src, dst, time, dns)
+      if client_query?(dst)
+        #log.debug("[#{time}]client_query")
+        client_query(src, dns, time)
+      elsif localdns_query?(src)
+        #log.debug("[#{time}]localdns_query")
+        localdns_query(dst, dns, time)
+      end
+    end
+
+    def client_query(src, dns, time)
       r = get_query(dns)
       if r
         qname, qtype = r
@@ -79,25 +89,30 @@ module EndlessDNS
         return
       end
 
-      if client_query?(dst)
-        #log.debug("[#{time}]client_query")
-        client_query(src, qname, qtype, time)
-      elsif localdns_query?(src)
-        #log.debug("[#{time}]localdns_query")
-        localdns_query(dst, qname, qtype, time)
-      end
-    end
-
-    def client_query(src, name, type, time)
-      if cached?(name, type)
-        query.add_hit_query(src, type)
+      if cached?(qname, qtype)
+        query.add_hit_query(src, qtype)
         #log.debug("cached!")
       end
-      query.add_client_query(src, name, type, time)
+      query.add_client_query(src, qname, qtype, time)
     end
 
-    def localdns_query(dst, name, type, time)
-      query.add_localdns_query(dst, name, type, time)
+    def localdns_query(dst, dns, time)
+      r = get_query(dns)
+      if r
+        qname, qtype = r
+      else
+        log.warn("query has no question")
+        return
+      end
+      q = qname + ":" + qtype
+        (dns.answer + dns.authority + dns.additional).each do |rr|
+          name = root?(rr.name) ? '.' : rr.name
+          cache.add_cache_ref(name, rr.type)
+          cache.add_record_info(name, rr.type, query)
+          #response.add_localdns_response(dst, name, rr.type)
+        end
+
+      query.add_localdns_query(dst, qname, qtype, time)
     end
 
     def analy_response(src, dst, time, dns)
@@ -124,9 +139,9 @@ module EndlessDNS
         query = qname + ":" + qtype
 
         (dns.answer + dns.authority + dns.additional).each do |rr|
-          name = root?(rr.name) ? '.' : rr.name
-          cache.add_cache_ref(name, rr.type)
-          cache.add_record_info(name, rr.type, query)
+          #name = root?(rr.name) ? '.' : rr.name
+          cache.add_cache_ref(rr.name, rr.type)
+          cache.add_record_info(rr.name, rr.type, query)
           #response.add_localdns_response(dst, name, rr.type)
         end
       end
@@ -146,12 +161,13 @@ module EndlessDNS
         query = qname + ":" + qtype
 
         (dns.answer + dns.authority + dns.additional).each do |rr|
+          #name = root?(rr.name) ? '.' : rr.name # NOTE: namesのdn_expandで対処すべきか?
           next if rr.type.to_s == "OPT" # OPTは疑似レコードなのでスキップ
 
-          name = root?(rr.name) ? '.' : rr.name # NOTE: namesのdn_expandで対処すべきか?
-          unless cached?(name, rr.type)
-            cache.add(name, rr.type, rdata(rr))
-            add_table(name, rr.type, rr.ttl, query)
+          cache.add_record_info(rr.name, rr.type, query)
+          unless cached?(rr.name, rr.type)
+            cache.add(rr.name, rr.type, rdata(rr))
+            add_table(rr.name, rr.type, rr.ttl)
           end
           #response.add_outside_response(src, name, rr.type)
         end
@@ -212,8 +228,8 @@ module EndlessDNS
       data
     end
 
-    def add_table(name, type, ttl, query)
-      table.add(name, type, ttl, query)
+    def add_table(name, type, ttl)
+      table.add(name, type, ttl)
     end
 
     def cached?(name, type)

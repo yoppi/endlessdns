@@ -55,16 +55,50 @@ module EndlessDNS
       @mutex = Mutex.new
     end
 
-    def invoke(name, type, query)
+    def default_method
+      method = config.get("recache-method") ? config.get("recache-method") : 'all'
+      select_method(method)
+    end
+
+    def select_method(method)
+      case method
+      when "no"
+        return RecacheNo.new
+      when "all"
+        return RecacheAll.new
+      when "ref"
+        return RecacheRef.new
+      when "prob"
+        return RecacheProb.new
+      end
+    end
+
+    def default_types
+      ret = {}
+      TYPES.keys.each do |type|
+        ret[type] = true
+      end
+      ret
+    end
+
+    def invoke(name, type)
       delete_cache(name, type)
-      if need_recache?(name, type, query)
-        type_class = select_type_class(type)
-        begin
-          @resolver.getresource(name, type_class)
-        rescue => e
-          log.warn("#{e}")
+      if @recache_types[type]
+        records = @recache_method.need_recache?(name, type)
+        if records != false
+          Thread.new do
+            records.each do |record|
+              n, t = record.split(':')
+              type_class = select_type_class(t)
+              begin
+                @resolver.getresource(n, type_class)
+              rescue => e
+                log.warn("ReCache was failed [#{e}]")
+              end
+              add_recache(name, type)
+            end
+          end
         end
-        add_recache(name, type)
       end
     end
 
@@ -104,87 +138,8 @@ module EndlessDNS
       cache.delete(name, type)
     end
 
-    def need_recache?(name, type, query)
-      # typeの判断
-      if @recache_types[type]
-        # 再キャッシュ方法
-        case @recache_method
-        when "no" # for monitoring and experiments
-          return false
-        when "all"
-          return true
-        when "ref"
-          return check_cache_ref(name, type)
-        when "prob"
-          return check_query_prob(name, type, query)
-        end
-      end
-      false
-    end
-
     def select_type_class(type)
       TYPES[type]
-    end
-
-    def check_cache_ref(name, type)
-      ref = cache.check_cache_ref(name, type)
-      if ref == nil
-        log.warn("[#{name}, #{type}] is no reference")
-        false
-      elsif ref > 1
-        cache.init_cache_ref(name, type)
-        true
-      else
-        false
-      end
-    end
-
-    def init_cache_ref(name, type)
-      cache.init_cache_ref(name, type)
-    end
-
-    def check_query_prob(name, type, q)
-      if check_cache_ref(name, type)
-        return true
-      else
-        info = query.query_info(q)
-        unless info
-          return false
-        end
-        prob = calc_prob(info)
-        return rand() <= prob
-      end
-    end
-
-    def calc_prob(info)
-      now = Time.now
-      #日付のnormalize
-      _now = Time.local(now.year, now.month, now.day)
-      _begin_t = Time.local(info['begin_t'].year, info['begin_t'].month, info['begin_t'].day)
-      elapse_day = (_now - _begin_t) / 86400 + 1
-
-      begin
-        qnday_prob = info['qnday'] / elapse_day.to_f
-        qntz_prob =
-          info['qntz_total'] ?
-          (info['qntz_total'].to_f/(info['qnday'] - 1))/24.0 :
-          info['qntz'].size / 24.0
-      rescue => e
-        log.warn("calc prob failed: " + e)
-      end
-      qnday_prob * qntz_prob
-    end
-
-    def default_types
-      ret = {}
-      TYPES.keys.each do |type|
-        ret[type] = true
-      end
-      ret
-    end
-
-    def default_method
-      config.get("recache-method") ? config.get("recache-method") : 'all'
     end
 
     def set_recache_types(types)
@@ -206,7 +161,96 @@ module EndlessDNS
     end
 
     def set_recache_method(method)
-      @recache_method = method
+      @recache_method = select_method(method)
+    end
+  end
+
+  class RecacheMethod
+    def check_cache_ref(name, type)
+      ref = cache.check_cache_ref(name, type)
+      if ref == nil
+        log.warn("[#{name}, #{type}] is no reference")
+        false
+      elsif ref > 1
+        cache.init_cache_ref(name, type)
+        true
+      else
+        false
+      end
+    end
+
+    def init_cache_ref(name, type)
+      cache.init_cache_ref(name, type)
+    end
+  end
+
+  class RecacheAll < RecacheMethod
+    def need_recache?(name, type)
+      record_info = cache.record_info(name, type)
+      return record_info.to_a
+    end
+  end
+
+  class RecacheNo < RecacheMethod
+    def need_recache?(name, type)
+      return false
+    end
+  end
+
+  class RecacheRef < RecacheMethod
+    def need_recache?(name, type)
+      if check_cache_ref(name, type)
+        record_info = cache.record_info(name, type)
+        return record_info.to_a
+      else
+        false
+      end
+    end
+  end
+
+  class RecacheProb < RecacheMethod
+    def need_recache?(name, type)
+      return check_query_prob(name, type)
+    end
+
+    def check_query_prob(name, type)
+      record_info = cache.record_info(name, type).to_a
+      if check_cache_ref(name, type)
+        return record_info
+      else
+        record_info.each do |q|
+          info = query.query_info(q)
+          unless info
+            next
+          end
+          prob = calc_prob(info)
+          if rand() <= prob
+            return record_info
+          else
+            next
+          end
+        end
+        return false
+      end
+    end
+
+    def calc_prob(info)
+      now = Time.now
+      #日付のnormalize
+      _now = Time.local(now.year, now.month, now.day)
+      _begin_t = Time.local(info['begin_t'].year, info['begin_t'].month, info['begin_t'].day)
+      elapse_day = (_now - _begin_t) / 86400 + 1
+
+      begin
+        qnday_prob = info['qnday'] / elapse_day.to_f
+        qntz_prob =
+          info['qntz_total'] ?
+          (info['qntz_total'].to_f/(info['qnday'] - 1))/24.0 :
+          info['qntz'].size / 24.0
+      rescue => e
+        log.warn("calc prob failed: " + e)
+      end
+      qnday_prob * qntz_prob
     end
   end
 end

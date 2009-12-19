@@ -18,10 +18,10 @@ module EndlessDNS
       ttl_cleaner
     end
 
-    def add(name, type, ttl, query)
+    def add(name, type, ttl)
       now = Time.now.tv_sec
       expire_time = ttl + now
-      add_table(expire_time, name, type, query)
+      add_table(expire_time, name, type)
       add_ttl(expire_time)
       #if @min_expire_time == nil or @min_expire_time > expire_time
       #  set_min_expire(expire_time)
@@ -81,7 +81,7 @@ module EndlessDNS
 
     def do_recache2(expired_records)
       expired_records.each do |record|
-        recache.invoke(record[0], record[1], record[2])
+        recache.invoke(record[0], record[1])
       end
     end
 
@@ -141,10 +141,10 @@ module EndlessDNS
       timer.set(cnt, expire_time)
     end
 
-    def add_table(expire_time, name, type, query)
+    def add_table(expire_time, name, type)
       @mutex.synchronize do
         @table[expire_time] ||= Set.new
-        @table[expire_time] << [name, type, query]
+        @table[expire_time] << [name, type]
       end
     end
 
