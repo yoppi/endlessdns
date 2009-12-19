@@ -104,14 +104,6 @@ module EndlessDNS
         log.warn("query has no question")
         return
       end
-      q = qname + ":" + qtype
-        (dns.answer + dns.authority + dns.additional).each do |rr|
-          name = root?(rr.name) ? '.' : rr.name
-          cache.add_cache_ref(name, rr.type)
-          cache.add_record_info(name, rr.type, query)
-          #response.add_localdns_response(dst, name, rr.type)
-        end
-
       query.add_localdns_query(dst, qname, qtype, time)
     end
 
