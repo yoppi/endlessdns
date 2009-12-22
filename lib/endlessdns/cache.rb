@@ -123,7 +123,7 @@ module EndlessDNS
 
     def check_cname(name, type)
       if @cache.has_key? name + ":" + "CNAME"
-        cnames = @cache[name + ":" +"CNAME"]
+        cnames = @cache[name + ":" + "CNAME"]
         cnames.each do |cname|
           if @cache.has_key? cname + ":" + type
             return true

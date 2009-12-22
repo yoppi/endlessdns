@@ -71,16 +71,6 @@ module EndlessDNS
     end
 
     def analy_query(src, dst, time, dns)
-      if client_query?(dst)
-        #log.debug("[#{time}]client_query")
-        client_query(src, dns, time)
-      elsif localdns_query?(src)
-        #log.debug("[#{time}]localdns_query")
-        localdns_query(dst, dns, time)
-      end
-    end
-
-    def client_query(src, dns, time)
       r = get_query(dns)
       if r
         qname, qtype = r
@@ -88,7 +78,16 @@ module EndlessDNS
         log.warn("query has no question")
         return
       end
+      if client_query?(dst)
+        #log.debug("[#{time}]client_query")
+        client_query(src, qname, qtype, time)
+      elsif localdns_query?(src)
+        #log.debug("[#{time}]localdns_query")
+        localdns_query(dst, qname, qtype, time)
+      end
+    end
 
+    def client_query(src, qname, qtype, time)
       if cached?(qname, qtype)
         query.add_hit_query(src, qtype)
         #log.debug("cached!")
@@ -96,73 +95,51 @@ module EndlessDNS
       query.add_client_query(src, qname, qtype, time)
     end
 
-    def localdns_query(dst, dns, time)
-      r = get_query(dns)
-      if r
-        qname, qtype = r
-      else
-        log.warn("query has no question")
-        return
-      end
+    def localdns_query(dst, qname, qtype, time)
       query.add_localdns_query(dst, qname, qtype, time)
     end
 
     def analy_response(src, dst, time, dns)
-      if localdns_response?(src)
-        #log.debug("[#{time}]localdns_response")
-        localdns_response(dst, dns)
-      elsif outside_response?(dst)
-        #log.debug("[#{time}]outside_response")
-        outside_response(src, dst, dns)
-      end
-    end
-
-    def localdns_response(dst, dns)
       if nxdomain?(dns) # negativeキャッシュの処理
         dispose_negative(dst, dns)
-      else
-        r = get_query(dns)
-        if r
-          qname, qtype = r
-        else
-          log.warn("localdns response has no question")
-          return
-        end
-        query = qname + ":" + qtype
+        return
+      end
 
-        (dns.answer + dns.authority + dns.additional).each do |rr|
-          #name = root?(rr.name) ? '.' : rr.name
-          cache.add_cache_ref(rr.name, rr.type)
-          cache.add_record_info(rr.name, rr.type, query)
-          #response.add_localdns_response(dst, name, rr.type)
-        end
+      r = get_query(dns)
+      if r
+        qname, qtype = r
+      else
+        log.warn("response has no question")
+        return
+      end
+      query = qname + ":" + qtype
+      if localdns_response?(src)
+        #log.debug("[#{time}]localdns_response")
+        localdns_response(dst, dns, query)
+      elsif outside_response?(dst)
+        #log.debug("[#{time}]outside_response")
+        outside_response(src, dns, query)
       end
     end
 
-    def outside_response(src, dst, dns)
-      if nxdomain?(dns)
-        dispose_negative(dst, dns)
-      else
-        r = get_query(dns)
-        if r
-          qname, qtype = r
-        else
-          log.warn("outside response has no question")
-          return
-        end
-        query = qname + ":" + qtype
+    def localdns_response(dst, dns, query)
+      (dns.answer + dns.authority + dns.additional).each do |rr|
+        cache.add_cache_ref(rr.name, rr.type)
+        cache.add_record_info(rr.name, rr.type, query)
+        #response.add_localdns_response(dst, rr.name, rr.type)
+      end
+    end
 
-        (dns.answer + dns.authority + dns.additional).each do |rr|
-          #name = root?(rr.name) ? '.' : rr.name # NOTE: namesのdn_expandで対処すべきか?
-          next if rr.type.to_s == "OPT" # OPTは疑似レコードなのでスキップ
+    def outside_response(src, dns, query)
+      (dns.answer + dns.authority + dns.additional).each do |rr|
+        next if rr.type.to_s == "OPT" # OPTは疑似レコードなのでスキップ
 
-          cache.add_record_info(rr.name, rr.type, query)
-          unless cached?(rr.name, rr.type)
-            cache.add(rr.name, rr.type, rdata(rr), rr.ttl)
-            add_table(rr.name, rr.type, rr.ttl)
-          end
-          #response.add_outside_response(src, name, rr.type)
+        cache.add_record_info(rr.name, rr.type, query)
+        unless cached?(rr.name, rr.type)
+          cache.add(rr.name, rr.type, rdata(rr))
+          add_table(rr.name, rr.type, rr.ttl)
         end
+        #response.add_outside_response(src, rr.name, rr.type)
       end
     end
 
