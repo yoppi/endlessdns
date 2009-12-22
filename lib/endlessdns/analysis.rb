@@ -123,24 +123,24 @@ module EndlessDNS
     end
 
     def localdns_response(dst, dns, query)
-        (dns.answer + dns.authority + dns.additional).each do |rr|
-          cache.add_cache_ref(rr.name, rr.type)
-          cache.add_record_info(rr.name, rr.type, query)
-          #response.add_localdns_response(dst, rr.name, rr.type)
-        end
+      (dns.answer + dns.authority + dns.additional).each do |rr|
+        cache.add_cache_ref(rr.name, rr.type)
+        cache.add_record_info(rr.name, rr.type, query)
+        #response.add_localdns_response(dst, rr.name, rr.type)
+      end
     end
 
     def outside_response(src, dns, query)
-        (dns.answer + dns.authority + dns.additional).each do |rr|
-          next if rr.type.to_s == "OPT" # OPTは疑似レコードなのでスキップ
+      (dns.answer + dns.authority + dns.additional).each do |rr|
+        next if rr.type.to_s == "OPT" # OPTは疑似レコードなのでスキップ
 
-          cache.add_record_info(rr.name, rr.type, query)
-          unless cached?(rr.name, rr.type)
-            cache.add(rr.name, rr.type, rdata(rr))
-            add_table(rr.name, rr.type, rr.ttl)
-          end
-          #response.add_outside_response(src, rr.name, rr.type)
+        cache.add_record_info(rr.name, rr.type, query)
+        unless cached?(rr.name, rr.type)
+          cache.add(rr.name, rr.type, rdata(rr))
+          add_table(rr.name, rr.type, rr.ttl)
         end
+        #response.add_outside_response(src, rr.name, rr.type)
+      end
     end
 
     def dispose_negative(dst, dns)
