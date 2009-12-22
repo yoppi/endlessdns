@@ -32,11 +32,26 @@ module EndlessDNS
       @mutex = Mutex.new
     end
 
-    def add(name, type, rdata)
+    # name:typeに対するレコードは複数保持すべきか?
+    # CNAMEが複数存在することがある
+    #   hoge.example.com. CNAME foo.ns.com.
+    #   hoge.example.com. CNAME hoge.ns.com.
+    #   foo.ns.com. A ...
+    #   hoge.ns.com. A ...
+    # tableで管理しているTTLはname:typeに対するTTLなので一つでよい．
+    # それにexpireを付ける
+    # 上書きしても良いか?
+    #   hoge.example.com. CNAME foo.ns.com.
+    # がまずキャッシュされる
+    # その次に同じname:typeのレコードを処理する場合
+    #   hoge.example.com. CNAME fuga.ns.com.
+    # すでにhoge.example.com.:CNAMEでキャッシュされているのでaddメソッドが呼ばれることはない．
+    def add(name, type, rdata, ttl)
       key = make_key(name, type)
       @mutex.synchronize do
-        @cache[key] ||= Set.new
-        @cache[key] << rdata
+        @cache[key] ||= {}
+        @cache[key][:rdata] = rdata
+        @cache[key][:expire] = Time.now.tv_sec + ttl
       end
     end
 
