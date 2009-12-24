@@ -45,9 +45,13 @@ module EndlessDNS
       else
         @sieve = CrubySieve.new()
       end
-      _ = config.get('recache-size')
-      @response = Response._new(_)
+      recache_size = default_recache_size()
+      @response = Response._new(recache_size)
       @query = Query.new()
+    end
+
+    def default_recache_size
+      config.get('recache-size') ? config.get('recache-size') : 0
     end
 
     def run
