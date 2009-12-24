@@ -1,5 +1,5 @@
 module EndlessDNS
-  class Query
+  class Query < DNSPacket
 
     QUERY_INTERVAL = 1000
 
@@ -40,6 +40,43 @@ module EndlessDNS
       @total_query_num = 0
 
       @mutex = Mutex.new
+    end
+
+    def analyze(src, dst, time, dns)
+      r = get_query(dns)
+      if r
+        qname, qtype = r
+      else
+        log.warn("query has no question")
+        return
+      end
+      if client_query?(dst)
+        #log.debug("[#{time}]client_query")
+        client_query(src, qname, qtype, time)
+      elsif localdns_query?(src)
+        #log.debug("[#{time}]localdns_query")
+        localdns_query(dst, qname, qtype, time)
+      end
+    end
+
+    def client_query(src, qname, qtype, time)
+      if cached?(qname, qtype, time)
+        add_hit_query(src, qtype)
+        #log.debug("cached!")
+      end
+      add_client_query(src, qname, qtype, time)
+    end
+
+    def localdns_query(dst, qname, qtype, time)
+      add_localdns_query(dst, qname, qtype, time)
+    end
+
+    def client_query?(dst)
+      dst == @dnsip
+    end
+
+    def localdns_query?(src)
+      src == @dnsip
     end
 
     def add_client_query(src, name, type, time)

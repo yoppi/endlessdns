@@ -40,12 +40,14 @@ module EndlessDNS
 
   class Analysis
     def initialize
-      @dnsip = config.get('dnsip')
       if defined? JRUBY_VERSION
         @sieve = JrubySieve.new()
       else
         @sieve = CrubySieve.new()
       end
+      _ = config.get('recache-size')
+      @response = Response._new(_)
+      @query = Query.new()
     end
 
     def run
@@ -64,9 +66,11 @@ module EndlessDNS
       end
 
       if dns.header.query?
-        analy_query(src, dst, time, dns)
+        #analy_query(src, dst, time, dns)
+        @query.analyze(src, dst, time, dns)
       elsif dns.header.response?
-        analy_response(src, dst, time, dns)
+        #analy_response(src, dst, time, dns)
+        @response.analyze(src, dst, time, dns)
       end
     end
 
@@ -198,7 +202,12 @@ module EndlessDNS
     end
 
     def add_table(name, type, ttl)
-      table.add(name, type, ttl)
+      # LRUテーブルをチェックしてLRUテーブルに空があるか，それとも
+      # LRUテーブルに存在すればそのレコードを再キャッシュの対象とし
+      # てTTL管理する
+      if check_lru_ok?(name, type)
+        table.add(name, type, ttl)
+      end
     end
 
     def cached?(name, type)

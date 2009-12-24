@@ -107,11 +107,16 @@ module EndlessDNS
     # なければnameとCNAMEで検索
     # CNAMEでhitすれば、さらにその正規名とtypeで検索
     # hitしなければ存在しない
-    def cached?(name, type)
+    def cached?(name, type, time)
       key = make_key(name, type)
       if @cache.has_key? key
-        return true
-      elsif check_cname(name, type)
+        if @cache[key][:expire] > time
+          return true
+        else
+          delete(name, type)
+          return false
+        end
+      elsif check_cname(name, type, time, [])
         return true
       elsif check_negative(name, type)
         add_negative_cache_ref(name, type)
@@ -121,16 +126,35 @@ module EndlessDNS
       end
     end
 
-    def check_cname(name, type)
-      if @cache.has_key? name + ":" + "CNAME"
-        cnames = @cache[name + ":" + "CNAME"]
-        cnames.each do |cname|
+    def check_cname(name, type, time, visited)
+      k = name + ":" + "CNAME"
+      if @cache.has_key? k
+        if @cache[k][:expire] > time 
+          cname = @cache[k]
+          return false if visited.include? cname
+          visited << cname
           if @cache.has_key? cname + ":" + type
-            return true
+            if @cache[cname + ":" + type][:expire] > time
+              return true 
+            else
+              delete(name, type)
+              return false
+            end
+          else
+            return check_cname(cname, type, time, visited)
           end
-          return check_cname(cname, type)
+        else
+          delete(name, "CNAME")
+          return false
         end
-        return false
+        #cnames = @cache[name + ":" + "CNAME"]
+        #cnames.each do |cname|
+        #  if @cache.has_key? cname + ":" + type
+        #    return true
+        #  end
+        #  return check_cname(cname, type)
+        #end
+        #return false
       else
         return false
       end
