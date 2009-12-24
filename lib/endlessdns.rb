@@ -28,10 +28,10 @@ require 'endlessdns/share'
 require 'endlessdns/cgihelper'
 require 'endlessdns/front'
 require 'endlessdns/pqueue'
+require 'endlessdns/dns'
 require 'endlessdns/query'
 require 'endlessdns/response'
 require 'endlessdns/lru'
-require 'endlessdns/dns'
 
 module EndlessDNS
   LIB_DIR = File.expand_path(File.dirname(__FILE__))
