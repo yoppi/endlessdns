@@ -133,6 +133,10 @@ module EndlessDNS
       dst == @dnsip
     end
 
+    def nxdomain?(dns)
+      dns.header.rCode.type == "NXDomain"
+    end
+
     def add_localdns_response(dst, name, type)
       @mutex.synchronize do
         @localdns_response[dst] ||= {}
