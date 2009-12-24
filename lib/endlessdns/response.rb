@@ -75,6 +75,40 @@ module EndlessDNS
       end
     end
 
+    def rdata(rr)
+      case rr.type.to_s
+      when 'A'
+        data = rr.address
+      when 'AAAA'
+        data = rr.address
+      when 'NS'
+        data = rr.nsdname
+      when 'CNAME'
+        data = rr.cname
+      when 'MX'
+        data = []
+        data << rr.preference
+        data << rr.exchage
+      when 'PTR'
+        data = rr.ptr
+      when 'TXT'
+        data = rr.txt
+      when 'SOA'
+        data = []
+        data << rr.mname
+        data << rr.rname
+        data << rr.serial
+        data << rr.refresh
+        data << rr.retry
+        data << rr.expire
+        data << rr.minimum
+      else
+        log.warn("unrecognized type record[#{rr.type}]")
+        return rr
+      end
+      data
+    end
+
     def add_table(name, type, ttl)
       table.add(name, type, ttl)
     end

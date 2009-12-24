@@ -4,7 +4,7 @@ module EndlessDNS
     QUERY_INTERVAL = 1000
 
     attr_reader :query_info, :client_query_num
-    attr_reader :localdns_query, :localdns_query_num
+    #attr_reader :localdns_query, :localdns_query_num
     attr_reader :timebase_hit_query, :pktbase_hit_query, :total_hit_query
     attr_reader :total_query_num
     attr_accessor :interval_query_num
