@@ -16,6 +16,8 @@ module EndlessDNS
     end
 
     def initialize
+      super
+
       # { 'name:type' => {
       #     'begin_t' => Time, # 初めてこのクエリが出現した日時
       #     'qnum' => Integer, # このクエリが索かれた回数
@@ -28,17 +30,13 @@ module EndlessDNS
       @query_info = {}
       @client_query_num = {}
       @interval_query_num = {}
-
-      @localdns_query = {}
-      @localdns_query_num = 0
-
-      @timebase_hit_query = {}
-      @pktbase_hit_query = {}
+      #@localdns_query = {}
+      #@localdns_query_num = 0
+      #@timebase_hit_query = {}
+      #@pktbase_hit_query = {}
       @total_hit_query = {}
-
       @total_hit_query_num = 0
       @total_query_num = 0
-
       @mutex = Mutex.new
     end
 

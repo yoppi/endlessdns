@@ -1,5 +1,5 @@
 #
-# queryとresposeの抽象クラス
+# queryとresposeの親クラス
 #
 module EndlessDNS
   class DNSPacket
@@ -13,6 +13,10 @@ module EndlessDNS
         return nil
       end
       [q.qName, q.qType.to_s]
+    end
+
+    def cached?(name, type, time)
+      cache.cached?(name, type, time)
     end
   end
 end

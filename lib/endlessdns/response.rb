@@ -22,12 +22,12 @@ module EndlessDNS
     #attr_reader :outside_response, :outside_response_num
 
     def initialize
+      super
+
       @localdns_response = {}
       @localdns_response_num = 0
-
       @outside_response = {}
       @outside_response_num = 0
-
       @mutex = Mutex.new
     end
 
