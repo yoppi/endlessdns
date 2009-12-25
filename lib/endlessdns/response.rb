@@ -68,7 +68,7 @@ module EndlessDNS
 
         cache.add_record_info(rr.name, rr.type, query)
         unless cached?(rr.name, rr.type, time)
-          cache.add(rr.name, rr.type, rdata(rr))
+          cache.add(rr.name, rr.type, rdata(rr), rr.ttl)
           add_table(rr.name, rr.type, rr.ttl)
         end
         #response.add_outside_response(src, rr.name, rr.type)
