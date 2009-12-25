@@ -130,7 +130,7 @@ module EndlessDNS
       k = name + ":" + "CNAME"
       if @cache.has_key? k
         if @cache[k][:expire] > time 
-          cname = @cache[k]
+          cname = @cache[k][:rdata]
           return false if visited.include? cname
           visited << cname
           if @cache.has_key? cname + ":" + type
