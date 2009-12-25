@@ -16,7 +16,7 @@ module EndlessDNS
     end
 
     def cached?(name, type, time)
-      cache.cached?(name, type, time)
+      cache.cached?(name, type, time.tv_sec)
     end
   end
 end

@@ -77,9 +77,5 @@ module EndlessDNS
         @response.analyze(src, dst, time, dns)
       end
     end
-
-    def cached?(name, type)
-      cache.cached?(name, type)
-    end
   end
 end
