@@ -203,7 +203,8 @@ module EndlessDNS
 
     def cache_stats
       io = File.open("#{statistics.stat_dir}/cache_querybase_total.log", "a+")
-      total_cache = cache.cache.values.inject(0) {|ret, e| ret += e.size }
+      #total_cache = cache.cache.values.inject(0) {|ret, e| ret += e.size }
+      total_cache = cache.cache.size
       io.puts "#{@total_query_num} #{total_cache}"
       io.close
     end

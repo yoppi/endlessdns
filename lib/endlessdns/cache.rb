@@ -35,8 +35,8 @@ module EndlessDNS
     def add(name, type, rdata)
       key = make_key(name, type)
       @mutex.synchronize do
-        @cache[key] ||= Set.new
-        @cache[key] << rdata
+        #@cache[key] ||= Set.new
+        @cache[key] = rdata
       end
     end
 
@@ -96,7 +96,7 @@ module EndlessDNS
       key = make_key(name, type)
       if @cache.has_key? key
         return true
-      elsif check_cname(name, type)
+      elsif check_cname(name, type, [])
         return true
       elsif check_negative(name, type)
         add_negative_cache_ref(name, type)
@@ -106,16 +106,24 @@ module EndlessDNS
       end
     end
 
-    def check_cname(name, type)
+    def check_cname(name, type, visited)
       if @cache.has_key? name + ":" + "CNAME"
-        cnames = @cache[name + ":" + "CNAME"]
-        cnames.each do |cname|
-          if @cache.has_key? cname + ":" + type
-            return true
-          end
-          return check_cname(cname, type)
+        cname = @cache[name + ":" + "CNAME"]
+        return false if visited.include? cname
+        visited << cname
+
+        if @cache.has_key? cname + ":" + type
+          return true
+        else
+          return check_cname(cname, type, visited)
         end
-        return false
+        #cnames.each do |cname|
+        #  if @cache.has_key? cname + ":" + type
+        #    return true
+        #  end
+        #  return check_cname(cname, type)
+        #end
+        #return false
       else
         return false
       end
