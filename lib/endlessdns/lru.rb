@@ -143,3 +143,14 @@ module EndlessDNS
     end
   end
 end
+
+if __FILE__ == $0
+  lru = EndlessDNS::LRU.new(5)
+  lru.put("www.google.com.:A", true)
+  lru.put("www.google.com.:AAAA", true)
+  lru.put("www.google.com.:PTR", true)
+  lru.put("www.google.com.:NS", true)
+  lru.put("www.google.com.:SOA", true)
+  p lru.size
+  p lru.get("www.google.com.:A")
+end

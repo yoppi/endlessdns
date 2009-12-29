@@ -199,7 +199,7 @@ module EndlessDNS
       (dns.answer + dns.authority + dns.additional).each do |rr|
         cache.add_cache_ref(rr.name, rr.type)
         cache.add_record_info(rr.name, rr.type, query)
-        @lru.put(rr.name + ":" + rr.type, nil)
+        @lru.put(rr.name + ":" + rr.type, true)
         #response.add_localdns_response(dst, rr.name, rr.type)
       end
     end
