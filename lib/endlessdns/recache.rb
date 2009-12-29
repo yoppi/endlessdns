@@ -186,8 +186,13 @@ module EndlessDNS
 
   class RecacheAll < RecacheMethod
     def need_recache?(name, type)
-      record_info = cache.record_info(name, type)
-      return record_info.to_a
+      #record_info = cache.record_info(name, type)
+      #if record_info
+      #  return record_info.to_a
+      #else
+      #  return [name+":"+type]
+      #end
+      [name+":"+type]
     end
   end
 
@@ -216,7 +221,8 @@ module EndlessDNS
     def check_query_prob(name, type)
       record_info = cache.record_info(name, type).to_a
       if check_cache_ref(name, type)
-        return record_info
+        #return record_info
+        return [name + ":" + type]
       else
         record_info.each do |q|
           info = query.query_info(q)
@@ -225,7 +231,8 @@ module EndlessDNS
           end
           prob = calc_prob(info)
           if rand() <= prob
-            return record_info
+            #return record_info
+            return [name + ":" + type]
           else
             next
           end

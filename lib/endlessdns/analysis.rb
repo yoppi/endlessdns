@@ -96,7 +96,7 @@ module EndlessDNS
     end
 
     def localdns_query(dst, qname, qtype, time)
-      query.add_localdns_query(dst, qname, qtype, time)
+      #query.add_localdns_query(dst, qname, qtype, time)
     end
 
     def analy_response(src, dst, time, dns)
@@ -134,7 +134,7 @@ module EndlessDNS
       (dns.answer + dns.authority + dns.additional).each do |rr|
         next if rr.type.to_s == "OPT" # OPTは疑似レコードなのでスキップ
 
-        cache.add_record_info(rr.name, rr.type, query)
+        #cache.add_record_info(rr.name, rr.type, query)
         unless cached?(rr.name, rr.type)
           cache.add(rr.name, rr.type, rdata(rr))
           add_table(rr.name, rr.type, rr.ttl)
