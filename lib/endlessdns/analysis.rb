@@ -13,7 +13,10 @@ module EndlessDNS
         time = pkt.sec + pkt.usec/100000.0
         dns = Net::DNS::Packet.parse(pkt.data.to_a.pack('C*'))
       rescue => e
-        log.error("src: #{src} unknown packet[#{e}]")
+        log.error("#{src} send unknown packet[#{e}]")
+        return false
+      rescue SystemStackError
+        log.fatal("#{src} send malicious packet!")
         return false
       end
       [dns, src, dst, time]
@@ -31,7 +34,10 @@ module EndlessDNS
         time = pkt.time
         dns = Net::DNS::Packet.parse(pkt.udp_data)
       rescue => e
-        log.error("src: #{src} unknown packet[#{e}]")
+        log.error("#{src} unknown packet[#{e}]")
+        return false
+      rescue SystemStackError
+        log.error("#{src} was malicious packet sending!")
         return false
       end
       [dns, src, dst, time]
