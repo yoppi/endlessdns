@@ -8,7 +8,7 @@ require 'endlessdns'
 require 'optparse'
 
 begin
-  options = {:daemonize => true, :web => true}
+  options = {:daemonize => true, :web => true, :stats => true}
   opts = OptionParser.new do |opts|
     opts.on("-D", "--no-daemonize", "Don't daemonize") do
       options[:daemonize] = false
@@ -24,6 +24,9 @@ begin
 
     opts.on("-p PID", "--pid=PID", "To watch DNS cache server with pid") do |o|
       options[:pid] = o
+    end
+    opts.on("-S", "--no-stats", "To disable statistics logging") do
+      options[:stats] = false
     end
   end
   opts.parse!

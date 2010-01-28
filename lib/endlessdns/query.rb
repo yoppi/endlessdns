@@ -181,28 +181,40 @@ module EndlessDNS
     def add_query_info(t, key)
       # 初回かどうか
       if !@query_info[key]
-        o = {}
-        o['begin_t'] = t
-        o['today'] = t.to_s.split(' ')[0]
-        o['qnum'] = 1
-        o['qnday'] = 1
-        o['qntz'] = Set.new
-        o['qntz'] << t.hour
-        @query_info[key] = o
-      # 変更
+        init_qinfo(t, key)
+      # 更新
       elsif t.to_s.split(' ')[0] == @query_info[key]['today']
-        @query_info[key]['qnum'] += 1
-        @query_info[key]['qntz'] << t.hour
+        udpate_qinfo(t, key)
       # 日付更新
       else
-        o = @query_info[key]
-        o['today'] = t.to_s.split(' ')[0]
-        o['qnum'] += 1
-        o['qnday'] += 1
-        o['qntz_total'] ||= 0
-        o['qntz_total'] += o['qntz'].size
-        o['qntz'].clear
+        dateupdate_qinfo(t, key)
       end
+    end
+
+    def init_qinfo(t, key)
+      o = {}
+      o['begin_t'] = t
+      o['today'] = t.to_s.split(' ')[0]
+      o['qnum'] = 1
+      o['qnday'] = 1
+      o['qntz'] = Set.new
+      o['qntz'] << t.hour
+      @query_info[key] = o
+    end
+
+    def update_qinfo(t, key)
+      @query_info[key]['qnum'] += 1
+      @query_info[key]['qntz'] << t.hour
+    end
+
+    def dateupdate_qinfo(t, key)
+      o = @query_info[key]
+      o['today'] = t.to_s.split(' ')[0]
+      o['qnum'] += 1
+      o['qnday'] += 1
+      o['qntz_total'] ||= 0
+      o['qntz_total'] += o['qntz'].size
+      o['qntz'].clear
     end
 
     def interval?(src=nil)
