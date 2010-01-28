@@ -71,7 +71,7 @@ module EndlessDNS
       ret = @sieve.analy(pkt)
       if ret
         dns, src, dst, time = ret
-      elsj
+      else
         return
       end
 
