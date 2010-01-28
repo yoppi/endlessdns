@@ -1,6 +1,5 @@
 #
-# 再キャッシュするレコードを管理するLRUテーブ
-# ル
+# 再キャッシュするレコードを管理するLRUテーブル
 #
 module EndlessDNS
   class LRU

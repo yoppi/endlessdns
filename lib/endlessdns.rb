@@ -23,15 +23,15 @@ require 'endlessdns/timer'   # TTL timer
 require 'endlessdns/snoop'   # packet snooping
 require 'endlessdns/packet'  # packet queue
 require 'endlessdns/version' # version of system
-require 'endlessdns/recache'
-require 'endlessdns/share'
-require 'endlessdns/cgihelper'
-require 'endlessdns/front'
-require 'endlessdns/pqueue'
-require 'endlessdns/dns'
-require 'endlessdns/query'
-require 'endlessdns/response'
-require 'endlessdns/lru'
+require 'endlessdns/recache' # ReCache
+require 'endlessdns/share'   # sharing cache info
+require 'endlessdns/cgihelper' # cgi setup
+require 'endlessdns/front' # communicate other system
+require 'endlessdns/pqueue' # priority queue
+require 'endlessdns/dns' # DNS packet
+require 'endlessdns/query' # DNS query packet
+require 'endlessdns/response' # DNS response packet
+require 'endlessdns/lru' # Least Recently Used table
 
 module EndlessDNS
   LIB_DIR = File.expand_path(File.dirname(__FILE__))
