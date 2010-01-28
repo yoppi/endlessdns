@@ -1,8 +1,7 @@
 require 'resolv'
 #
 # レコードの再キャッシュ
-#   o 統計情報からそのexpireされたレコードを再cache(DNSキャッシュサーバに問い合わせる)かどうか
-#   を判断する
+#   o 統計情報からそのexpireされたレコードを再キャッシュするかどうかを判断する
 #   o TYPE別に再キャッシュするかどうか判断
 #
 module EndlessDNS

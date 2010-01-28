@@ -1,5 +1,5 @@
 #
-# キャッシュの分散共有
+# キャッシュの共有
 #
 require 'drb/drb'
 
@@ -122,7 +122,7 @@ module EndlessDNS
     def host_ipaddr
       config.get('dnsip')
     end
-  end
+  end # Host end
 
   class Master < Host
     def initialize
@@ -197,7 +197,7 @@ module EndlessDNS
     def another_status
       @slave_statuses
     end
-  end
+  end # Master end
 
   class Slave < Host
     RETRY_SEC = 300

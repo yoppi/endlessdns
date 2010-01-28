@@ -1,13 +1,6 @@
-# Priority queue with array based heap.
 #
-# This is distributed freely in the sence of
-# GPL(GNU General Public License).
+# Priorty Queue
 #
-# H.Yoshida 2009/11/11. to fix indents and code rule for code rule
-# K.Kodama 2005/09/01.  push_array, pop_array
-# Rick Bradley 2003/02/02. patch for Ruby 1.6.5. Thank you!
-# K.Kodama 2001/03/10. 1st version
-
 class PQueue
 
   attr_accessor :qarray # format: [nil, e1, e2, ..., en]
