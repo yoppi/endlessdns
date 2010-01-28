@@ -79,10 +79,10 @@ module EndlessDNS
 
     def add_client_query(src, name, type, time)
       @mutex.synchronize do
-        t = Time.at(time)
+        #t = Time.at(time)
         key = name + ":" + type
 
-        add_query_info(t, key)
+        add_query_info(time, key)
 
         @client_query_num[src] ||= {}
         @client_query_num[src][type] ||= 0
@@ -108,9 +108,9 @@ module EndlessDNS
     end
 
     def add_localdns_query(dst, name, type, time)
-      t = Time.at(time)
+      #t = Time.at(time)
       key = name + ":" + type
-      add_query_info(t, key)
+      add_query_info(time, key)
       #@mutex.synchronize do
       #  @localdns_query[dst] ||= {}
       #  @localdns_query[dst][key] ||= 0
@@ -250,7 +250,8 @@ module EndlessDNS
 
     def cache_stats
       io = File.open("#{statistics.stat_dir}/cache_querybase_total.log", "a+")
-      total_cache = cache.cache.values.inject(0) {|ret, e| ret += e.size }
+      #total_cache = cache.cache.values.inject(0) {|ret, e| ret += e.size }
+      total_cache = cache.cache.size
       io.puts "#{@total_query_num} #{total_cache}"
       io.close
     end

@@ -200,7 +200,7 @@ module EndlessDNS
         name, type = name_type.split(':')
         ret['num_of_cache'] ||= {}
         ret['num_of_cache'][type] ||= 0
-        ret['num_of_cache'][type] += val.size
+        ret['num_of_cache'][type] += 1
       end
       ncache_ref = cache.negative_cache_ref
       ncache_ref.each do |name_type, cnt|
