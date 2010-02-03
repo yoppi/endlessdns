@@ -22,9 +22,9 @@ module EndlessDNS
       # { name:type, ...}
       @negative_cache = Set.new
       # { name:type => n }
-      @negative_cache_ref = {}
+      #@negative_cache_ref = {}
       # {src(client) => { name:type => n } }
-      @negative_cache_client = {}
+      #@negative_cache_client = {}
 
       # {record => [query, query], ..}
       @record_info = {}
