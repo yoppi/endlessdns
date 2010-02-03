@@ -40,9 +40,9 @@ module EndlessDNS
 
     def ttl_cleaner
       @cleaner_th = Thread.new do
+        expired_times = Set.new
         loop do
           sleep 1 # 定期的にttlテーブルから超過しているものを取得する
-          expired_times = Set.new
           now = Time.now.tv_sec
           loop do
             if @ttl_table.top <= now
@@ -53,6 +53,7 @@ module EndlessDNS
           end
           if expired_times.size > 0
             update2(expired_times)
+            expired_times.clear
           end
         end
       end
