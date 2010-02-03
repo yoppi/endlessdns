@@ -82,7 +82,9 @@ module EndlessDNS
 
     def do_recache2(expired_records)
       expired_records.each do |record|
-        recache.invoke(record[0], record[1])
+        #recache.invoke(record[0], record[1])
+        name, type = record.split(':')
+        recache.invoke(name, type)
       end
     end
 
@@ -145,7 +147,7 @@ module EndlessDNS
     def add_table(expire_time, name, type)
       @mutex.synchronize do
         @table[expire_time] ||= Set.new
-        @table[expire_time] << [name, type]
+        @table[expire_time] << name + ":" + type
       end
     end
 
