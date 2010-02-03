@@ -58,7 +58,7 @@ module EndlessDNS
     end
 
     def client_query(src, qname, qtype, time)
-      if cached?(qname, qtype, time)
+      if cached?(qname, qtype)
         add_hit_query(src, qtype)
         #log.debug("cached!")
       end

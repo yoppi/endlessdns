@@ -67,7 +67,7 @@ module EndlessDNS
         next if rr.type.to_s == "OPT" # OPTは疑似レコードなのでスキップ
 
         cache.add_record_info(rr.name, rr.type, query)
-        unless cached?(rr.name, rr.type, time)
+        unless cached?(rr.name, rr.type)
           cache.add(rr.name, rr.type, rdata(rr), rr.ttl)
           add_table(rr.name, rr.type, rr.ttl)
         end
@@ -117,7 +117,7 @@ module EndlessDNS
       if dns.header.qdCount == 1 && dns.header.nsCount == 1
         q = dns.question.first
         #cache.add_negative_cache_client(dst, q.qName, q.qType.to_s)
-        cache.add_negative_cache_ref(q.qName, q.qType.to_s)
+        #cache.add_negative_cache_ref(q.qName, q.qType.to_s)
         cache.add_negative(q.qName, q.qType.to_s)
         log.warn("negative cache[#{dst} send #{q.qName}/#{q.qType.to_s}]")
       else

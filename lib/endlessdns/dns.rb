@@ -15,8 +15,8 @@ module EndlessDNS
       [q.qName, q.qType.to_s]
     end
 
-    def cached?(name, type, time)
-      cache.cached?(name, type, time.tv_sec)
+    def cached?(name, type)
+      cache.cached?(name, type)
     end
   end
 end

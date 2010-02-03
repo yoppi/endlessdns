@@ -49,9 +49,7 @@ module EndlessDNS
     def add(name, type, rdata, ttl)
       key = make_key(name, type)
       @mutex.synchronize do
-        @cache[key] ||= {}
-        @cache[key][:rdata] = rdata
-        @cache[key][:expire] = Time.now.tv_sec + ttl
+        @cache[key] ||= rdata
       end
     end
 
@@ -107,54 +105,31 @@ module EndlessDNS
     # なければnameとCNAMEで検索
     # CNAMEでhitすれば、さらにその正規名とtypeで検索
     # hitしなければ存在しない
-    def cached?(name, type, time)
+    def cached?(name, type)
       key = make_key(name, type)
       if @cache.has_key? key
-        if @cache[key][:expire] > time
-          return true
-        else
-          delete(name, type)
-          return false
-        end
-      elsif check_cname(name, type, time, [])
+        return true
+      elsif check_cname(name, type, [])
         return true
       elsif check_negative(name, type)
-        add_negative_cache_ref(name, type)
+        #add_negative_cache_ref(name, type)
         return true
       else
         return false
       end
     end
 
-    def check_cname(name, type, time, visited)
+    def check_cname(name, type, visited)
       k = name + ":" + "CNAME"
       if @cache.has_key? k
-        if @cache[k][:expire] > time 
-          cname = @cache[k][:rdata]
-          return false if visited.include? cname
-          visited << cname
-          if @cache.has_key? cname + ":" + type
-            if @cache[cname + ":" + type][:expire] > time
-              return true 
-            else
-              delete(name, type)
-              return false
-            end
-          else
-            return check_cname(cname, type, time, visited)
-          end
+        cname = @cache[k]
+        return false if visited.include? cname
+        visited << cname
+        if @cache.has_key? cname + ":" + type
+          return true
         else
-          delete(name, "CNAME")
-          return false
+          return check_cname(cname, type, visited)
         end
-        #cnames = @cache[name + ":" + "CNAME"]
-        #cnames.each do |cname|
-        #  if @cache.has_key? cname + ":" + type
-        #    return true
-        #  end
-        #  return check_cname(cname, type)
-        #end
-        #return false
       else
         return false
       end
