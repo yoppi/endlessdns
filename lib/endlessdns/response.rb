@@ -24,10 +24,10 @@ module EndlessDNS
     def initialize
       super
 
-      @localdns_response = {}
-      @localdns_response_num = 0
-      @outside_response = {}
-      @outside_response_num = 0
+      #@localdns_response = {}
+      #@localdns_response_num = 0
+      #@outside_response = {}
+      #@outside_response_num = 0
       @mutex = Mutex.new
     end
 
